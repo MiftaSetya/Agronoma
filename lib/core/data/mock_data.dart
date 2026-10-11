@@ -99,6 +99,7 @@ class MockData {
       place: 'Pekarangan Rumah',
       media: PlantingMedia.polybag,
       status: CareStatus.needsWater,
+      secondaryStatus: CareStatus.needsFertilizer,
       phase: GrowthPhase.vegetativeEarly,
       plantedAt: _daysAgo(38),
       careScore: 96,
