@@ -39,6 +39,11 @@ class AppRadius {
   static const double xl = 20;
   static const double sheet = 24;
 
+  /// Radius lembar hasil deteksi penyakit — `Disease Drawer` di design memakai
+  /// 32, lebih besar dari sheet biasa supaya terlihat seperti panel yang bisa
+  /// ditarik naik.
+  static const double sheetLarge = 32;
+
   static const BorderRadius chipAll = BorderRadius.all(Radius.circular(chip));
   static const BorderRadius xsAll = BorderRadius.all(Radius.circular(xs));
   static const BorderRadius smAll = BorderRadius.all(Radius.circular(sm));
