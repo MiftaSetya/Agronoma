@@ -318,27 +318,47 @@ class MockData {
   // Penyakit (layar deteksi)
   // ─────────────────────────────────────────────────────────────────────────
 
+  /// Isi hasil diagnosa mengikuti frame `Disease Drawer` (`253:2575`):
+  /// nama, nama ilmiah, persentase cocok, dan tiga langkah penanganan.
+  /// Dipakai untuk membandingkan hasil render dengan design, jadi teksnya
+  /// sengaja sama persis.
   static const Disease disease = Disease(
-    name: 'Daun Menggulung',
-    scientificName: 'Thrips spp. / Aphis spp.',
-    diseaseType: 'Hama',
+    name: 'Karat Daun',
+    scientificName: 'Infeksi Jamur (Pucciniomycetes)',
+    diseaseType: 'Jamur',
     cause:
-        'Serangan Thrips dan kutu daun yang menghisap cairan daun, diperparah '
-        'oleh cuaca panas dan kelembapan tanah yang rendah.',
+        'Infeksi jamur Pucciniomycetes yang sporanya terbawa angin dan '
+        'menempel pada daun yang lembap, diperparah oleh sirkulasi udara '
+        'yang buruk.',
     symptoms: [
-      'Daun menggulung ke atas atau ke dalam',
-      'Tepi daun mengering dan berwarna kecoklatan',
-      'Pertumbuhan tunas baru terhambat',
-      'Terdapat serbuk putih halus di bawah daun',
+      'Bercak oranye kecoklatan di permukaan bawah daun',
+      'Daun menguning lalu mengering',
+      'Pertumbuhan tanaman terhambat',
     ],
-    treatment: [
-      'Semprot dengan larutan sabun insektisida pagi atau sore',
-      'Buang dan musnahkan daun yang sudah parah',
-      'Jaga kelembapan tanah dengan penyiraman teratur',
-      'Beri mulsa untuk menekan populasi hama',
+    steps: [
+      DiseaseStep(
+        title: 'Karantina Tanaman',
+        detail:
+            'Segera jauhkan tanaman yang terinfeksi dari tanaman yang sehat '
+            'untuk mencegah penyebaran spora melalui angin.',
+      ),
+      DiseaseStep(
+        title: 'Pangkas Bagian yang Terinfeksi',
+        detail:
+            'Gunting dengan hati-hati daun yang menunjukkan bercak karat. '
+            'Jangan jadikan potongan daun ini sebagai kompos; masukkan ke '
+            'dalam kantong dan buang segera.',
+      ),
+      DiseaseStep(
+        title: 'Berikan Perawatan',
+        detail:
+            'Semprot daun sehat yang tersisa dengan fungisida berbahan dasar '
+            'tembaga atau larutan minyak mimba (neem oil) pada pagi hari.',
+      ),
     ],
-    confidence: 0.94,
+    confidence: 0.98,
     severity: 'Sedang',
+    photoAsset: AppAssets.photoPlantDetection,
   );
 
   // ─────────────────────────────────────────────────────────────────────────
