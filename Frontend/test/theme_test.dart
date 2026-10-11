@@ -91,6 +91,78 @@ void main() {
     });
   });
 
+  test('setiap token AppTextStyles menuliskan letterSpacing sendiri', () {
+    // Kalau `letterSpacing` dibiarkan kosong, `TextStyle` tetap mewarisi jarak
+    // dari `Typography.englishLike2021` (+0,3px pada 14px) begitu digabung
+    // dengan `textTheme` Material. Figma memakai 0 untuk semua teks yang tidak
+    // menuliskan `tracking`, jadi jarak itu membuat teks ~2% lebih lebar dari
+    // design dan memaksa baris membungkus lebih awal (langkah 2 di panel hasil
+    // deteksi sempat jadi 5 baris padahal designnya 4).
+    //
+    // Daftar ini sengaja ditulis manual supaya menambah token baru tanpa
+    // menentukan sendiri `letterSpacing`-nya langsung ketahuan di sini.
+    final tokens = <String, TextStyle>{
+      'greetingLarge': AppTextStyles.greetingLarge,
+      'headlineSmall': AppTextStyles.headlineSmall,
+      'displayMedium': AppTextStyles.displayMedium,
+      'displayLarge': AppTextStyles.displayLarge,
+      'displayName': AppTextStyles.displayName,
+      'sheetTitle': AppTextStyles.sheetTitle,
+      'headlineLarge': AppTextStyles.headlineLarge,
+      'headlineMedium': AppTextStyles.headlineMedium,
+      'headlineMediumOnDark': AppTextStyles.headlineMediumOnDark,
+      'sectionTitle': AppTextStyles.sectionTitle,
+      'cardTitle': AppTextStyles.cardTitle,
+      'cardTitleWide': AppTextStyles.cardTitleWide,
+      'overline': AppTextStyles.overline,
+      'overlineValue': AppTextStyles.overlineValue,
+      'phaseLabel': AppTextStyles.phaseLabel,
+      'phaseLabelActive': AppTextStyles.phaseLabelActive,
+      'forecastDay': AppTextStyles.forecastDay,
+      'forecastTemp': AppTextStyles.forecastTemp,
+      'scanTitle': AppTextStyles.scanTitle,
+      'scanCaption': AppTextStyles.scanCaption,
+      'calendarDay': AppTextStyles.calendarDay,
+      'calendarDate': AppTextStyles.calendarDate,
+      'legend': AppTextStyles.legend,
+      'tagChip': AppTextStyles.tagChip,
+      'sheetBody': AppTextStyles.sheetBody,
+      'titleLarge': AppTextStyles.titleLarge,
+      'titleWide': AppTextStyles.titleWide,
+      'menuItem': AppTextStyles.menuItem,
+      'menuRow': AppTextStyles.menuRow,
+      'menuRowCaption': AppTextStyles.menuRowCaption,
+      'tagline': AppTextStyles.tagline,
+      'titleMedium': AppTextStyles.titleMedium,
+      'bodyLarge': AppTextStyles.bodyLarge,
+      'bodyMuted': AppTextStyles.bodyMuted,
+      'bodySmall': AppTextStyles.bodySmall,
+      'bodyCaption': AppTextStyles.bodyCaption,
+      'labelLarge': AppTextStyles.labelLarge,
+      'labelMedium': AppTextStyles.labelMedium,
+      'labelSmall': AppTextStyles.labelSmall,
+      'buttonLarge': AppTextStyles.buttonLarge,
+      'buttonOutline': AppTextStyles.buttonOutline,
+    };
+
+    tokens.forEach((name, style) {
+      expect(
+        style.letterSpacing,
+        isNotNull,
+        reason: '$name harus menuliskan letterSpacing (0 bila design tidak '
+            'menentukan tracking)',
+      );
+    });
+
+    // Nilai tracking yang memang ada di design, supaya perubahan tak sengaja
+    // ikut ketahuan.
+    expect(AppTextStyles.bodyLarge.letterSpacing, 0);
+    expect(AppTextStyles.titleLarge.letterSpacing, 0);
+    expect(AppTextStyles.overlineValue.letterSpacing, 0.14);
+    expect(AppTextStyles.overline.letterSpacing, 0.55);
+    expect(AppTextStyles.greetingLarge.letterSpacing, -0.64);
+  });
+
   test('AppTextStyles tidak memakai SF Pro', () {
     final families = {
       AppTextStyles.displayLarge.fontFamily,
