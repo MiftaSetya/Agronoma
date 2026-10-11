@@ -178,10 +178,11 @@ void main() {
     expect(keyframes, greaterThanOrEqualTo(500));
   });
 
-  test('aset raster dibatasi (glyph vektor tidak boleh bertambah)', () async {
-    // Tripwire, bukan pujian: ekspor Figma saat ini menanam 3 glyph ("g", "o",
-    // "a") sebagai PNG 1x sehingga tampak lebih lembut dari glyph vektor lain.
-    // Kalau jumlahnya bertambah, kualitas logo menurun tanpa ketahuan.
+  test('Lottie tidak memakai aset raster (semua glyph vektor)', () async {
+    // Kontrak kualitas: seluruh glyph harus berupa path vektor supaya tajam di
+    // layar padat. Ekspor Figma sempat menanam huruf "g", "o", dan "a" sebagai
+    // PNG 1x; ketiganya sudah dikonversi ke vektor. Test ini gagal kalau ada
+    // ekspor ulang yang diam-diam mengembalikannya menjadi gambar.
     final json = jsonDecode(
       File(SplashScreen.assetPath).readAsStringSync(),
     ) as Map<String, dynamic>;
@@ -190,13 +191,51 @@ void main() {
         .where(
           (a) => a['p'] is String && (a['p'] as String).startsWith('data:'),
         )
-        .length;
+        .toList();
     expect(
       rasters,
-      lessThanOrEqualTo(3),
+      isEmpty,
       reason:
-          'Jumlah glyph raster bertambah — logo makin buram di layar padat.',
+          'Ada ${rasters.length} aset raster. Glyph akan tampak buram di '
+          'layar padat; konversi ulang ke path vektor.',
     );
+
+    // Tidak boleh ada layer bergambar (ty=2) yang tersisa di mana pun.
+    var imageLayers = 0;
+    void walk(Object? node) {
+      if (node is List) return node.forEach(walk);
+      if (node is! Map) return;
+      if (node['ty'] == 2) imageLayers++;
+      node.values.forEach(walk);
+    }
+
+    walk(json);
+    expect(imageLayers, 0);
+  });
+
+  test('glyph hasil konversi tetap punya animasi aslinya', () async {
+    // Konversi image -> shape hanya boleh mengubah representasi, bukan timing.
+    // Ketiga glyph itu ("a" ind 8, "o" ind 10, "g" ind 11) harus tetap punya
+    // keyframe opacity dan posisi-x yang menggerakkannya masuk.
+    final json = jsonDecode(
+      File(SplashScreen.assetPath).readAsStringSync(),
+    ) as Map<String, dynamic>;
+    final precomp =
+        (json['assets'] as List).whereType<Map>().firstWhere(
+              (a) => a['id'] == 'asset_5',
+            )['layers']
+            as List;
+
+    for (final ind in [8, 10, 11]) {
+      final layer = precomp.whereType<Map>().firstWhere((l) => l['ind'] == ind);
+      expect(layer['ty'], 4, reason: 'Layer $ind harus berupa shape.');
+      final ks = layer['ks'] as Map;
+      final px = (ks['p'] as Map)['x'] as Map;
+      expect(px['a'], 1, reason: 'Layer $ind kehilangan animasi posisi-x.');
+      final opacity = ks['o'] as Map;
+      expect(opacity['a'], 1, reason: 'Layer $ind kehilangan animasi opacity.');
+      expect(layer['shapes'], isNotEmpty);
+    }
   });
 
   test('kanvas Lottie memakai rasio design 440x956', () async {
