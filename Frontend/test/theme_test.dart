@@ -56,7 +56,7 @@ void main() {
     // dari `leading-[Npx]` pada simpul teksnya; rumusnya height = leading / size.
     expect(AppTextStyles.labelSmall.height, 15 / 10);
     expect(AppTextStyles.bodySmall.height, 16 / 12);
-    expect(AppTextStyles.labelMedium.height, isNull); // `leading-[normal]`
+    expect(AppTextStyles.labelMedium.height, AppTextStyles.leadingNormal);
     expect(AppTextStyles.bodyLarge.height, 20 / 14);
     expect(AppTextStyles.titleMedium.height, 20 / 14);
     expect(AppTextStyles.titleLarge.height, 20 / 16);
@@ -64,6 +64,31 @@ void main() {
     expect(AppTextStyles.headlineMedium.height, 1);
     expect(AppTextStyles.displayLarge.height, 28 / 32);
     expect(AppTextStyles.displayMedium.height, 40 / 32);
+  });
+
+  test('token leading-normal memakai tinggi baris metrik hhea Inter', () {
+    // Simpul teks design yang ditulis `leading-[normal]` **tidak boleh**
+    // dibiarkan `height: null`. Kalau null, Flutter memakai metrik
+    // usWinAscent/usWinDescent Inter (1,4302 em) sementara Figma memakai
+    // hhea/typo (1984 + 494 dari 2048 = 1,21 em). Selisih 0,22 em itu membuat
+    // tiap blok teks turun ~0,11 em dan menumpuk ke seluruh layar, jadi
+    // nilainya dikunci di sini.
+    const normal = AppTextStyles.leadingNormal;
+    expect(normal, 1.21);
+
+    final tokens = <String, TextStyle>{
+      'sheetTitle': AppTextStyles.sheetTitle,
+      'cardTitle': AppTextStyles.cardTitle,
+      'cardTitleWide': AppTextStyles.cardTitleWide,
+      'overline': AppTextStyles.overline,
+      'overlineValue': AppTextStyles.overlineValue,
+      'scanTitle': AppTextStyles.scanTitle,
+      'legend': AppTextStyles.legend,
+      'labelMedium': AppTextStyles.labelMedium,
+    };
+    tokens.forEach((name, style) {
+      expect(style.height, normal, reason: '$name harus height: leadingNormal');
+    });
   });
 
   test('AppTextStyles tidak memakai SF Pro', () {
