@@ -47,11 +47,16 @@ enum CareStatus {
 }
 
 /// Fase pertumbuhan tanaman (langkah 5 wizard tambah tanaman).
+///
+/// Urutannya mengikuti empat titik pada garis waktu "Fase Pertumbuhan" di
+/// Detail Tanaman: Semai Biji → Vegetatif Awal → Vegetatif Akhir → Generatif.
+/// Design memakai istilah yang lebih rinci daripada "Vegetatif/Panen", jadi
+/// labelnya disamakan supaya garis waktunya tidak perlu diterjemahkan lagi.
 enum GrowthPhase {
-  seedling('Semai', 'Baru berkecambah, masih sangat rentan.'),
-  vegetative('Vegetatif', 'Tumbuh daun dan batang, butuh nitrogen tinggi.'),
-  generative('Generatif', 'Mulai berbunga dan berbuah.'),
-  harvest('Panen', 'Siap atau sedang dipanen.');
+  seedling('Semai Biji', 'Baru berkecambah, masih sangat rentan.'),
+  vegetativeEarly('Vegetatif Awal', 'Tumbuh daun dan batang, butuh nitrogen.'),
+  vegetativeLate('Vegetatif Akhir', 'Batang menguat, siap masuk masa berbunga.'),
+  generative('Generatif', 'Mulai berbunga dan berbuah.');
 
   const GrowthPhase(this.label, this.description);
 
@@ -72,12 +77,26 @@ enum PlantingMedia {
   final String description;
 }
 
+/// Jenis tugas perawatan — menentukan ikon bulat 48px di kartu perawatan.
+enum CareTaskKind {
+  watering,
+  fertilizing;
+
+  /// Judul aksi seperti di design, mis. "Siram Tanaman".
+  String get actionLabel => switch (this) {
+    CareTaskKind.watering => 'Siram Tanaman',
+    CareTaskKind.fertilizing => 'Pupuk Tanaman',
+  };
+}
+
 /// Satu tugas perawatan pada tab "Perawatan".
 class CareTask {
   const CareTask({
     required this.title,
     required this.date,
     required this.done,
+    this.description = '',
+    this.kind = CareTaskKind.watering,
     this.note,
   });
 
@@ -87,8 +106,14 @@ class CareTask {
   /// Tanggal tampil di kartu tugas, mis. "Hari ini".
   final String date;
 
+  /// Petunjuk singkat di bawah judul, mis. "Siram hingga tanah lembap…".
+  final String description;
+
   /// Sudah dikerjakan atau belum.
   final bool done;
+
+  /// Jenis tugas — dipakai untuk memilih ikon dan warnanya.
+  final CareTaskKind kind;
 
   /// Catatan tambahan (opsional).
   final String? note;
@@ -96,21 +121,29 @@ class CareTask {
   CareTask copyWith({bool? done}) => CareTask(
     title: title,
     date: date,
+    description: description,
     done: done ?? this.done,
+    kind: kind,
     note: note,
   );
 
   factory CareTask.fromJson(Map<String, dynamic> json) => CareTask(
     title: json['title'] as String,
     date: json['date'] as String,
+    description: json['description'] as String? ?? '',
     done: json['done'] as bool? ?? false,
+    kind: json['kind'] == null
+        ? CareTaskKind.watering
+        : CareTaskKind.values.byName(json['kind'] as String),
     note: json['note'] as String?,
   );
 
   Map<String, dynamic> toJson() => {
     'title': title,
     'date': date,
+    'description': description,
     'done': done,
+    'kind': kind.name,
     'note': note,
   };
 }
@@ -160,6 +193,9 @@ class Plant {
     required this.careScore,
     required this.description,
     this.scientificName,
+    this.tags = const [],
+    this.fertilizer = 'NPK Daun',
+    this.soilName = 'Tanah Gembur',
     this.tasks = const [],
     this.timeline = const [],
   });
@@ -173,7 +209,8 @@ class Plant {
   /// Kota tempat tanaman tumbuh, mis. "Surabaya".
   final String location;
 
-  /// Tempat spesifik, mis. "Pekarangan Rumah" (titik pemisah di kartu).
+  /// Tempat spesifik, mis. "Pekarangan Rumah" (titik pemisah di kartu, dan
+  /// nilai "MEDIA TANAM" pada Detail Tanaman).
   final String place;
 
   final PlantingMedia media;
@@ -187,8 +224,20 @@ class Plant {
   final String description;
   final String? scientificName;
 
+  /// Label kecil di bawah deskripsi Detail Tanaman, mis. `Indoor`/`Outdoor`.
+  final List<String> tags;
+
+  /// Jenis pupuk yang dipakai ("JENIS PUPUK" pada Detail Tanaman).
+  final String fertilizer;
+
+  /// Jenis tanah ("JENIS TANAH" pada Detail Tanaman).
+  final String soilName;
+
   final List<CareTask> tasks;
   final List<GrowthMilestone> timeline;
+
+  /// Indeks fase pada garis waktu "Fase Pertumbuhan" (0..3).
+  int get phaseIndex => GrowthPhase.values.indexOf(phase);
 
   /// Umur tanaman dalam hari.
   int get ageInDays =>
@@ -205,6 +254,8 @@ class Plant {
     CareStatus? status,
     GrowthPhase? phase,
     double? careScore,
+    String? fertilizer,
+    String? soilName,
     List<CareTask>? tasks,
   }) => Plant(
     id: id,
@@ -219,6 +270,9 @@ class Plant {
     careScore: careScore ?? this.careScore,
     description: description,
     scientificName: scientificName,
+    tags: tags,
+    fertilizer: fertilizer ?? this.fertilizer,
+    soilName: soilName ?? this.soilName,
     tasks: tasks ?? this.tasks,
     timeline: timeline,
   );
@@ -236,6 +290,9 @@ class Plant {
     careScore: (json['careScore'] as num).toDouble(),
     description: json['description'] as String,
     scientificName: json['scientificName'] as String?,
+    tags: (json['tags'] as List? ?? const []).cast<String>(),
+    fertilizer: json['fertilizer'] as String? ?? 'NPK Daun',
+    soilName: json['soilName'] as String? ?? 'Tanah Gembur',
     tasks: (json['tasks'] as List? ?? [])
         .map((e) => CareTask.fromJson(e as Map<String, dynamic>))
         .toList(),
@@ -257,6 +314,9 @@ class Plant {
     'careScore': careScore,
     'description': description,
     'scientificName': scientificName,
+    'tags': tags,
+    'fertilizer': fertilizer,
+    'soilName': soilName,
     'tasks': tasks.map((e) => e.toJson()).toList(),
     'timeline': timeline.map((e) => e.toJson()).toList(),
   };

@@ -23,11 +23,15 @@ class PlantController extends ChangeNotifier {
 
   List<Plant> _plants = const [];
   Weather? _weather;
+  List<WeatherForecast> _forecast = const [];
   bool _loading = false;
   Object? _error;
 
   List<Plant> get plants => _plants;
   Weather? get weather => _weather;
+
+  /// Ramalan cuaca untuk kartu "Perkiraan Cuaca" di Detail Tanaman.
+  List<WeatherForecast> get forecast => _forecast;
   bool get isLoading => _loading;
   Object? get error => _error;
 
@@ -51,9 +55,11 @@ class PlantController extends ChangeNotifier {
       final results = await Future.wait([
         _repository.getPlants(),
         _weatherRepository.current('Surabaya'),
+        _weatherRepository.forecast('Surabaya'),
       ]);
       _plants = results[0] as List<Plant>;
       _weather = results[1] as Weather;
+      _forecast = results[2] as List<WeatherForecast>;
     } catch (e) {
       _error = e;
     } finally {

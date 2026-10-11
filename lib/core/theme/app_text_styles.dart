@@ -274,12 +274,12 @@ class AppTextStyles {
     color: AppColors.onPrimary,
   );
 
-  /// Keterangan di bawah [scanTitle]. 14px Medium, putih.
+  /// Keterangan di bawah [scanTitle]. 14px Medium, tinggi baris `normal`.
   static const TextStyle scanCaption = TextStyle(
     fontFamily: fontInter,
     fontSize: 14,
     fontWeight: FontWeight.w500,
-    height: 20 / 14,
+    height: leadingNormal,
     color: AppColors.onPrimary,
   );
 

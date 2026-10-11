@@ -159,4 +159,17 @@ class AppColors {
       spreadRadius: 0,
     ),
   ];
+
+  /// Bayangan lembut kartu pada Detail Tanaman:
+  /// `DROP_SHADOW, #0000000D, offset (0, 1), blur 2` — sama dengan [shadow1],
+  /// tetapi design menuliskannya pada kartu yang lebih besar sehingga tepinya
+  /// terlihat lebih tegas di layar.
+  static const List<BoxShadow> shadowRaisedSoft = [
+    BoxShadow(
+      color: Color(0x0D000000),
+      offset: Offset(0, 1),
+      blurRadius: 2,
+      spreadRadius: 0,
+    ),
+  ];
 }

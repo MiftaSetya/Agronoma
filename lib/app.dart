@@ -5,6 +5,7 @@ import 'package:frontend/core/data/mock_disease_repository.dart';
 import 'package:frontend/core/data/mock_weather_repository.dart';
 import 'package:frontend/core/data/plant_repository.dart';
 import 'package:frontend/core/data/weather_repository.dart';
+import 'package:frontend/core/models/app_user.dart';
 import 'package:frontend/core/routing/app_router.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
 import 'package:frontend/core/state/auth_controller.dart';
@@ -32,6 +33,7 @@ class AgronomaApp extends StatelessWidget {
     this.diseaseRepository,
     this.initialRoute = Routes.splash,
     this.home,
+    this.signedInUser,
   });
 
   /// Sumber data tanaman; default [MockPlantRepository].
@@ -53,6 +55,13 @@ class AgronomaApp extends StatelessWidget {
   /// Di produksi biarkan `null` agar [initialRoute] yang berlaku.
   final Widget? home;
 
+  /// Pengguna awal. Bila diisi, sesi langsung dianggap sudah masuk.
+  ///
+  /// Dipakai `tool/dev_preview.dart` supaya Home dan Profile bisa dipotret
+  /// dengan data yang benar tanpa harus melewati layar Login lebih dulu —
+  /// kalau tidak, kedua layar itu hanya menampilkan nilai kosong.
+  final AppUser? signedInUser;
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -71,7 +80,7 @@ class AgronomaApp extends StatelessWidget {
         // ── Controller ─────────────────────────────────────────────────────
         // Semua didaftarkan di root supaya state-nya tidak hilang saat berpindah
         // halaman: sesi login, daftar tanaman, draft wizard, dan percakapan bot.
-        ChangeNotifierProvider(create: (_) => AuthController()),
+        ChangeNotifierProvider(create: (_) => AuthController(initialUser: signedInUser)),
         ChangeNotifierProvider(
           create: (ctx) => PlantController(
             plantRepository: ctx.read<PlantRepository>(),

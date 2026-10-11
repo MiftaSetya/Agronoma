@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:frontend/app.dart';
+import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/routing/app_router.dart';
 import 'package:frontend/features/add_plant/add_plant_flow.dart';
 import 'package:frontend/features/auth/login_screen.dart';
@@ -50,6 +51,10 @@ Future<void> main() async {
 
   runApp(
     AgronomaApp(
+      // Sesi langsung diisi supaya Home dan Profile menampilkan data seperti
+      // setelah login — kalau tidak, keduanya hanya menampilkan nilai kosong
+      // dan tidak ada gunanya dibandingkan dengan design.
+      signedInUser: MockData.user,
       home: _previewFor(
         route.isEmpty ? Routes.login : route,
         (step ?? 0).clamp(0, 4),

@@ -42,14 +42,44 @@ class MockData {
   // ─────────────────────────────────────────────────────────────────────────
 
   static final List<CareTask> _tasksWater = [
-    CareTask(title: 'Siram tanaman', date: 'Hari ini', done: false),
-    CareTask(title: 'Cek kelembapan tanah', date: 'Hari ini', done: true),
-    CareTask(title: 'Pangkas daun kering', date: 'Besok', done: false),
+    CareTask(
+      title: 'Siram Tanaman',
+      description: 'Siram hingga tanah lembap secara merata.',
+      date: 'Hari ini',
+      done: false,
+    ),
+    CareTask(
+      title: 'Pupuk Tanaman',
+      description: 'Pupuk tanaman',
+      date: 'Hari ini',
+      done: false,
+      kind: CareTaskKind.fertilizing,
+    ),
   ];
 
   static final List<CareTask> _tasksFertilize = [
-    CareTask(title: 'Pupuk NPK 16-16-16', date: 'Hari ini', done: false),
-    CareTask(title: 'Siram setelah memupuk', date: 'Hari ini', done: false),
+    CareTask(
+      title: 'Pupuk Tanaman',
+      description: 'Pupuk NPK 16-16-16, siram setelahnya.',
+      date: 'Hari ini',
+      done: false,
+      kind: CareTaskKind.fertilizing,
+    ),
+    CareTask(
+      title: 'Siram Tanaman',
+      description: 'Siram hingga tanah lembap secara merata.',
+      date: 'Besok',
+      done: true,
+      kind: CareTaskKind.watering,
+    ),
+  ];
+
+  /// Empat titik pada "Fase Pertumbuhan", berurutan seperti [GrowthPhase].
+  static const List<String> growthPhaseSteps = [
+    'Semai Biji',
+    'Vegetatif Awal',
+    'Vegetatif Akhir',
+    'Generatif',
   ];
 
   static final List<GrowthMilestone> _timeline = [
@@ -69,12 +99,15 @@ class MockData {
       place: 'Pekarangan Rumah',
       media: PlantingMedia.polybag,
       status: CareStatus.needsWater,
-      phase: GrowthPhase.generative,
+      phase: GrowthPhase.vegetativeEarly,
       plantedAt: _daysAgo(38),
       careScore: 96,
       description:
           'Sangat adaptif dengan suhu terik. Mudah ditanam di pekarangan dan '
           'bisa dipanen untuk kebutuhan dapur sehari-hari.',
+      tags: const ['Indoor', 'Outdoor'],
+      fertilizer: 'NPK Daun',
+      soilName: 'Tanah Gembur',
       tasks: _tasksWater,
       timeline: _timeline,
     ),
@@ -93,6 +126,9 @@ class MockData {
       description:
           'Butuh sinar matahari penuh dan penyiraman teratur. Buahnya manis '
           'dan cocok untuk salad atau camilan segar.',
+      tags: const ['Indoor', 'Outdoor'],
+      fertilizer: 'NPK Buah',
+      soilName: 'Tanah Humus',
       tasks: _tasksFertilize,
       timeline: _timeline,
     ),
@@ -105,12 +141,15 @@ class MockData {
       place: 'Kebun Belakang',
       media: PlantingMedia.ground,
       status: CareStatus.safe,
-      phase: GrowthPhase.harvest,
+      phase: GrowthPhase.vegetativeLate,
       plantedAt: _daysAgo(75),
       careScore: 99,
       description:
           'Sudah masuk masa panen. Petik buah merah secara berkala supaya '
           'tanaman terus memproduksi bunga baru.',
+      tags: const ['Outdoor'],
+      fertilizer: 'NPK Kandang',
+      soilName: 'Tanah Liat',
       tasks: const [],
       timeline: _timeline,
     ),
@@ -130,11 +169,48 @@ class MockData {
   );
 
   static const List<WeatherForecast> forecast = [
-    WeatherForecast(day: 'Sen', condition: 'Cerah', high: 31, low: 25),
-    WeatherForecast(day: 'Sel', condition: 'Berawan', high: 30, low: 25),
-    WeatherForecast(day: 'Rab', condition: 'Hujan', high: 29, low: 24),
-    WeatherForecast(day: 'Kam', condition: 'Cerah', high: 32, low: 25),
-    WeatherForecast(day: 'Jum', condition: 'Berawan', high: 31, low: 26),
+    WeatherForecast(
+      day: 'Hari ini',
+      condition: 'Hujan',
+      high: 32,
+      low: 24,
+      iconAsset: AppAssets.weatherRain,
+    ),
+    WeatherForecast(
+      day: 'Besok',
+      condition: 'Hujan',
+      high: 32,
+      low: 24,
+      iconAsset: AppAssets.weatherRainAlt,
+    ),
+    WeatherForecast(
+      day: 'Rab',
+      condition: 'Berawan',
+      high: 32,
+      low: 25,
+      iconAsset: AppAssets.weatherPartlyCloudy,
+    ),
+    WeatherForecast(
+      day: 'Kam',
+      condition: 'Cerah',
+      high: 32,
+      low: 25,
+      iconAsset: AppAssets.weatherClear,
+    ),
+    WeatherForecast(
+      day: 'Jum',
+      condition: 'Hujan lebat',
+      high: 32,
+      low: 24,
+      iconAsset: AppAssets.weatherRainHeavy,
+    ),
+    WeatherForecast(
+      day: 'Sab',
+      condition: 'Cerah berawan',
+      high: 32,
+      low: 25,
+      iconAsset: AppAssets.weatherSunShower,
+    ),
   ];
 
   // ─────────────────────────────────────────────────────────────────────────
