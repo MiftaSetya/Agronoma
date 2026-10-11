@@ -92,6 +92,11 @@ class MockPlantRepository implements PlantRepository {
       plantedAt: DateTime.now(),
       careScore: 100,
       description: source.description,
+      tags: const ['Indoor'],
+      fertilizer: soil.name == 'Tanah Humus' ? 'NPK Organik' : 'NPK Daun',
+      soilName: soil.name,
+      // Tanaman baru selalu mulai dari nol: belum ada jadwal perawatan dan
+      // belum ada tonggak pertumbuhan yang terlewati.
       tasks: const [],
       timeline: const [],
     );

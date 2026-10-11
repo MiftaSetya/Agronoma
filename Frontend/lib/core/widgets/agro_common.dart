@@ -224,6 +224,14 @@ class CareStatusBadge extends StatelessWidget {
 }
 
 /// Kartu ringkasan angka (dipakai di Profile: "Tanaman 24", "Dipanen 12").
+///
+/// Ukurannya mengikuti komponen `Total Plants` / `Harvested` pada design:
+/// padding 17, radius 12, jarak antar-baris **4** (bukan 8), border
+/// `#E1E3E4` — abu yang sedikit lebih dingin dari border kartu biasa.
+/// Lebarnya 196px karena dua kartu + jarak 16 harus pas 408 pada kanvas 440.
+///
+/// Warnanya hanya berbeda di angka ([valueColor]): hijau untuk tanaman yang
+/// sedang tumbuh, cokelat untuk hasil panen.
 class StatCard extends StatelessWidget {
   const StatCard({
     super.key,
@@ -246,21 +254,21 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: margin,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(color: AppColors.border),
+        borderRadius: AppRadius.mdAll,
+        border: Border.all(color: AppColors.borderStrong),
         boxShadow: AppColors.shadow1,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AgroIcon(icon, size: 22),
-          const SizedBox(height: AppSpacing.sm),
+          AgroIcon(icon, size: 24),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             title,
-            style: AppTextStyles.labelLarge.copyWith(color: AppColors.darkGrey),
+            style: AppTextStyles.titleMedium.copyWith(letterSpacing: 0.14),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
@@ -270,7 +278,7 @@ class StatCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             caption,
-            style: AppTextStyles.bodyLarge.copyWith(color: AppColors.grey),
+            style: AppTextStyles.titleWide.copyWith(color: AppColors.grey),
           ),
         ],
       ),

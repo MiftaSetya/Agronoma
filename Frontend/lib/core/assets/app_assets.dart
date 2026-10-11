@@ -68,6 +68,10 @@ class AppAssets {
   static const String chevronRight =
       '$_icons/7c1bfeeab8abbce777d4a8167432ac79152b568f.svg';
 
+  /// Panah ">" kecil (7.4x12) untuk baris daftar, mis. "Arsip tanaman".
+  static const String chevronRightSmall =
+      '$_icons/2e6408ac1b3fac5f48f1b88828bb3fac7f8c00fc.svg';
+
   /// Panah "<" (chevron kiri) di top bar.
   static const String chevronLeft =
       '$_icons/94312fbfd7eb7a516ff388c59c4dafa9851503ba.svg';
@@ -162,7 +166,7 @@ class AppAssets {
 
   /// Kotak arsip — baris "Arsip tanaman".
   static const String archive =
-      '$_icons/2e6408ac1b3fac5f48f1b88828bb3fac7f8c00fc.svg';
+      '$_icons/39e90148463a205633460bcfcba12bf6f83db64a.svg';
 
   /// Pintu keluar — tombol "Keluar".
   static const String logout =
@@ -211,6 +215,82 @@ class AppAssets {
   /// Penanda lokasi pada peta (langkah 1).
   static const String mapPointer =
       '$_icons/2fa8343d259af84d9bf2691f0331c1677b703040.svg';
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Detail tanaman
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Panah kiri putih di atas foto header.
+  static const String arrowLeftWhite =
+      '$_icons/ef737f2fd5f77ee8b2373bcd192ef31ba14d492b.svg';
+
+  /// Gir pengaturan (putih) di kanan atas header Detail Tanaman.
+  static const String settingsLineWhite =
+      '$_icons/5aaaa51f244abcfb56f8da61543bb79b2144f90a.svg';
+
+  /// Ikon pindai kesehatan (putih) untuk kartu "Pindai Kesehatan".
+  static const String diseaseScan =
+      '$_icons/3c4a16316f4fc77064326da38a9e6111d77f1a01.svg';
+
+  /// Titik fase pertumbuhan yang sedang aktif (lingkaran hijau + cincin putih).
+  static const String phaseDotActive =
+      '$_icons/69aded8418e740d6bda9f92bfeef8d864a84fe7f.svg';
+
+  /// Kotak centang tugas perawatan — sudah dikerjakan.
+  static const String taskCheckDone =
+      '$_icons/31a2dc7cf9b51123d1fe48f4b7791761038cc104.svg';
+
+  /// Kotak centang tugas perawatan — belum dikerjakan.
+  static const String taskCheckEmpty =
+      '$_icons/7360fdf6fcb97da9a8596989f80c5862221146cd.svg';
+
+  /// Ikon tugas penyiraman (biru) pada "Perawatan Hari Ini".
+  static const String careWaterDrops =
+      '$_icons/13655dc5f4f5c913570be0285f420059a4df9167.svg';
+
+  /// Ikon tugas pemupukan (cokelat) pada "Perawatan Hari Ini".
+  static const String careWateringCan =
+      '$_icons/cc68dec2da50f29b52a52705b3d1089e62b6e816.svg';
+
+  /// Ikon kecil (12px) penyiraman di kalender perawatan.
+  static const String calendarWatering =
+      '$_icons/1bc17606b2180b12291e17a8b9239ccfe9282fc7.svg';
+
+  /// Ikon kecil (12px) pemupukan di kalender perawatan.
+  static const String calendarFertilizer =
+      '$_icons/fce7e399a8278f3f99643b151ac4f22372d87c6b.svg';
+
+  /// Garis bawah tab yang sedang aktif pada Detail Tanaman.
+  static const String tabUnderline =
+      '$_icons/8832c9f72a47e02a3bbffc64b85f1ff410274900.svg';
+
+  /// Peringatan hujan (FAB di atas tombol obrolan).
+  static const String rainAlert =
+      '$_icons/277e53b539780ab8332228aed88ed415049ceba2.svg';
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Cuaca (ramalan)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Matahari penuh — "Cerah".
+  static const String weatherClear =
+      '$_icons/fe532cf4fc291f9c9007ee4aeaa5f0055d0def3a.svg';
+
+  /// Hujan (varian abu-biru) — "Hujan".
+  static const String weatherRain =
+      '$_icons/746c5a179d5139b05592888c60dde480e03891fd.svg';
+
+  /// Hujan (varian kedua, tanpa tetes ringan).
+  static const String weatherRainAlt =
+      '$_icons/98832cea57af00afa1ed2540a2499464115251f3.svg';
+
+  /// Hujan lebat.
+  static const String weatherRainHeavy =
+      '$_icons/a6f91e88e5d5585c53aff52712cabf3d40a75bc2.svg';
+
+  /// Cerah berawan (matahari + awan + tetes).
+  static const String weatherSunShower =
+      '$_icons/9b2be4d4fe2969ff3fb5aaeaf1ae7f2900e84c7a.svg';
 
   // ─────────────────────────────────────────────────────────────────────────
   // Foto
