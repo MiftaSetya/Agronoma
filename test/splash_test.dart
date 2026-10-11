@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lottie/lottie.dart';
 
 import 'package:frontend/features/splash/splash_screen.dart';
 
@@ -14,6 +16,40 @@ class _DummyNextScreen extends StatelessWidget {
 }
 
 Widget _app(Widget child) => MaterialApp(home: child);
+
+/// Waktu (ms) keyframe terakhir yang **masih mengubah nilai** di `splash.json`.
+///
+/// Semua track berhenti pada frame terakhir komposisi (5 detik) karena nilai
+/// terakhir hanya ditahan, jadi "frame terakhir" saja tidak berguna untuk
+/// keperluan timing. Yang dicari adalah keyframe terakhir yang nilainya berbeda
+/// dari nilai akhir — di situlah gerakan sungguh-sungguh berhenti.
+Future<int> _lastMovementMs() async {
+  final json = jsonDecode(
+    File(SplashScreen.assetPath).readAsStringSync(),
+  ) as Map<String, dynamic>;
+  final fr = (json['fr'] as num).toDouble();
+  var latest = 0;
+
+  void walk(Object? node) {
+    if (node is List) return node.forEach(walk);
+    if (node is! Map) return;
+    if (node['a'] == 1 && node['k'] is List) {
+      final list = (node['k'] as List).cast<Map>();
+      if (list.isNotEmpty) {
+        final end = jsonEncode(list.last['s'] ?? list.last['e'] ?? list.last);
+        for (final kf in list) {
+          if (jsonEncode(kf['s'] ?? kf['e'] ?? kf) != end) {
+            latest = (kf['t'] as num).toInt().clamp(latest, 1 << 30);
+          }
+        }
+      }
+    }
+    node.values.forEach(walk);
+  }
+
+  walk(json);
+  return (latest / fr * 1000).round();
+}
 
 void main() {
   testWidgets('splash merender tanpa error', (tester) async {
@@ -40,8 +76,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('NEXT'), findsNothing);
 
-    // Lewati durasi, lalu selesaikan transisi fade (250 ms).
-    await tester.pump(const Duration(milliseconds: 300));
+    // Aset Lottie tidak bisa dimuat di `flutter test`, jadi yang menyelamatkan
+    // di sini adalah jaring pengaman: duration + loadGrace (300 ms + 2 detik).
+    await tester.pump(const Duration(milliseconds: 2400));
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump();
 
@@ -62,35 +99,116 @@ void main() {
       ),
     );
 
-    // Lepas splash sebelum timernya menyala. Timer harus dibatalkan di
-    // `dispose`, jadi tidak boleh ada navigasi ke route yang sudah tiada.
+    // Lepas splash sebelum timernya menyala. `dispose` harus membatalkan timer,
+    // jadi tidak boleh ada navigasi ke route yang sudah tiada — termasuk setelah
+    // lewat jaring pengaman (duration + loadGrace).
     await tester.pumpWidget(_app(const Scaffold(body: Text('OTHER'))));
-    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump(const Duration(milliseconds: 2500));
 
     expect(find.text('OTHER'), findsOneWidget);
     expect(find.text('NEXT'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('splash menampilkan fallback saat berkas Lottie tidak ada', (
-    tester,
-  ) async {
-    // Selama `assets/lottie/splash.json` belum ada (menunggu ekspor dari Figma),
-    // splash tidak boleh menjadi layar putih bisu: errorBuilder harus
-    // menampilkan teks pengganti.
+  test('berkas Lottie ada dan bisa diurai oleh lottie 3.6.1', () async {
+    final file = File(SplashScreen.assetPath);
     expect(
-      File(SplashScreen.assetPath).existsSync(),
-      isFalse,
+      file.existsSync(),
+      isTrue,
       reason:
-          'Test ini mengandaikan berkas Lottie belum ada. Bila berkasnya sudah '
-          'ditambahkan, hapus test ini karena fallback tidak lagi relevan.',
+          '${SplashScreen.assetPath} hilang. Splash akan memakai tampilan '
+          'cadangan (teks "Agronoma"), bukan animasi logo.',
     );
 
-    await tester.pumpWidget(_app(const SplashScreen()));
-    await tester.pump(const Duration(milliseconds: 100));
+    // Diurai dengan paket yang benar-benar dipakai di runtime, bukan dengan
+    // pemeriksa JSON biasa — jadi kegagalan parsing ketahuan di sini, bukan di
+    // layar pengguna.
+    final bytes = file.readAsBytesSync();
+    final composition = await LottieComposition.fromBytes(bytes);
 
-    expect(find.text('Agronoma'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expect(composition.duration.inMilliseconds, 5000);
+    expect(composition.frameRate, closeTo(60, 0.1));
+    expect(composition.bounds.width, 440);
+    expect(composition.bounds.height, 956);
+  });
+
+  test('durasi animasi cocok dengan jeda handoff splash', () async {
+    // Kontrak yang mudah rusak tanpa ketahuan: kalau berkas Lottie diekspor
+    // ulang dengan durasi lebih pendek, handoff bisa memotong gerakan terakhir.
+    // Ambangnya dihitung dari berkas itu sendiri, bukan ditulis tangan, supaya
+    // test ini tetap benar setelah ekspor ulang.
+    final lastMovement = await _lastMovementMs();
+    expect(
+      lastMovement,
+      greaterThan(0),
+      reason: 'Tidak ada track yang beranimasi — berkasnya statis.',
+    );
+    expect(
+      SplashScreen.defaultHandoff.inMilliseconds,
+      greaterThan(lastMovement + 100),
+      reason:
+          'Animasi masih bergerak sampai $lastMovement ms; handoff harus '
+          'menyisakan jeda untuk "mendarat".',
+    );
+    expect(
+      SplashScreen.defaultHandoff.inMilliseconds,
+      lessThanOrEqualTo(5000),
+      reason: 'Handoff melewati akhir komposisi (5 detik).',
+    );
+  });
+
+  test('komposisi Lottie benar-benar beranimasi, bukan gambar diam', () async {
+    final json = jsonDecode(
+      File(SplashScreen.assetPath).readAsStringSync(),
+    ) as Map<String, dynamic>;
+    var tracks = 0;
+    var keyframes = 0;
+    void walk(Object? node) {
+      if (node is List) return node.forEach(walk);
+      if (node is! Map) return;
+      if (node['a'] == 1 && node['k'] is List) {
+        tracks++;
+        keyframes += (node['k'] as List).length;
+      }
+      node.values.forEach(walk);
+    }
+
+    walk(json);
+    expect(tracks, greaterThanOrEqualTo(20));
+    expect(keyframes, greaterThanOrEqualTo(500));
+  });
+
+  test('aset raster dibatasi (glyph vektor tidak boleh bertambah)', () async {
+    // Tripwire, bukan pujian: ekspor Figma saat ini menanam 3 glyph ("g", "o",
+    // "a") sebagai PNG 1x sehingga tampak lebih lembut dari glyph vektor lain.
+    // Kalau jumlahnya bertambah, kualitas logo menurun tanpa ketahuan.
+    final json = jsonDecode(
+      File(SplashScreen.assetPath).readAsStringSync(),
+    ) as Map<String, dynamic>;
+    final rasters = (json['assets'] as List)
+        .whereType<Map>()
+        .where(
+          (a) => a['p'] is String && (a['p'] as String).startsWith('data:'),
+        )
+        .length;
+    expect(
+      rasters,
+      lessThanOrEqualTo(3),
+      reason:
+          'Jumlah glyph raster bertambah — logo makin buram di layar padat.',
+    );
+  });
+
+  test('kanvas Lottie memakai rasio design 440x956', () async {
+    // Rasio ini yang membuat logo duduk di posisi dan margin yang sama seperti
+    // Figma tanpa perhitungan manual: layer "agronoma full" ada di (51, 309)
+    // di dalam kanvas 440x956.
+    final bytes = File(SplashScreen.assetPath).readAsBytesSync();
+    final composition = await LottieComposition.fromBytes(bytes);
+    expect(
+      composition.bounds.width / composition.bounds.height,
+      closeTo(440 / 956, 0.001),
+    );
   });
 
   test('folder assets/lottie dideklarasikan di pubspec', () {
@@ -101,16 +219,6 @@ void main() {
       reason:
           'assets/lottie/ harus terdaftar di pubspec.yaml agar '
           '${SplashScreen.assetPath} ikut ter-bundle.',
-    );
-  });
-
-  test('jeda handoff memberi waktu logo tampil utuh', () {
-    // Logo baru utuh pada ±72% dari timeline 5 detik, yaitu ±3,6 detik
-    // (lihat dokumentasi di splash_screen.dart), jadi jeda tidak boleh lebih
-    // pendek dari itu agar animasi tidak terpotong.
-    expect(
-      SplashScreen.defaultHandoff.inMilliseconds,
-      greaterThanOrEqualTo(3600),
     );
   });
 }
