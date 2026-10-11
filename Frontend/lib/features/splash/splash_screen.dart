@@ -57,7 +57,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   Timer? _timer;
-  bool _handedOff = false;
 
   @override
   void initState() {
@@ -67,20 +66,24 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void dispose() {
+    // Timer dibatalkan di sini, dan itu satu-satunya penjaga yang dibutuhkan:
+    // timer yang sudah dibatalkan tidak akan pernah memanggil `_goToNext`, jadi
+    // tidak mungkin ada navigasi ganda maupun navigasi setelah widget dilepas.
     _timer?.cancel();
     super.dispose();
   }
 
   /// Berpindah ke [SplashScreen.next] dengan transisi fade.
   ///
-  /// Dijaga oleh `_handedOff` dan `mounted` supaya tidak pernah terjadi
-  /// navigasi ganda — misalnya bila widget sudah dilepas sebelum timer selesai.
+  /// Syarat `mounted` tetap dipertahankan sebagai sabuk pengaman: kalau kelak
+  /// [SplashScreen.duration] berubah di tengah jalan (mis. dari cek sesi login)
+  /// dan `initState` diganti memakai `Future` alih-alih `Timer`, tidak ada lagi
+  /// yang otomatis menjamin widget masih hidup saat callback menyala.
   void _goToNext() {
     final next = widget.next;
-    if (_handedOff || !mounted || next == null) {
+    if (!mounted || next == null) {
       return;
     }
-    _handedOff = true;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder<void>(
         transitionDuration: const Duration(milliseconds: 250),
