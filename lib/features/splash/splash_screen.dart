@@ -16,12 +16,14 @@ import 'package:frontend/features/splash/splash_handoff.dart';
 /// delapan glyph wordmark (A, g, r, o, n, o, m, a) ditambah cincin, tunas, dan
 /// bayangan tanah — dengan 32 track animasi dan 874 keyframe.
 ///
-/// Catatan kualitas: tiga glyph (huruf "g", "o", dan "a") diekspor plugin Figma
-/// sebagai **gambar PNG 1x**, bukan path vektor, karena simpul aslinya berupa
-/// boolean operation ("Subtract") yang tidak dijadikan path oleh eksportir.
-/// Ukurannya 32x44, 32x32, dan 26x32 px, sedangkan di layar ketiganya digambar
-/// sekitar 2,9x lebih besar (kepadatan Pixel 9 Pro), jadi ketiganya tampak
-/// lebih lembut daripada lima glyph lain yang tetap vektor.
+/// Catatan kualitas: tiga glyph (huruf "g", "o", dan "a") awalnya diekspor
+/// plugin Figma sebagai gambar PNG 1x karena simpul aslinya boolean operation
+/// ("Subtract"). Ketiganya sudah **diganti path vektor** memakai SVG sumber di
+/// `assets/icons/`, dengan `ks` (posisi, anchor, scale, opacity, keyframe) dan
+/// warna fill yang sama persis; titik kontrol path-nya diverifikasi identik
+/// dengan SVG asli (IoU 1,000). Seluruh 8 glyph kini vektor dan tajam di layar
+/// padat. Test "Lottie tidak memakai aset raster" di `test/splash_test.dart`
+/// menjaga agar tidak ada glyph yang diam-diam kembali menjadi gambar.
 ///
 /// Di Figma timeline itu berulang tanpa henti (`animation-iteration-count:
 /// infinite`), sedangkan splash di sini dimainkan **sekali** (`repeat: false`).
