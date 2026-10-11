@@ -196,6 +196,7 @@ class Plant {
     this.tags = const [],
     this.fertilizer = 'NPK Daun',
     this.soilName = 'Tanah Gembur',
+    this.secondaryStatus,
     this.tasks = const [],
     this.timeline = const [],
   });
@@ -215,6 +216,14 @@ class Plant {
 
   final PlantingMedia media;
   final CareStatus status;
+
+  /// Kondisi kedua, bila tanaman butuh dua tindakan sekaligus.
+  ///
+  /// Di frame Home, kartu pertama menampilkan **dua** chip dan **dua** lencana
+  /// ("PERLU DISIRAM" + "PERLU PUPUK"), jadi modelnya memang perlu menampung
+  /// lebih dari satu kondisi. `null` berarti hanya [status] yang tampil.
+  final CareStatus? secondaryStatus;
+
   final GrowthPhase phase;
   final DateTime plantedAt;
 
@@ -252,6 +261,7 @@ class Plant {
     String? place,
     PlantingMedia? media,
     CareStatus? status,
+    CareStatus? secondaryStatus,
     GrowthPhase? phase,
     double? careScore,
     String? fertilizer,
@@ -273,6 +283,7 @@ class Plant {
     tags: tags,
     fertilizer: fertilizer ?? this.fertilizer,
     soilName: soilName ?? this.soilName,
+    secondaryStatus: secondaryStatus ?? this.secondaryStatus,
     tasks: tasks ?? this.tasks,
     timeline: timeline,
   );
@@ -293,6 +304,9 @@ class Plant {
     tags: (json['tags'] as List? ?? const []).cast<String>(),
     fertilizer: json['fertilizer'] as String? ?? 'NPK Daun',
     soilName: json['soilName'] as String? ?? 'Tanah Gembur',
+    secondaryStatus: json['secondaryStatus'] == null
+        ? null
+        : CareStatus.values.byName(json['secondaryStatus'] as String),
     tasks: (json['tasks'] as List? ?? [])
         .map((e) => CareTask.fromJson(e as Map<String, dynamic>))
         .toList(),
@@ -309,6 +323,7 @@ class Plant {
     'place': place,
     'media': media.name,
     'status': status.name,
+    'secondaryStatus': secondaryStatus?.name,
     'phase': phase.name,
     'plantedAt': plantedAt.toIso8601String(),
     'careScore': careScore,

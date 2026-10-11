@@ -86,7 +86,13 @@ class PlantCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: AppRadius.lgAll,
           child: Container(
-            padding: const EdgeInsets.all(17),
+            // Tailwind menghitung border di dalam padding (`box-sizing:
+            // border-box`), sedangkan Flutter menambahkannya di luar. Jadi
+            // supaya kotak kartunya tetap 114px seperti design — 80px foto +
+            // 17px padding + 1px border di tiap sisi — padding di sini dipakai
+            // 16px. Kalau ditulis 17px, tiap kartu jadi 2px lebih tinggi dan
+            // selisihnya menumpuk ke bawah.
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: AppRadius.lgAll,
               border: Border.all(color: AppColors.border),
@@ -118,18 +124,54 @@ class PlantCard extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       _LocationLine(plant: plant),
-                      const SizedBox(height: AppSpacing.xs),
-                      CareStatusChip(status: plant.status),
+                      const SizedBox(height: 6),
+                      // Design bisa menampilkan dua chip sekaligus (kartu pertama
+                      // di frame Home memasang "PERLU DISIRAM" + "PERLU PUPUK").
+                      Row(
+                        children: [
+                          CareStatusChip(status: plant.status),
+                          if (plant.secondaryStatus != null) ...[
+                            const SizedBox(width: AppSpacing.sm),
+                            CareStatusChip(status: plant.secondaryStatus!),
+                          ],
+                        ],
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                CareStatusBadge(status: plant.status),
+                _CardBadges(plant: plant),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Lencana kondisi di sisi kanan kartu tanaman.
+///
+/// Satu kondisi tampil sebagai satu bulatan; dua kondisi (lihat
+/// [Plant.secondaryStatus]) ditumpuk ke bawah dengan jarak 8px persis seperti
+/// varian kartu di design.
+class _CardBadges extends StatelessWidget {
+  const _CardBadges({required this.plant});
+
+  final Plant plant;
+
+  @override
+  Widget build(BuildContext context) {
+    final secondary = plant.secondaryStatus;
+    if (secondary == null) return CareStatusBadge(status: plant.status);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CareStatusBadge(status: plant.status),
+        const SizedBox(height: AppSpacing.sm),
+        CareStatusBadge(status: secondary),
+      ],
     );
   }
 }
@@ -157,12 +199,18 @@ class _LocationLine extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            plant.place,
-            style: style,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+        // `Media Tanam` di design lebar kolomnya terbatas: teks panjang dipotong
+        // dengan elipsis ("Pekarangan Ru…"), bukan dibiarkan melebar. Karena itu
+        // kolomnya dibatasi, bukan memakai Expanded yang mengisi sisa ruang.
+        Flexible(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 118),
+            child: Text(
+              plant.place,
+              style: style,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ),
       ],
@@ -321,6 +369,10 @@ class WeatherCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: SizedBox(
+            // Diukur langsung dari frame Home: border atas kartu ini mendarat di
+            // baris 232 dan border bawahnya di 313, jadi tingginya 82px.
+            // (Komponen `WeatherCard` di design punya empat varian dengan tinggi
+            // berbeda-beda; yang dipakai Home adalah yang 82px ini.)
             height: 82,
             child: Stack(
               children: [
