@@ -54,6 +54,21 @@ class AppTextStyles {
   static const String fontInter = 'Inter';
   static const String fontPoppins = 'Poppins';
 
+  /// Tinggi baris untuk semua teks yang di Figma ditulis `leading-[normal]`.
+  ///
+  /// Ini bukan angka karangan. Figma memakai metrik `hhea` font Inter
+  /// (ascent 1984 + descent 494 dari unitsPerEm 2048 = **1,21 em**), sedangkan
+  /// Flutter/Skia mengambil `usWinAscent/usWinDescent` (2269 + 660 = 1,4302 em).
+  /// Kalau `height` dibiarkan `null`, kotak baris Flutter jadi 18% lebih tinggi
+  /// dan **setengah kelebihannya menambah jarak di atas teks** — sehingga setiap
+  /// blok teks `leading-normal` turun ~0,11 em dari design (≈2px untuk 20px),
+  /// dan kesalahan itu menumpuk ke seluruh layar. Menuliskan 1,21 eksplisit
+  /// membuat Flutter memakai tinggi baris yang sama dengan Figma.
+  ///
+  /// Nilai ini dipakai di [cardTitle], [cardTitleWide], [overline],
+  /// [overlineValue], [scanTitle], [legend], [labelMedium], dan [sheetTitle].
+  static const double leadingNormal = 1.21;
+
   // ── Judul ───────────────────────────────────────────────────────────────
 
   /// Sapaan besar di Home (`Hallo, User!`). 32px Poppins Bold, 40px.
@@ -104,6 +119,31 @@ class AppTextStyles {
     color: AppColors.ink,
   );
 
+  /// Nama pengguna di Profile (`Username`). 24px SemiBold, 32px,
+  /// letter-spacing -0.24px.
+  static const TextStyle displayName = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 24,
+    fontWeight: FontWeight.w600,
+    height: 32 / 24,
+    letterSpacing: -0.24,
+    color: AppColors.ink,
+  );
+
+  /// Nama tanaman di atas lembar Detail Tanaman (`Cabai Rawit`). 20px SemiBold,
+  /// tinggi baris `normal`.
+  ///
+  /// Sengaja dipisah dari [headlineLarge] yang tinggi barisnya 28px: di design
+  /// simpul nama tanaman memakai `leading-[normal]`, dan selisih 4px itu
+  /// menggeser seluruh isi lembar di bawahnya.
+  static const TextStyle sheetTitle = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    height: leadingNormal,
+    color: AppColors.ink,
+  );
+
   /// Judul layar / judul seksi. 20px SemiBold, 28px.
   static const TextStyle headlineLarge = TextStyle(
     fontFamily: fontInter,
@@ -121,6 +161,176 @@ class AppTextStyles {
     height: 1,
     letterSpacing: -1,
     color: AppColors.ink,
+  );
+
+  /// Judul top bar di atas foto gelap (Detail Tanaman, kamera). Sama seperti
+  /// [headlineMedium] tetapi putih.
+  static const TextStyle headlineMediumOnDark = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    height: 1,
+    letterSpacing: -1,
+    color: AppColors.onPrimary,
+  );
+
+  /// Judul seksi besar pada Detail Tanaman ("Ringkasan", "Perawatan").
+  /// 20px SemiBold, 20px.
+  static const TextStyle sectionTitle = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    height: 1,
+    color: AppColors.ink,
+  );
+
+  /// Judul kartu berukuran sedang, mis. "Detail Tanam", "Perkiraan Cuaca".
+  /// 16px Medium, tinggi baris `normal`.
+  static const TextStyle cardTitle = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    height: leadingNormal,
+    color: AppColors.ink,
+  );
+
+  /// Judul kartu yang lebih tegas, mis. "Kalender Perawatan". 18px SemiBold,
+  /// tinggi baris `normal`.
+  static const TextStyle cardTitleWide = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    height: leadingNormal,
+    color: AppColors.ink,
+  );
+
+  /// Label kecil huruf kapital di dalam kotak "Detail Tanam". 11px Bold,
+  /// letter-spacing 0.55px, tinggi baris `normal`.
+  static const TextStyle overline = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 11,
+    fontWeight: FontWeight.w700,
+    height: leadingNormal,
+    letterSpacing: 0.55,
+    color: AppColors.darkGrey,
+  );
+
+  /// Nilai di bawah [overline]. 14px SemiBold, letter-spacing 0.14px,
+  /// tinggi baris `normal`.
+  static const TextStyle overlineValue = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    height: leadingNormal,
+    letterSpacing: 0.14,
+    color: AppColors.ink,
+  );
+
+  /// Label fase pada garis waktu "Fase Pertumbuhan" yang belum dicapai.
+  /// 12px Medium, 14px.
+  static const TextStyle phaseLabel = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    height: 14 / 12,
+    color: AppColors.darkGrey,
+  );
+
+  /// Label fase yang sedang aktif. 14px SemiBold, 14px, hijau.
+  static const TextStyle phaseLabelActive = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    height: 1,
+    letterSpacing: 0.14,
+    color: AppColors.primary,
+  );
+
+  /// Nama hari pada kartu ramalan cuaca. 12px Medium, 16px.
+  static const TextStyle forecastDay = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    height: 16 / 12,
+    color: AppColors.darkGrey,
+  );
+
+  /// Suhu pada kartu ramalan cuaca. 18px Medium, 20px.
+  static const TextStyle forecastTemp = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+    height: 20 / 18,
+    color: AppColors.ink,
+  );
+
+  /// Judul kartu "Pindai Kesehatan" (putih di atas hijau). 16px SemiBold,
+  /// tinggi baris `normal`.
+  static const TextStyle scanTitle = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    height: leadingNormal,
+    color: AppColors.onPrimary,
+  );
+
+  /// Keterangan di bawah [scanTitle]. 14px Medium, putih.
+  static const TextStyle scanCaption = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    height: 20 / 14,
+    color: AppColors.onPrimary,
+  );
+
+  /// Nama hari pada kalender perawatan. 12px Regular, 16px.
+  static const TextStyle calendarDay = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    height: 16 / 12,
+    color: AppColors.darkGrey,
+  );
+
+  /// Tanggal pada kalender perawatan. 18px Medium, 27px.
+  static const TextStyle calendarDate = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+    height: 27 / 18,
+    color: AppColors.ink,
+  );
+
+  /// Keterangan ikon di bawah kalender ("Siram", "Pupuk"). 10px Regular,
+  /// tinggi baris `normal`.
+  static const TextStyle legend = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 10,
+    fontWeight: FontWeight.w400,
+    height: leadingNormal,
+    color: AppColors.ink,
+  );
+
+  /// Chip kecil di Detail Tanaman (`Indoor`/`Outdoor`). 12px Medium, 18px,
+  /// letter-spacing -0.5px.
+  static const TextStyle tagChip = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    height: 18 / 12,
+    letterSpacing: -0.5,
+    color: AppColors.grey,
+  );
+
+  /// Deskripsi di bawah nama tanaman pada Detail Tanaman. 16px Regular, 18px,
+  /// letter-spacing -0.5px, `Dark Grey`.
+  static const TextStyle sheetBody = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    height: 18 / 16,
+    letterSpacing: -0.5,
+    color: AppColors.darkGrey,
   );
 
   /// Judul kartu & seksi kecil. 16px SemiBold, 20px.
@@ -239,11 +449,12 @@ class AppTextStyles {
     color: AppColors.ink,
   );
 
-  /// Label nav bawah. 12px Medium, tinggi baris `normal` (tanpa pengali).
+  /// Label nav bawah ("Beranda", "Profil"). 12px Medium, tinggi baris `normal`.
   static const TextStyle labelMedium = TextStyle(
     fontFamily: fontInter,
     fontSize: 12,
     fontWeight: FontWeight.w500,
+    height: leadingNormal,
     color: AppColors.inkMuted,
   );
 
