@@ -40,7 +40,12 @@ FIGMA_STATUS_BAR = 64
 FIGMA_HOME_BAR = 24
 
 # Tinggi status bar Android pada emulator uji. Bisa ditimpa dengan --run-top.
-DEFAULT_RUN_TOP = 52
+#
+# Nilainya bukan tinggi status bar asli (52px), melainkan **inset yang dipakai
+# aplikasi**: `AppSizes.normalizeTopInset` menaikkannya ke 64px supaya isi layar
+# sejajar dengan kanvas Figma. Kalau angka 52 dipakai, seluruh layar akan
+# terlihat bergeser 12px dari design padahal sebenarnya sudah pas.
+DEFAULT_RUN_TOP = 64
 
 GAP = 16
 LABEL_H = 28
