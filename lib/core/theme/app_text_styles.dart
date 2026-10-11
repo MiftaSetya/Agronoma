@@ -14,6 +14,14 @@ import 'app_colors.dart';
 /// 2. **Poppins hampir tidak dipakai.** Dari 210 simpul teks yang diperiksa,
 ///    hanya satu yang memakai Poppins: sapaan `Hallo, User!` di Home. Sisanya
 ///    Inter, sehingga token yang dulu memakai Poppins dipindahkan ke Inter.
+/// 3. **Letter-spacing harus ditulis eksplisit, termasuk `0`.** Kalau sebuah
+///    token membiarkan `letterSpacing` kosong, Material menambahkan jarak dari
+///    `Typography.englishLike2021` (+0,3px pada 14px) — dan Figma memakai 0
+///    untuk semua teks yang tidak menuliskan `tracking`. Akibatnya teks jadi
+///    ~2% lebih lebar dari design dan ada baris yang **membungkus lebih awal**
+///    (mis. langkah 2 di panel hasil deteksi: 5 baris padahal design 4).
+///    Karena itu ke-41 token di bawah menuliskan `letterSpacing` — nilainya 0
+///    kecuali pada token yang di Figma memang punya `tracking`.
 ///
 /// Ukuran px yang benar-benar muncul di design:
 /// **10, 12, 14, 16, 18, 20, 24, 32**.
@@ -116,6 +124,7 @@ class AppTextStyles {
     fontSize: 32,
     fontWeight: FontWeight.w500,
     height: 28 / 32,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -141,6 +150,7 @@ class AppTextStyles {
     fontSize: 20,
     fontWeight: FontWeight.w600,
     height: leadingNormal,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -150,6 +160,7 @@ class AppTextStyles {
     fontSize: 20,
     fontWeight: FontWeight.w600,
     height: 28 / 20,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -181,6 +192,7 @@ class AppTextStyles {
     fontSize: 20,
     fontWeight: FontWeight.w600,
     height: 1,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -191,6 +203,7 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.w500,
     height: leadingNormal,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -201,6 +214,7 @@ class AppTextStyles {
     fontSize: 18,
     fontWeight: FontWeight.w600,
     height: leadingNormal,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -233,6 +247,7 @@ class AppTextStyles {
     fontSize: 12,
     fontWeight: FontWeight.w500,
     height: 14 / 12,
+    letterSpacing: 0,
     color: AppColors.darkGrey,
   );
 
@@ -252,6 +267,7 @@ class AppTextStyles {
     fontSize: 12,
     fontWeight: FontWeight.w500,
     height: 16 / 12,
+    letterSpacing: 0,
     color: AppColors.darkGrey,
   );
 
@@ -261,6 +277,7 @@ class AppTextStyles {
     fontSize: 18,
     fontWeight: FontWeight.w500,
     height: 20 / 18,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -271,6 +288,7 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.w600,
     height: leadingNormal,
+    letterSpacing: 0,
     color: AppColors.onPrimary,
   );
 
@@ -280,6 +298,7 @@ class AppTextStyles {
     fontSize: 14,
     fontWeight: FontWeight.w500,
     height: leadingNormal,
+    letterSpacing: 0,
     color: AppColors.onPrimary,
   );
 
@@ -289,6 +308,7 @@ class AppTextStyles {
     fontSize: 12,
     fontWeight: FontWeight.w400,
     height: 16 / 12,
+    letterSpacing: 0,
     color: AppColors.darkGrey,
   );
 
@@ -298,6 +318,7 @@ class AppTextStyles {
     fontSize: 18,
     fontWeight: FontWeight.w500,
     height: 27 / 18,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -308,6 +329,7 @@ class AppTextStyles {
     fontSize: 10,
     fontWeight: FontWeight.w400,
     height: leadingNormal,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -339,6 +361,7 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.w600,
     height: 20 / 16,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -349,6 +372,7 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.w500,
     height: 24 / 16,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -358,6 +382,7 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.w600,
     height: 24 / 16,
+    letterSpacing: 0,
     color: AppColors.primary,
   );
 
@@ -367,6 +392,7 @@ class AppTextStyles {
     fontSize: 18,
     fontWeight: FontWeight.w400,
     height: 28 / 18,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -376,6 +402,7 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.w400,
     height: 24 / 16,
+    letterSpacing: 0,
     color: AppColors.grey,
   );
 
@@ -386,6 +413,7 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.w400,
     height: 24 / 16,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -397,6 +425,7 @@ class AppTextStyles {
     fontSize: 14,
     fontWeight: FontWeight.w600,
     height: 20 / 14,
+    letterSpacing: 0,
     color: AppColors.darkGrey,
   );
 
@@ -408,6 +437,7 @@ class AppTextStyles {
     fontSize: 14,
     fontWeight: FontWeight.w400,
     height: 20 / 14,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -417,6 +447,7 @@ class AppTextStyles {
     fontSize: 14,
     fontWeight: FontWeight.w400,
     height: 20 / 14,
+    letterSpacing: 0,
     color: AppColors.grey,
   );
 
@@ -426,6 +457,7 @@ class AppTextStyles {
     fontSize: 12,
     fontWeight: FontWeight.w400,
     height: 16 / 12,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -435,6 +467,7 @@ class AppTextStyles {
     fontSize: 12,
     fontWeight: FontWeight.w500,
     height: 16 / 12,
+    letterSpacing: 0,
     color: AppColors.grey,
   );
 
@@ -446,6 +479,7 @@ class AppTextStyles {
     fontSize: 14,
     fontWeight: FontWeight.w500,
     height: 20 / 14,
+    letterSpacing: 0,
     color: AppColors.ink,
   );
 
@@ -455,6 +489,7 @@ class AppTextStyles {
     fontSize: 12,
     fontWeight: FontWeight.w500,
     height: leadingNormal,
+    letterSpacing: 0,
     color: AppColors.inkMuted,
   );
 
@@ -475,6 +510,7 @@ class AppTextStyles {
     fontSize: 14,
     fontWeight: FontWeight.w700,
     height: 29 / 14,
+    letterSpacing: 0,
     color: AppColors.onPrimary,
   );
 
@@ -484,6 +520,7 @@ class AppTextStyles {
     fontSize: 14,
     fontWeight: FontWeight.w700,
     height: 29 / 14,
+    letterSpacing: 0,
     color: AppColors.primary,
   );
 }
