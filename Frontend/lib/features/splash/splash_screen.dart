@@ -1,17 +1,27 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/features/splash/splash_handoff.dart';
 
 /// Splash screen Agronoma.
 ///
 /// Animasi diambil dari frame `Splash Screen` (node `1:2`) pada Figma
-/// "Agronoma Design". Frame itu dibuat dengan **Figma Motion**: timeline 5 detik
-/// berisi 15 layer — delapan glyph wordmark (A, g, r, o, n, o, m, a) ditambah
-/// cincin, tunas, dan bagian dalam huruf "o".
+/// "Agronoma Design", diekspor dari **Figma Motion** ke Lottie
+/// (`assets/lottie/splash.json`).
+///
+/// Isi berkas itu: kanvas 440x956, 60 fps, 300 frame (5 detik), berisi grup
+/// "agronoma full" di posisi Figma `(51, 309)`. Di dalamnya ada 11 layer —
+/// delapan glyph wordmark (A, g, r, o, n, o, m, a) ditambah cincin, tunas, dan
+/// bayangan tanah — dengan 32 track animasi dan 874 keyframe.
+///
+/// Catatan kualitas: tiga glyph (huruf "g", "o", dan "a") diekspor plugin Figma
+/// sebagai **gambar PNG 1x**, bukan path vektor, karena simpul aslinya berupa
+/// boolean operation ("Subtract") yang tidak dijadikan path oleh eksportir.
+/// Ukurannya 32x44, 32x32, dan 26x32 px, sedangkan di layar ketiganya digambar
+/// sekitar 2,9x lebih besar (kepadatan Pixel 9 Pro), jadi ketiganya tampak
+/// lebih lembut daripada lima glyph lain yang tetap vektor.
 ///
 /// Di Figma timeline itu berulang tanpa henti (`animation-iteration-count:
 /// infinite`), sedangkan splash di sini dimainkan **sekali** (`repeat: false`).
@@ -29,9 +39,10 @@ import 'package:frontend/core/theme/theme.dart';
 /// | m | idem | 69,5% | 75,5% |
 /// | a | idem | 73,5% | 79,5% |
 ///
-/// Logo baru utuh pada ±72% (3,6 detik), karena itu jeda menuju layar
-/// berikutnya dipasang di [defaultHandoff] (3,9 detik) supaya masih ada jeda
-/// tenang sesaat sebelum berpindah.
+/// Angka persen di atas dibulatkan dari keyframe Figma. Pengukuran langsung atas
+/// `splash.json` menunjukkan animasi **berhenti bergerak pada 3,967 detik
+/// (79,3%)** — bukan 3,6 detik — dan angka itulah yang jadi dasar
+/// [defaultHandoff].
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key, this.next, this.duration = defaultHandoff});
 
@@ -39,9 +50,17 @@ class SplashScreen extends StatefulWidget {
   /// `pubspec.yaml`, jadi berkas ini otomatis ikut ter-bundle.
   static const String assetPath = 'assets/lottie/splash.json';
 
-  /// Jeda sebelum berpindah layar: logo sudah utuh di 3,6 detik, jadi 3,9 detik
-  /// memberi jeda tenang sesaat tanpa animasi terpotong.
-  static const Duration defaultHandoff = Duration(milliseconds: 3900);
+  /// Jeda sebelum berpindah layar, dihitung **dari saat animasi mulai berjalan**
+  /// (lihat `_onAnimationLoaded`), bukan dari saat widget dibangun.
+  ///
+  /// Diukur dari `splash.json`, bukan dari perkiraan: seluruh 32 track berhenti
+  /// pada 3,967 detik (keyframe terakhir yang masih mengubah nilai ada di frame
+  /// 238 dari 300). Sisa 1 detik terakhir hanya nilai yang ditahan, jadi memotong
+  /// di 4,2 detik tidak menghilangkan satu gerakan pun dan masih menyisakan
+  /// ±230 ms untuk "mendarat" sebelum transisi fade 250 ms —
+  /// sedangkan 3,9 detik (nilai lama, dari perkiraan 3,6 detik) memotong glyph
+  /// "a" sebelum selesai, dan 4,0 detik terlalu mepet.
+  static const Duration defaultHandoff = Duration(milliseconds: 4200);
 
   /// Layar tujuan setelah splash. Disuntikkan dari luar (composition root di
   /// `main.dart`) supaya fitur splash tidak perlu mengimpor fitur lain dan bisa
@@ -56,20 +75,32 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  Timer? _timer;
+  late final SplashHandoff _handoff = SplashHandoff(_goToNext);
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer(widget.duration, _goToNext);
+    _handoff.arm(widget.duration + SplashHandoff.loadGrace);
+  }
+
+  /// Dipanggil begitu komposisi Lottie selesai di-decode dan animasi mulai.
+  ///
+  /// Jadwal dihitung ulang dari sini karena [SplashScreen.duration] diukur dari
+  /// **saat animasi benar-benar berjalan**, sedangkan dekode aset butuh waktu.
+  /// Kalau jeda dihitung dari `initState` (perilaku lama), waktu dekode itu
+  /// diam-diam memotong durasi animasi dan wordmark belum selesai saat handoff.
+  /// Menambatkannya ke `onLoaded` membuat total waktu layar memanjang mengikuti
+  /// lambatnya pemuatan, sehingga animasinya selalu utuh.
+  void _onAnimationLoaded(LottieComposition composition) {
+    _handoff.arm(widget.duration);
   }
 
   @override
   void dispose() {
-    // Timer dibatalkan di sini, dan itu satu-satunya penjaga yang dibutuhkan:
-    // timer yang sudah dibatalkan tidak akan pernah memanggil `_goToNext`, jadi
-    // tidak mungkin ada navigasi ganda maupun navigasi setelah widget dilepas.
-    _timer?.cancel();
+    // Satu-satunya penjaga yang dibutuhkan: jadwal yang sudah dibatalkan tidak
+    // akan pernah memanggil `_goToNext`, jadi tidak mungkin ada navigasi ganda
+    // maupun navigasi setelah widget dilepas.
+    _handoff.cancel();
     super.dispose();
   }
 
@@ -120,6 +151,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Lottie.asset(
               SplashScreen.assetPath,
               repeat: false,
+              onLoaded: _onAnimationLoaded,
               errorBuilder: (context, error, stackTrace) =>
                   const _SplashLogoFallback(),
             ),
