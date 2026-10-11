@@ -15,6 +15,7 @@ class AgroIcon extends StatelessWidget {
     this.asset, {
     super.key,
     this.size = 24,
+    this.height,
     this.semanticLabel,
     this.color,
   });
@@ -22,7 +23,20 @@ class AgroIcon extends StatelessWidget {
   /// Path aset, HARUS lewat konstanta di `AppAssets`.
   final String asset;
 
+  /// Lebar ikon. Bila [height] kosong, tinggi mengikuti nilai ini juga.
   final double size;
+
+  /// Tinggi ikon, untuk ikon yang rasio aslinya **bukan** 1:1.
+  ///
+  /// Ini bukan hiasan: berkas SVG dari Figma hampir semuanya ditulis dengan
+  /// `preserveAspectRatio="none"`, jadi begitu lebar dan tinggi sama-sama
+  /// ditentukan, isinya **diregangkan** ke kotak itu. Selama ini tidak terasa
+  /// karena hampir semua ikon dipasang di design dengan ukuran simpul yang
+  /// kebetulan sama dengan ukuran aslinya. Beberapa tidak: silang `close-line`
+  /// aslinya 14,7x19,2 tetapi simpulnya 24x24 — memaksa 24x24 membuat silangnya
+  /// 30% lebih besar dari design. Untuk ikon seperti itu, isi [height] dengan
+  /// tinggi aslinya.
+  final double? height;
 
   /// Nama untuk pembaca layar. Kosong berarti ikon dianggap murni hiasan.
   final String? semanticLabel;
@@ -35,7 +49,7 @@ class AgroIcon extends StatelessWidget {
     return SvgPicture.asset(
       asset,
       width: size,
-      height: size,
+      height: height ?? size,
       colorFilter: color == null
           ? null
           : ColorFilter.mode(color!, BlendMode.srcIn),
@@ -54,12 +68,14 @@ class AgroIconTinted extends StatelessWidget {
     this.asset, {
     super.key,
     this.size = 24,
+    this.height,
     required this.color,
     this.semanticLabel,
   });
 
   final String asset;
   final double size;
+  final double? height;
   final Color color;
   final String? semanticLabel;
 
@@ -68,6 +84,7 @@ class AgroIconTinted extends StatelessWidget {
     return AgroIcon(
       asset,
       size: size,
+      height: height,
       color: color,
       semanticLabel: semanticLabel,
     );

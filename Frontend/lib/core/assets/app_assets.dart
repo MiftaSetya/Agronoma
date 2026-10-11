@@ -56,8 +56,12 @@ class AppAssets {
   static const String fabLogo =
       '$_icons/200d5ec8666be0da1473ff5b003f26fdc460de58.svg';
 
-  /// Simbol tutup (garis) di menu FAB.
-  static const String fabCloseLine =
+  /// Gagang (handle) bottom sheet — garis abu 32x4 di tengah kanvas 440x24.
+  ///
+  /// Berkas SVG-nya selebar kanvas (440x24) dan garisnya sudah tergambar di
+  /// posisi tengah, jadi dipakai apa adanya dengan lebar penuh; kalau digambar
+  /// sebagai garis kecil sendiri, posisinya harus dihitung ulang.
+  static const String sheetHandle =
       '$_icons/d4923294986d45c05f568a95865b2104835b6f1a.svg';
 
   /// Ikon "Tutup" (kotak dengan silang) di menu FAB.
@@ -140,6 +144,18 @@ class AppAssets {
   static const String infoFill =
       '$_icons/83fa194c6dbe83a4361e999218ba218625294047.svg';
 
+  /// Ikon peringatan bulat (merah) — label "Penyakit terdeteksi" pada drawer
+  /// hasil deteksi.
+  static const String warningFill =
+      '$_icons/042357eb72843fcc732cf87814a881f75d3a8aba.svg';
+
+  /// Centang bulat hijau kecil (15px) — pil akurasi "98% Cocok".
+  ///
+  /// Berbeda dari [checkCircle] yang dipakai di kartu tanaman: yang ini lebih
+  /// kecil dan warnanya hijau tua (#56810B) agar terbaca di atas pil hijau.
+  static const String checkCircleSolid =
+      '$_icons/63bd523e40fe86456993c5dc397b57c50ddaf3a7.svg';
+
   /// Ikon galeri — tombol kiri di bawah layar kamera.
   static const String galleryFill =
       '$_icons/17ff6b81d5a4ce835ab648a932a53a492539509c.svg';
@@ -215,6 +231,13 @@ class AppAssets {
   /// Penanda lokasi pada peta (langkah 1).
   static const String mapPointer =
       '$_icons/2fa8343d259af84d9bf2691f0331c1677b703040.svg';
+
+  /// Penanda lokasi bulat (terisi) pada kartu lokasi terpilih (langkah 1).
+  ///
+  /// Beda dari [mapPointer] yang berbentuk pin peta: yang ini bulat penuh
+  /// dengan lubang di tengah dan dipakai di samping nama lokasi.
+  static const String locationFilled =
+      '$_icons/091d3ab263f91469af9789033f53ae49543eb966.svg';
 
   // ─────────────────────────────────────────────────────────────────────────
   // Detail tanaman
@@ -308,6 +331,18 @@ class AppAssets {
   /// Foto "Cabai Rawit Keriting".
   static const String photoCabaiKeriting =
       '$_images/e1c380d0fe338c6467944659e846a0f9c64879df.jpg';
+
+  /// Foto latar layar deteksi penyakit — kebun tomat yang terserang karat daun.
+  ///
+  /// Ini **bukan** [photoCabaiRawit]: design memang memakai foto lain untuk
+  /// layar kamera deteksi, dan memakai foto yang salah membuat seluruh layar
+  /// terlihat berbeda walau tata letaknya sudah pas.
+  static const String photoPlantDetection =
+      '$_images/d41d5e0848924bc81706be83a6c9fe6a1e60c0e8.jpg';
+
+  /// Foto peta (ubin jalan) untuk langkah "Lokasi penanaman".
+  static const String photoMap =
+      '$_images/0b2e0f5be47ba56050c9b3b67807a7ad737bcc8e.jpg';
 
   /// Foto profil pengguna.
   static const String photoProfile =
