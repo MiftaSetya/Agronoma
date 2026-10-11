@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_text_styles.dart';
 
-/// Skala jarak. Design digambar pada kanvas 440px, jadi nilai-nilainya
-/// kelipatan 4 yang lazim dipakai di Figma.
+/// Skala jarak. Design digambar pada kanvas 440px dengan padding halaman
+/// **16px** (diukur dari `Home`, `Profile`, dan `Plant detail`).
+///
+/// Nilai-nilainya kelipatan 4 yang lazim dipakai di Figma.
 class AppSpacing {
   AppSpacing._();
   static const double xs = 4;
@@ -16,7 +18,11 @@ class AppSpacing {
   static const double xxxl = 32;
 
   /// Padding horizontal standar halaman (kiri-kanan).
-  static const double page = 20;
+  ///
+  /// Diambil dari design: Home dan Profile memakai 16, sehingga lebar kartu
+  /// 408 dari kanvas 440. Ada beberapa komponen yang memakai 20 di dalam
+  /// dirinya sendiri (mis. isi kartu), tetapi **kerangka halaman** selalu 16.
+  static const double page = 16;
 
   /// Jarak aman dari tepi bawah untuk konten di atas home indicator.
   static const double bottomGutter = 24;
@@ -26,6 +32,7 @@ class AppSpacing {
 class AppRadius {
   AppRadius._();
   static const double chip = 999;
+  static const double xs = 4;
   static const double sm = 8;
   static const double md = 12;
   static const double lg = 16;
@@ -33,6 +40,7 @@ class AppRadius {
   static const double sheet = 24;
 
   static const BorderRadius chipAll = BorderRadius.all(Radius.circular(chip));
+  static const BorderRadius xsAll = BorderRadius.all(Radius.circular(xs));
   static const BorderRadius smAll = BorderRadius.all(Radius.circular(sm));
   static const BorderRadius mdAll = BorderRadius.all(Radius.circular(md));
   static const BorderRadius lgAll = BorderRadius.all(Radius.circular(lg));
@@ -52,6 +60,35 @@ class AppSizes {
   static const double fabSize = 56;
   static const double listImage = 64;
   static const double hitTarget = 48;
+
+  /// Lebar dan tinggi kanvas Figma. Semua jarak di design diukur pada frame
+  /// 440x956 (iPhone 16 Pro Max), jadi angka-angka di tema ini juga.
+  static const double designWidth = 440;
+  static const double designHeight = 956;
+
+  /// Tinggi area status bar pada kanvas Figma — status bar iPhone 16 Pro Max.
+  ///
+  /// Design menggambar seluruh isi layar **mulai dari baris 64**: status bar
+  /// setinggi itu bukan sekadar gambar, ia turut menentukan posisi judul, kartu,
+  /// dan tombol di bawahnya. Di Android status bar rata-rata hanya ~32px, jadi
+  /// kalau dibiarkan setiap layar akan meleset 32px ke atas dengan arah yang
+  /// sama dan hasilnya terlihat "mirip tapi bukan".
+  ///
+  /// Karena itu inset atas diseragamkan sekali di `app.dart`
+  /// ([normalizeTopInset]), bukan ditambal satu per satu di tiap layar.
+  static const double designStatusBar = 64;
+
+  /// Menyamakan inset atas dengan area status bar pada design.
+  ///
+  /// Nilai yang dipakai adalah **nilai terbesar** antara inset sistem dan
+  /// [designStatusBar]. Sengaja tidak pernah mengecilkan inset: pada perangkat
+  /// berponi inset sistem bisa lebih tinggi dari 64, dan memaksanya jadi 64 akan
+  /// membuat konten tertutup poni. Dengan mengambil yang terbesar, layout sama
+  /// seperti design pada perangkat biasa, dan tetap aman pada perangkat berponi.
+  static double normalizeTopInset(BuildContext context) {
+    final systemInset = MediaQuery.of(context).padding.top;
+    return systemInset < designStatusBar ? designStatusBar : systemInset;
+  }
 }
 
 class AppTheme {

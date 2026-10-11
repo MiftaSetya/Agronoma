@@ -34,17 +34,36 @@ void main() {
   });
 
   test('AppTextStyles memakai ukuran yang ada di design', () {
-    // Ukuran px yang benar-benar muncul di design: 10, 12, 14, 16, 17, 20, 32.
+    // Ukuran px yang benar-benar muncul di 210 simpul teks design:
+    // 10, 12, 14, 16, 18, 20, 24, 32.
     expect(AppTextStyles.labelSmall.fontSize, 10);
     expect(AppTextStyles.bodySmall.fontSize, 12);
     expect(AppTextStyles.labelMedium.fontSize, 12);
     expect(AppTextStyles.bodyLarge.fontSize, 14);
     expect(AppTextStyles.labelLarge.fontSize, 14);
+    expect(AppTextStyles.titleMedium.fontSize, 14);
     expect(AppTextStyles.titleLarge.fontSize, 16);
-    expect(AppTextStyles.headlineMedium.fontSize, 17);
+    expect(AppTextStyles.titleWide.fontSize, 16);
+    expect(AppTextStyles.menuRow.fontSize, 18);
     expect(AppTextStyles.headlineLarge.fontSize, 20);
+    expect(AppTextStyles.headlineMedium.fontSize, 20);
     expect(AppTextStyles.displayLarge.fontSize, 32);
     expect(AppTextStyles.displayMedium.fontSize, 32);
+  });
+
+  test('tinggi baris AppTextStyles sama dengan leading di Figma', () {
+    // Figma menulis tinggi baris dalam px, bukan rasio. Angka-angka ini diambil
+    // dari `leading-[Npx]` pada simpul teksnya; rumusnya height = leading / size.
+    expect(AppTextStyles.labelSmall.height, 15 / 10);
+    expect(AppTextStyles.bodySmall.height, 16 / 12);
+    expect(AppTextStyles.labelMedium.height, isNull); // `leading-[normal]`
+    expect(AppTextStyles.bodyLarge.height, 20 / 14);
+    expect(AppTextStyles.titleMedium.height, 20 / 14);
+    expect(AppTextStyles.titleLarge.height, 20 / 16);
+    expect(AppTextStyles.headlineLarge.height, 28 / 20);
+    expect(AppTextStyles.headlineMedium.height, 1);
+    expect(AppTextStyles.displayLarge.height, 28 / 32);
+    expect(AppTextStyles.displayMedium.height, 40 / 32);
   });
 
   test('AppTextStyles tidak memakai SF Pro', () {
@@ -55,6 +74,7 @@ void main() {
       AppTextStyles.bodyLarge.fontFamily,
       AppTextStyles.labelSmall.fontFamily,
       AppTextStyles.displayMedium.fontFamily,
+      AppTextStyles.greetingLarge.fontFamily,
     };
     expect(families, containsAll(<String?>{'Inter', 'Poppins'}));
     expect(families.any((f) => f != null && f.contains('SF')), isFalse);

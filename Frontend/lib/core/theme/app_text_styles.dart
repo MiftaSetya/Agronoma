@@ -4,15 +4,50 @@ import 'app_colors.dart';
 
 /// Tipografi Agronoma.
 ///
-/// Design memakai 6 varian font: `Inter` (Regular / Medium / SemiBold / Bold),
-/// `Poppins` Bold, dan `SF Pro` Semibold. SF Pro tidak di-bundle karena
-/// lisensinya milik Apple, dan seluruh pemakaiannya berada di status bar iPhone
-/// yang di Flutter digantikan oleh sistem operasi — jadi tidak ada teks design
-/// yang kehilangan typeface-nya.
+/// Seluruh nilai di bawah **diukur dari Figma**, bukan diperkirakan. Dua hal
+/// yang paling mudah salah dan sudah dikoreksi di sini:
 ///
-/// Ukuran (px) yang benar-benar muncul di design: 10, 12, 14, 16, 17, 20, 32.
-/// Semua di bawah ini memakai satuan px yang sama (Flutter memperlakukannya
-/// sebagai logical pixel, dan design digambar pada 440px untuk iPhone 16 Pro Max).
+/// 1. **Tinggi baris memakai px, bukan rasio.** Figma menuliskan tinggi baris
+///    secara eksplisit (mis. `leading-[20px]` untuk teks 14px), jadi angkanya
+///    dipakai apa adanya lewat `height: 20 / 14`. Kalau ditulis sebagai rasio
+///    bulat, akumulasi selisihnya menggeser seluruh layar dari design.
+/// 2. **Poppins hampir tidak dipakai.** Dari 210 simpul teks yang diperiksa,
+///    hanya satu yang memakai Poppins: sapaan `Hallo, User!` di Home. Sisanya
+///    Inter, sehingga token yang dulu memakai Poppins dipindahkan ke Inter.
+///
+/// Ukuran px yang benar-benar muncul di design:
+/// **10, 12, 14, 16, 18, 20, 24, 32**.
+///
+/// Ringkasan peran tiap token (lihat `docs/typography.md` untuk tabel lengkap):
+///
+/// | Token | Nilai | Dipakai untuk |
+/// |---|---|---|
+/// | [greetingLarge] | 32/40 Poppins w700 | `Hallo, User!` |
+/// | [headlineSmall] | 32/40 Inter w700 | nama penyakit, angka besar tebal |
+/// | [displayMedium] | 32/40 Inter w700 | angka statistik (24, 12, 98%) |
+/// | [displayLarge] | 32/28 Inter w500 | suhu `28°C` |
+/// | [headlineLarge] | 20/28 Inter w600 | judul layar, judul seksi, kota |
+/// | [headlineMedium] | 20/20 Inter w600 | judul di top bar |
+/// | [titleLarge] | 16/20 Inter w600 | judul kartu & seksi kecil |
+/// | [titleWide] | 16/24 Inter w500 | subjudul Home, `Ayo cek …` |
+/// | [menuItem] | 16/24 Inter w600 | item menu FAB |
+/// | [menuRow] | 18/28 Inter w400 | baris menu Profile |
+/// | [menuRowCaption] | 16/24 Inter w400 | keterangan baris menu Profile |
+/// | [tagline] | 16/24 Inter w400 | teks pengantar berukuran besar |
+/// | [titleMedium] | 14/20 Inter w600 | label field, nama tanaman |
+/// | [bodyLarge] | 14/20 Inter w400 | teks isi |
+/// | [bodyMuted] | 14/20 Inter w400 | teks isi sekunder |
+/// | [bodySmall] | 12/16 Inter w400 | teks kecil |
+/// | [bodyCaption] | 12/16 Inter w500 | meta, chip teks |
+/// | [labelLarge] | 14/20 Inter w500 | label umum |
+/// | [labelMedium] | 12 Inter w500 | label nav bawah |
+/// | [labelSmall] | 10/15 Inter w600 | chip huruf kapital |
+/// | [buttonLarge] | 14/29 Inter w700 | teks tombol utama |
+/// | [buttonOutline] | 14/29 Inter w700 | teks tombol sekunder |
+///
+/// SF Pro tidak di-bundle karena lisensinya milik Apple, dan seluruh
+/// pemakaiannya berada di status bar iPhone yang di Flutter digantikan oleh
+/// sistem operasi — jadi tidak ada teks design yang kehilangan typeface-nya.
 class AppTextStyles {
   AppTextStyles._();
 
@@ -21,144 +56,223 @@ class AppTextStyles {
 
   // ── Judul ───────────────────────────────────────────────────────────────
 
-  /// Angka besar / temperatur (mis. `28°C`). 32px SemiBold.
-  static const TextStyle displayLarge = TextStyle(
-    fontFamily: fontInter,
-    fontSize: 32,
-    fontWeight: FontWeight.w600,
-    height: 1.2,
-    color: AppColors.ink,
-  );
-
-  /// Angka statistik di Profile (mis. `24`, `12`, `98%`).
-  static const TextStyle displayMedium = TextStyle(
+  /// Sapaan besar di Home (`Hallo, User!`). 32px Poppins Bold, 40px.
+  ///
+  /// Satu-satunya teks design yang memakai Poppins, dan satu-satunya yang
+  /// memakai letter-spacing negatif sebesar -0.64px (2% dari ukuran font).
+  ///
+  /// Catatan: design memakai Poppins **ExtraBold** (w900), sedangkan repo hanya
+  /// menyediakan `Poppins-Bold.ttf` (w700). Bobot yang tersedia dipakai apa
+  /// adanya — hurufnya sedikit lebih ringan dari design, dan itu disengaja
+  /// daripada menambah berkas font tanpa perlu.
+  static const TextStyle greetingLarge = TextStyle(
     fontFamily: fontPoppins,
     fontSize: 32,
     fontWeight: FontWeight.w700,
-    height: 1.1,
+    height: 40 / 32,
+    letterSpacing: -0.64,
     color: AppColors.ink,
   );
 
-  /// Judul screen / judul kartu besar. 20px SemiBold.
+  /// Judul hasil yang menonjol, mis. nama penyakit `Karat Daun`.
+  /// 32px Bold, 40px, letter-spacing -0.64px.
+  static const TextStyle headlineSmall = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 32,
+    fontWeight: FontWeight.w700,
+    height: 40 / 32,
+    letterSpacing: -0.64,
+    color: AppColors.ink,
+  );
+
+  /// Angka statistik di Profile (mis. `24`, `12`, `98%`). 32px Bold, 40px.
+  static const TextStyle displayMedium = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 32,
+    fontWeight: FontWeight.w700,
+    height: 40 / 32,
+    letterSpacing: -0.64,
+    color: AppColors.ink,
+  );
+
+  /// Angka besar / temperatur (mis. `28°C`). 32px Medium, 28px.
+  static const TextStyle displayLarge = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 32,
+    fontWeight: FontWeight.w500,
+    height: 28 / 32,
+    color: AppColors.ink,
+  );
+
+  /// Judul layar / judul seksi. 20px SemiBold, 28px.
   static const TextStyle headlineLarge = TextStyle(
     fontFamily: fontInter,
     fontSize: 20,
     fontWeight: FontWeight.w600,
-    height: 1.3,
+    height: 28 / 20,
     color: AppColors.ink,
   );
 
-  /// Judul layar di top bar (mis. `Tambahlah tanaman`). 17px SemiBold.
+  /// Judul di top bar. 20px SemiBold, 20px, letter-spacing -1px.
   static const TextStyle headlineMedium = TextStyle(
     fontFamily: fontInter,
-    fontSize: 17,
+    fontSize: 20,
     fontWeight: FontWeight.w600,
-    height: 1.3,
+    height: 1,
+    letterSpacing: -1,
     color: AppColors.ink,
   );
 
-  /// Judul seksi / kartu. 16px SemiBold.
+  /// Judul kartu & seksi kecil. 16px SemiBold, 20px.
   static const TextStyle titleLarge = TextStyle(
     fontFamily: fontInter,
     fontSize: 16,
     fontWeight: FontWeight.w600,
-    height: 1.35,
+    height: 20 / 16,
     color: AppColors.ink,
   );
 
-  /// Sub-judul seksi. 14px SemiBold.
+  /// Baris dua tingkat dengan judul dan keterangan (mis. kota + kondisi cuaca
+  /// di kartu cuaca). 16px Medium, 24px.
+  static const TextStyle titleWide = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    height: 24 / 16,
+    color: AppColors.ink,
+  );
+
+  /// Item menu yang muncul dari tombol tambah. 16px SemiBold, 24px.
+  static const TextStyle menuItem = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    height: 24 / 16,
+    color: AppColors.primary,
+  );
+
+  /// Baris menu di Profile (mis. `Pengingat Penyiraman`). 18px Regular, 28px.
+  static const TextStyle menuRow = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 18,
+    fontWeight: FontWeight.w400,
+    height: 28 / 18,
+    color: AppColors.ink,
+  );
+
+  /// Keterangan di bawah baris menu Profile. 16px Regular, 24px.
+  static const TextStyle menuRowCaption = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    height: 24 / 16,
+    color: AppColors.grey,
+  );
+
+  /// Teks pengantar berukuran besar (mis. `Arahkan kamera ke tanaman`).
+  /// 16px Regular, 24px.
+  static const TextStyle tagline = TextStyle(
+    fontFamily: fontInter,
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    height: 24 / 16,
+    color: AppColors.ink,
+  );
+
+  /// Sub-judul seksi / label field / nama tanaman. 14px SemiBold, 20px.
+  ///
+  /// Warnanya `Dark Grey` (#454545) sesuai design, bukan hitam.
   static const TextStyle titleMedium = TextStyle(
     fontFamily: fontInter,
     fontSize: 14,
     fontWeight: FontWeight.w600,
-    height: 1.4,
-    color: AppColors.ink,
+    height: 20 / 14,
+    color: AppColors.darkGrey,
   );
 
   // ── Isi ─────────────────────────────────────────────────────────────────
 
-  /// Teks isi utama. 14px Regular.
+  /// Teks isi utama. 14px Regular, 20px.
   static const TextStyle bodyLarge = TextStyle(
     fontFamily: fontInter,
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    height: 1.5,
+    height: 20 / 14,
     color: AppColors.ink,
   );
 
-  /// Teks isi sekunder / deskripsi. 14px Regular, abu gelap.
+  /// Teks isi sekunder / deskripsi. 14px Regular, 20px, abu.
   static const TextStyle bodyMuted = TextStyle(
     fontFamily: fontInter,
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    height: 1.5,
-    color: AppColors.inkSecondary,
+    height: 20 / 14,
+    color: AppColors.grey,
   );
 
-  /// Teks isi kecil. 12px Regular.
+  /// Teks isi kecil. 12px Regular, 16px.
   static const TextStyle bodySmall = TextStyle(
     fontFamily: fontInter,
     fontSize: 12,
     fontWeight: FontWeight.w400,
-    height: 1.45,
+    height: 16 / 12,
     color: AppColors.ink,
   );
 
-  /// Meta / keterangan waktu. 12px Regular, abu.
+  /// Meta / label kecil (mis. `Semi-Indoor`). 12px Medium, 16px, abu.
   static const TextStyle bodyCaption = TextStyle(
     fontFamily: fontInter,
     fontSize: 12,
-    fontWeight: FontWeight.w400,
-    height: 1.4,
-    color: AppColors.inkMuted,
+    fontWeight: FontWeight.w500,
+    height: 16 / 12,
+    color: AppColors.grey,
   );
 
   // ── Label & kontrol ─────────────────────────────────────────────────────
 
-  /// Label field / tombol. 14px Medium.
+  /// Label umum & tautan aksi. 14px Medium, 20px.
   static const TextStyle labelLarge = TextStyle(
     fontFamily: fontInter,
     fontSize: 14,
     fontWeight: FontWeight.w500,
-    height: 1.4,
+    height: 20 / 14,
     color: AppColors.ink,
   );
 
-  /// Label nav bawah, tab. 12px Medium.
+  /// Label nav bawah. 12px Medium, tinggi baris `normal` (tanpa pengali).
   static const TextStyle labelMedium = TextStyle(
     fontFamily: fontInter,
     fontSize: 12,
     fontWeight: FontWeight.w500,
-    height: 1.3,
     color: AppColors.inkMuted,
   );
 
-  /// Chip / badge huruf kapital (mis. `PERLU DISIRAM`). 10px SemiBold,
-  /// diberi jarak antar-huruf karena huruf kapital kecil mudah rapat.
+  /// Chip / badge huruf kapital (mis. `PERLU DISIRAM`). 10px SemiBold, 15px,
+  /// letter-spacing 0.5px.
   static const TextStyle labelSmall = TextStyle(
     fontFamily: fontInter,
     fontSize: 10,
     fontWeight: FontWeight.w600,
-    height: 1.2,
-    letterSpacing: 0.4,
+    height: 15 / 10,
+    letterSpacing: 0.5,
     color: AppColors.ink,
   );
 
-  /// Teks tombol utama (mis. `Masuk`, `Lanjut`). 14px SemiBold.
+  /// Teks tombol utama (mis. `Masuk`, `Lanjut`). 14px Bold, 29px.
   static const TextStyle buttonLarge = TextStyle(
     fontFamily: fontInter,
     fontSize: 14,
-    fontWeight: FontWeight.w600,
-    height: 1.2,
+    fontWeight: FontWeight.w700,
+    height: 29 / 14,
     color: AppColors.onPrimary,
   );
 
-  /// Teks tombol sekunder / outline. 14px SemiBold.
+  /// Teks tombol sekunder / outline. 14px Bold, 29px.
   static const TextStyle buttonOutline = TextStyle(
     fontFamily: fontInter,
     fontSize: 14,
-    fontWeight: FontWeight.w600,
-    height: 1.2,
+    fontWeight: FontWeight.w700,
+    height: 29 / 14,
     color: AppColors.primary,
   );
 }
