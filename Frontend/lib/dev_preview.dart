@@ -39,6 +39,7 @@ import 'package:frontend/features/profile/profile_screen.dart';
 /// |---|---|---|
 /// | `/add-plant` | 0..4 | langkah wizard |
 /// | `/plant-detail` | 0 / 1 | tab Ringkasan / Perawatan |
+/// | `/disease-detection` | 0 / 1 | kamera / panel hasil |
 ///
 /// Berkas ini tidak pernah dipanggil `main.dart`, jadi tidak ikut ke aplikasi
 /// rilis: `flutter build` hanya mengompilasi kode yang terjangkau dari entry
@@ -108,7 +109,9 @@ Widget _previewFor(String route, int step) {
     case Routes.addPlant:
       return AddPlantFlow(initialStep: step);
     case Routes.diseaseDetection:
-      return const DiseaseDetectionScreen();
+      return DiseaseDetectionScreen(
+        initialResult: step == 1 ? MockData.disease : null,
+      );
     default:
       throw ArgumentError.value(route, 'route', 'Rute preview tidak dikenal');
   }
