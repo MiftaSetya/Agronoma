@@ -20,40 +20,37 @@ class AuthController extends ChangeNotifier {
 
   AppUser? _user;
   AuthStatus _status = AuthStatus.signedOut;
-  String? _error;
+  Map<String, String> _errors = const {};
 
   AppUser? get user => _user;
   AuthStatus get status => _status;
-  String? get error => _error;
 
-  /// Apakah pengguna sudah masuk.
-  bool get isSignedIn => _status == AuthStatus.signedIn;
-
-  /// Pesan kesalahan terakhir, lalu dihapus supaya tidak menempel di layar.
-  String? consumeError() {
-    final e = _error;
-    _error = null;
+  /// Pesan kesalahan terakhir per field (`'email'`, `'password'`, dst.),
+  /// lalu dihapus supaya tidak menempel di layar.
+  Map<String, String> consumeErrors() {
+    final e = _errors;
+    _errors = const {};
     return e;
   }
 
   /// Masuk. Mengembalikan `true` kalau berhasil.
   Future<bool> signIn({required String email, required String password}) async {
     _status = AuthStatus.signingIn;
-    _error = null;
+    _errors = const {};
     notifyListeners();
 
     // Tiruan panggilan jaringan.
     await Future<void>.delayed(const Duration(milliseconds: 700));
 
-    if (email.trim().isEmpty || password.isEmpty) {
-      _error = 'Email dan kata sandi wajib diisi.';
-      _status = AuthStatus.signedOut;
-      notifyListeners();
-      return false;
+    final errors = <String, String>{};
+    if (email.trim().isEmpty) errors['email'] = 'Email wajib diisi.';
+    if (password.isEmpty) {
+      errors['password'] = 'Kata sandi wajib diisi.';
+    } else if (password.length < 8) {
+      errors['password'] = 'Kata sandi minimal 8 karakter.';
     }
-
-    if (password.length < 8) {
-      _error = 'Kata sandi minimal 8 karakter.';
+    if (errors.isNotEmpty) {
+      _errors = errors;
       _status = AuthStatus.signedOut;
       notifyListeners();
       return false;
@@ -73,25 +70,24 @@ class AuthController extends ChangeNotifier {
     required String confirmation,
   }) async {
     _status = AuthStatus.signingIn;
-    _error = null;
+    _errors = const {};
     notifyListeners();
 
     await Future<void>.delayed(const Duration(milliseconds: 700));
 
-    if (name.trim().isEmpty || email.trim().isEmpty) {
-      _error = 'Nama dan email wajib diisi.';
-      _status = AuthStatus.signedOut;
-      notifyListeners();
-      return false;
+    final errors = <String, String>{};
+    if (name.trim().isEmpty) errors['name'] = 'Nama wajib diisi.';
+    if (email.trim().isEmpty) errors['email'] = 'Email wajib diisi.';
+    if (password.isEmpty) {
+      errors['password'] = 'Kata sandi wajib diisi.';
+    } else if (password.length < 8) {
+      errors['password'] = 'Kata sandi minimal 8 karakter.';
     }
-    if (password.length < 8) {
-      _error = 'Kata sandi minimal 8 karakter.';
-      _status = AuthStatus.signedOut;
-      notifyListeners();
-      return false;
+    if (confirmation != password) {
+      errors['confirmation'] = 'Konfirmasi kata sandi tidak cocok.';
     }
-    if (password != confirmation) {
-      _error = 'Konfirmasi kata sandi tidak cocok.';
+    if (errors.isNotEmpty) {
+      _errors = errors;
       _status = AuthStatus.signedOut;
       notifyListeners();
       return false;

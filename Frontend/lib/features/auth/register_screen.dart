@@ -24,7 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _obscurePassword = true;
   bool _obscureConfirmation = true;
-  String? _error;
+  Map<String, String> _errors = const {};
 
   @override
   void dispose() {
@@ -51,7 +51,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         (route) => false,
       );
     } else {
-      setState(() => _error = auth.consumeError());
+      setState(() => _errors = auth.consumeErrors());
     }
   }
 
@@ -70,7 +70,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           hint: 'Masukkan nama pengguna',
           controller: _name,
           textInputAction: TextInputAction.next,
-          errorText: _error,
+          errorText: _errors['name'],
         ),
         AgroTextField(
           label: 'Email',
@@ -78,6 +78,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           controller: _email,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
+          errorText: _errors['email'],
         ),
         AgroTextField(
           label: 'Password',
@@ -85,6 +86,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           controller: _password,
           obscureText: _obscurePassword,
           textInputAction: TextInputAction.next,
+          errorText: _errors['password'],
           suffix: PasswordVisibilityToggle(
             visible: !_obscurePassword,
             onPressed: () =>
@@ -98,6 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           obscureText: _obscureConfirmation,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _submit(),
+          errorText: _errors['confirmation'],
           suffix: PasswordVisibilityToggle(
             visible: !_obscureConfirmation,
             onPressed: () =>
