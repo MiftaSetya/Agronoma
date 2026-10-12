@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:frontend/app.dart';
 import 'package:frontend/core/data/mock_data.dart';
+import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/routing/app_router.dart';
+import 'package:frontend/core/state/add_plant_controller.dart';
 import 'package:frontend/features/add_plant/add_plant_flow.dart';
 import 'package:frontend/features/auth/login_screen.dart';
 import 'package:frontend/features/auth/register_screen.dart';
@@ -107,12 +110,44 @@ Widget _previewFor(String route, int step) {
     case Routes.plantChat:
       return const PlantChatScreen();
     case Routes.addPlant:
-      return AddPlantFlow(initialStep: step);
+      return _AddPlantPreview(step: step);
     case Routes.diseaseDetection:
       return DiseaseDetectionScreen(
         initialResult: step == 1 ? MockData.disease : null,
       );
     default:
       throw ArgumentError.value(route, 'route', 'Rute preview tidak dikenal');
+  }
+}
+
+/// Wizard dengan isian yang sudah disemai.
+///
+/// Design memotret wizard dalam keadaan yang sudah terisi: langkah 2 sudah
+/// memilih "Pot tanaman" dan langkah 3 sudah menganalisis tanah lewat kamera.
+/// Tanpa penyemaian, tangkapan langkah itu memperlihatkan kartu-kartu kosong
+/// sehingga tidak bisa dibandingkan dengan referensinya.
+///
+/// Penyemaiannya lewat post-frame callback: controller dipakai `AddPlantFlow`
+/// sendiri di frame pertama, jadi mengubah draft harus menunggu frame itu
+/// selesai.
+class _AddPlantPreview extends StatelessWidget {
+  const _AddPlantPreview({required this.step});
+
+  final int step;
+
+  @override
+  Widget build(BuildContext context) {
+    // Semai hanya sekali per build; controller reset() sendiri di post-frame
+    // pertama milik AddPlantFlow.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final add = context.read<AddPlantController>();
+      switch (step) {
+        case 1:
+          add.setMedia(PlantingMedia.pot.name);
+        case 2:
+          add.markSoilDetected();
+      }
+    });
+    return AddPlantFlow(initialStep: step);
   }
 }

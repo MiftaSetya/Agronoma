@@ -76,9 +76,24 @@ class AppAssets {
   static const String chevronRightSmall =
       '$_icons/2e6408ac1b3fac5f48f1b88828bb3fac7f8c00fc.svg';
 
-  /// Panah "<" (chevron kiri) di top bar.
+  /// Panah "<" (chevron kiri) di top bar — terlihat, 24x24.
+  ///
+  /// Design punya **tiga** berkas yang menggambar panah kiri dan mudah
+  /// tertukar, karena ketiganya memakai `path` yang sama persis:
+  ///
+  /// - `1422e538…` (24x24, terlihat) — inilah yang dipakai top bar wizard
+  ///   "Tambah tanaman" (langkah 2-5), obrolan AI, dan deteksi penyakit.
+  ///   `a7ce4d8f…` (24x24, terlihat) identik dengannya dan dipakai varian top
+  ///   bar lain, mis. langkah 1 — jadi keduanya sah, tetapi yang ini yang
+  ///   menjadi acuan karena muncul di empat frame sekaligus.
+  /// - `94312fbf…` (32x32) — **dibungkus `opacity="0"`**. Ini "slot kanan" pada
+  ///   top bar: design menyisipkan panah yang tidak terlihat supaya judul tetap
+  ///   di tengah. Memakainya sebagai tombol kembali menghasilkan tombol yang
+  ///   tidak terlihat, dan itu pernah terjadi.
+  /// - `b0edba78…` (32x32, `chevronLeftThin`) — versi bergaris untuk top bar
+  ///   layar kamera. Juga dibungkus `opacity="0"`.
   static const String chevronLeft =
-      '$_icons/94312fbfd7eb7a516ff388c59c4dafa9851503ba.svg';
+      '$_icons/1422e538c2c6069584f2be50ff8d8a1df87507c0.svg';
 
   /// Panah bawah (dropdown), mis. pada field pilih.
   static const String arrowDown =
@@ -200,32 +215,50 @@ class AppAssets {
   // Wizard tambah tanaman
   // ─────────────────────────────────────────────────────────────────────────
 
-  /// Ikon media tanam: pot.
+  /// Ikon media tanam: pot (`Pot tanaman`). Asli 18x19,9.
   static const String mediaPot =
       '$_icons/61e410580a1154c9d0e46fe0bbc09d055ca75034.svg';
 
-  /// Ikon media tanam: polybag.
-  static const String mediaPolybag =
+  /// Ikon media tanam: rumah (`Pekarangan rumah`). Asli 20x20.
+  ///
+  /// Dulu bernama [mediaPolybag] — nama itu salah baca: bentuknya rumah beratap,
+  /// bukan polybag, dan design memakainya untuk pilihan "Pekarangan rumah".
+  static const String mediaHouse =
       '$_icons/3fc8a3bedb27a05d125fe5010a63fd9bd0783b43.svg';
 
-  /// Ikon media tanam: tanah langsung.
+  /// Ikon media tanam: tanah lapang (`Lahan terbuka`). Asli 20x19,9.
   static const String mediaGround =
       '$_icons/f03253ccd9c730f318a31e8d54c5718364947c47.svg';
 
-  /// Ikon fase: semai.
+  // ── Langkah 3: analisis tanah ────────────────────────────────────────────
+
+  /// Ikon kartu "Bantu saya scan tanah" saat **terpilih** (putih di atas hijau).
+  /// Asli 29,3x29,1 — dipasang di dalam bulatan 60px, digambar 32px.
+  static const String soilScanSelected =
+      '$_icons/3cc16617bca9652e3982eef86d8e3df2ab4a2ec2.svg';
+
+  /// Ikon kartu "Bantu saya scan tanah" saat **belum dipilih** (abu). Ukuran
+  /// aslinya sama dengan [soilScanSelected].
+  static const String soilScan =
+      '$_icons/eff00ba59f89a0c385d0f2080e5e5bf852888f81.svg';
+
+  /// Ikon fase: semai biji. Asli 16x16.
   static const String phaseSeedling =
       '$_icons/dd67902a30301086456de678d952b12db558ff3c.svg';
 
-  /// Ikon fase: vegetatif.
-  static const String phaseVegetative =
+  /// Ikon fase: vegetatif awal. Asli 19x17.
+  static const String phaseVegetativeEarly =
       '$_icons/b29cf6263f25e6b7d930eb277ced477bb23100db.svg';
 
-  /// Ikon fase: generatif.
-  static const String phaseGenerative =
+  /// Ikon fase: vegetatif akhir. Asli 16x25,009.
+  ///
+  /// Bentuknya memanjang ke atas, jadi tinggi simpulnya di design memang 25px
+  /// walau lebar kotaknya tetap 16px — bukan 16x16 yang diregangkan.
+  static const String phaseVegetativeLate =
       '$_icons/3484631a58aeb12eb4b1ca0859c14cdee65a5991.svg';
 
-  /// Ikon fase: panen.
-  static const String phaseHarvest =
+  /// Ikon fase: generatif. Asli 16x19.
+  static const String phaseGenerative =
       '$_icons/3ab2a16f06867678af0e9bf237ad440ece3141fa.svg';
 
   /// Penanda lokasi pada peta (langkah 1).
@@ -238,6 +271,29 @@ class AppAssets {
   /// dengan lubang di tengah dan dipakai di samping nama lokasi.
   static const String locationFilled =
       '$_icons/091d3ab263f91469af9789033f53ae49543eb966.svg';
+
+  /// Centang hijau bergaris (32px) di kanan kartu pilihan yang terpilih.
+  ///
+  /// Ini **bukan** [checkCircleSolid] (centang di dalam bulatan penuh 15px):
+  /// yang ini centang telanjang tanpa bulatan, bergaris `#6D9C25`. Design
+  /// memakai versi telanjang di kartu opsi wizard tambah tanaman.
+  ///
+  /// Ada juga berkas kembar `bb146b37…` yang identik tapi dibungkus
+  /// `opacity="0"` — itu dipakai design untuk opsi yang belum dipilih.
+  /// Memakai berkas itu membuat slot centangnya benar-benar kosong di Flutter,
+  /// padahal tingginya tetap ikut menggeser tata letak; lebih baik menggambar
+  /// [checkMarkGreen] lalu disembunyikan dengan `Opacity`.
+  static const String checkMarkGreen =
+      '$_icons/e49bbb9c2a7503b4c030f0694067d5cd2cf5e81a.svg';
+
+  /// Bintang kuning kecil (12x12,6) di chip "Pilihan Terbaik" (langkah 4).
+  static const String bestMatchStar =
+      '$_icons/86fcf6188b602b790546f60663c6049b287264fd.svg';
+
+  /// Ikon "tambah" di dalam bulatan untuk tombol "Tambah manual tanaman"
+  /// (langkah 4). Asli 20x21,8, dipasang pada kotak 24px.
+  static const String manualAddCircle =
+      '$_icons/6e06a745ee1bbc9b5d3db70ee27cadf1535ef3a6.svg';
 
   // ─────────────────────────────────────────────────────────────────────────
   // Detail tanaman
@@ -331,6 +387,14 @@ class AppAssets {
   /// Foto "Cabai Rawit Keriting".
   static const String photoCabaiKeriting =
       '$_images/e1c380d0fe338c6467944659e846a0f9c64879df.jpg';
+
+  /// Foto "Lidah Mertua (Sansevieria)" — rekomendasi ke-2 di langkah 4.
+  static const String photoLidahMertua =
+      '$_images/ad9f407e510c9863d23e9f4536be7df515b3bed2.jpg';
+
+  /// Foto "Sirih Gading" — rekomendasi ke-3 di langkah 4.
+  static const String photoSirihGading =
+      '$_images/5aee898294f2a3a69c294ff46e01c96c14261f84.jpg';
 
   /// Foto latar layar deteksi penyakit — kebun tomat yang terserang karat daun.
   ///

@@ -6,6 +6,11 @@ import 'soil_type.dart';
 ///
 /// Ini hasil "AI Recommendation": daftar tanaman yang cocok dengan lokasi,
 /// media tanam, dan jenis tanah yang sudah dipilih pengguna.
+///
+/// Di design kartunya cuma menampilkan empat hal: foto, nama, dua chip, dan
+/// deskripsi. Model yang lama menyimpan `suitability`, `difficulty`, dan
+/// `harvestAge`, tetapi ketiganya **tidak pernah tampil** pada frame itu —
+/// angka kesesuaian hanya menambah data yang tidak terpakai, jadi dihapus.
 @immutable
 class PlantRecommendation {
   const PlantRecommendation({
@@ -13,11 +18,7 @@ class PlantRecommendation {
     required this.name,
     required this.photoAsset,
     required this.description,
-    required this.suitability,
-    this.scientificName,
-    this.bestFor = false,
-    this.difficulty = 'Mudah',
-    this.harvestAge = '-',
+    this.tags = const [],
   });
 
   final String id;
@@ -25,22 +26,19 @@ class PlantRecommendation {
   final String photoAsset;
   final String description;
 
-  /// Tingkat kesesuaian 0–100 dengan kondisi yang dipilih.
-  final double suitability;
+  /// Chip di bawah nama tanaman.
+  ///
+  /// Design menampilkan satu chip "Pilihan Terbaik" berlatar kuning di kartu
+  /// yang paling sesuai, lalu nol atau dua chip `Indoor`/`Outdoor`. Tag lain
+  /// yang tidak ada di design sengaja tidak dimodelkan — chip-nya memang bukan
+  /// daftar bebas, melainkan tiga varian tetap itu.
+  final List<String> tags;
 
-  final String? scientificName;
+  /// Kartu ini ditandai "Pilihan Terbaik".
+  bool get bestFor => tags.contains(bestForTag);
 
-  /// Ditandai "Pilihan Terbaik" di design (ikon bintang).
-  final bool bestFor;
-
-  /// Tingkat kesulitan, mis. "Mudah".
-  final String difficulty;
-
-  /// Perkiraan umur panen, mis. "60-80 hari".
-  final String harvestAge;
-
-  /// Teks persentase siap tampil, mis. "92%".
-  String get suitabilityLabel => '${suitability.round()}%';
+  /// Nilai tag yang menandai "Pilihan Terbaik".
+  static const String bestForTag = 'Pilihan Terbaik';
 
   factory PlantRecommendation.fromJson(Map<String, dynamic> json) =>
       PlantRecommendation(
@@ -48,11 +46,7 @@ class PlantRecommendation {
         name: json['name'] as String,
         photoAsset: json['photoAsset'] as String,
         description: json['description'] as String,
-        suitability: (json['suitability'] as num).toDouble(),
-        scientificName: json['scientificName'] as String?,
-        bestFor: json['bestFor'] as bool? ?? false,
-        difficulty: json['difficulty'] as String? ?? 'Mudah',
-        harvestAge: json['harvestAge'] as String? ?? '-',
+        tags: (json['tags'] as List? ?? const []).cast<String>(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -60,11 +54,7 @@ class PlantRecommendation {
     'name': name,
     'photoAsset': photoAsset,
     'description': description,
-    'suitability': suitability,
-    'scientificName': scientificName,
-    'bestFor': bestFor,
-    'difficulty': difficulty,
-    'harvestAge': harvestAge,
+    'tags': tags,
   };
 }
 

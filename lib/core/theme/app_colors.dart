@@ -74,6 +74,13 @@ class AppColors {
   /// Border yang lebih tegas (kartu terpilih / outline). 3 kemunculan.
   static const Color borderStrong = Color(0xFFE1E3E4);
 
+  /// Tombol utama saat nonaktif. Tidak pernah tertulis sebagai hex di design:
+  /// terukur dari pixel tombol "Lanjut" langkah 4/5 yang di Figma ditulis
+  /// `bg-[#898b87] opacity-40` — hasil campurannya di atas putih itulah
+  /// #D0D1CF. Meniru opacity membuat teksnya ikut pudar, jadi warna akhirnya
+  /// saja yang dipakai.
+  static const Color disabledFill = Color(0xFFD0D1CF);
+
   /// Placeholder abu & garis non-aktif. 2 kemunculan.
   static const Color muted = Color(0xFFD9D9D9);
 

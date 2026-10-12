@@ -1,9 +1,9 @@
 ﻿{
     "generatedAt":  "2026-10-08T23:58:03",
     "counts":  {
-                   "total":  136,
+                   "total":  135,
                    "icons":  117,
-                   "images":  19
+                   "images":  18
                },
     "assets":  [
                    {
@@ -1220,15 +1220,6 @@
                        "w":  null,
                        "h":  null,
                        "bytes":  204646
-                   },
-                   {
-                       "sha":  "ece298d0ec2c16f10310d45724b276a6035cb503",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/ece298d0ec2c16f10310d45724b276a6035cb503.jpg",
-                       "w":  256,
-                       "h":  256,
-                       "bytes":  1831
                    }
                ]
 }
