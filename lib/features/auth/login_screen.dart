@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   bool _obscure = true;
-  String? _error;
+  Map<String, String> _errors = const {};
 
   @override
   void dispose() {
@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
         (route) => false,
       );
     } else {
-      setState(() => _error = auth.consumeError());
+      setState(() => _errors = auth.consumeErrors());
     }
   }
 
@@ -62,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
           controller: _email,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
-          errorText: _error,
+          errorText: _errors['email'],
         ),
         AgroTextField(
           label: 'Password',
@@ -71,6 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
           obscureText: _obscure,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _submit(),
+          errorText: _errors['password'],
           suffix: PasswordVisibilityToggle(
             visible: !_obscure,
             onPressed: () => setState(() => _obscure = !_obscure),
