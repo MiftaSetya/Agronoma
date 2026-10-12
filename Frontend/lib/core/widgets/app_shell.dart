@@ -59,10 +59,16 @@ class AppShell extends StatelessWidget {
 
 /// Top bar: wordmark "Agronoma" + tombol obrolan AI, atau panah + judul.
 class AgroTopBar extends StatelessWidget {
-  const AgroTopBar({super.key, this.title});
+  const AgroTopBar({super.key, this.title, this.onBack});
 
   /// Kalau null → tampilkan wordmark; kalau diisi → tampilkan judul + back.
   final String? title;
+
+  /// Aksi tombol panah. Bila null, panah menutup halaman lewat `maybePop`.
+  ///
+  /// Wizard tambah tanaman memakai ini untuk mundur satu langkah, bukan
+  /// menutup halaman.
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +103,7 @@ class AgroTopBar extends StatelessWidget {
                 )
               : Row(
                   children: [
-                    _BackArrow(),
+                    _BackArrow(onTap: onBack),
                     Expanded(
                       child: Text(
                         title!,
@@ -146,12 +152,15 @@ class _TopBarChatButton extends StatelessWidget {
 }
 
 class _BackArrow extends StatelessWidget {
-  const _BackArrow();
+  const _BackArrow({this.onTap});
+
+  /// Aksi khusus; bila null, panah menutup halaman lewat `maybePop`.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => Navigator.of(context).maybePop(),
+      onTap: onTap ?? () => Navigator.of(context).maybePop(),
       child: SizedBox(
         width: 24,
         height: 24,

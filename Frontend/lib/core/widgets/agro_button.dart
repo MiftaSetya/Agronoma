@@ -52,7 +52,10 @@ class AgroButton extends StatelessWidget {
       onPressed: loading ? null : onPressed,
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.primary,
-        disabledBackgroundColor: AppColors.borderStrong,
+        disabledBackgroundColor: AppColors.disabledFill,
+        // Teks tombol nonaktif tetap putih penuh seperti design: di Figma
+        // opacity-40 dipasang pada tombolnya, bukan pada teksnya.
+        disabledForegroundColor: AppColors.onPrimary,
         minimumSize: const Size(0, 54),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.lgAll),

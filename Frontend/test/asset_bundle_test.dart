@@ -30,10 +30,10 @@ void main() {
     entries = (json['assets'] as List).cast<Map<String, dynamic>>();
   });
 
-  test('manifest memuat 136 aset', () {
-    expect(entries.length, 136);
+  test('manifest memuat 135 aset', () {
+    expect(entries.length, 135);
     expect(entries.where((e) => e['kind'] == 'icon').length, 117);
-    expect(entries.where((e) => e['kind'] == 'image').length, 19);
+    expect(entries.where((e) => e['kind'] == 'image').length, 18);
   });
 
   test('setiap aset ada di disk dan isinya sesuai ekstensi', () {

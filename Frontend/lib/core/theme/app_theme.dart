@@ -217,8 +217,8 @@ class AppTheme {
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
-          disabledBackgroundColor: AppColors.borderStrong,
-          disabledForegroundColor: AppColors.surface,
+          disabledBackgroundColor: AppColors.disabledFill,
+          disabledForegroundColor: AppColors.onPrimary,
           minimumSize: const Size.fromHeight(AppSizes.buttonHeight),
           elevation: 0,
           textStyle: AppTextStyles.buttonLarge,

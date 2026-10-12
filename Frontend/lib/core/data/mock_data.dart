@@ -97,7 +97,7 @@ class MockData {
       photoAsset: AppAssets.photoCabaiRawit,
       location: 'Surabaya',
       place: 'Pekarangan Rumah',
-      media: PlantingMedia.polybag,
+      media: PlantingMedia.pot,
       status: CareStatus.needsWater,
       secondaryStatus: CareStatus.needsFertilizer,
       phase: GrowthPhase.vegetativeEarly,
@@ -274,43 +274,44 @@ class MockData {
   // Rekomendasi tanaman (langkah 4)
   // ─────────────────────────────────────────────────────────────────────────
 
+  /// Isi kartu rekomendasi mengikuti frame `Add Plant 4 - AI Recommendation`
+  /// (`336:2882`) apa adanya — nama, chip, dan deskripsi persis teksnya, jadi
+  /// hasil render bisa dibandingkan langsung dengan design.
+  ///
+  /// Catatan design: chip "Pilihan Terbaik" tampil pada **dua** kartu pertama
+  /// (bukan hanya satu) menurut context-nya, dan kartu kedua menuliskan
+  /// nama dengan satu spasi di awal (`' Lidah Mertua (Sansevieria)'`).
+  /// Spasi itu sengaja tidak disalin — jelas kecelakaan pengetikan, bukan
+  /// maksud design.
   static final List<PlantRecommendation> recommendations = [
     PlantRecommendation(
       id: 'r1',
       name: 'Cabai Rawit',
-      scientificName: 'Capsicum frutescens',
       photoAsset: AppAssets.photoCabaiRawit,
       description:
-          'Sangat cocok dengan suhu kota ini dan tahan terhadap sinar matahari '
-          'langsung. Bisa dipanen mulai umur 70 hari.',
-      suitability: 95,
-      bestFor: true,
-      difficulty: 'Mudah',
-      harvestAge: '70-80 hari',
+          'Sangat adaptif dengan suhu terik. Mudah ditanam di pekarangan dan '
+          'bisa dipanen untuk kebutuhan dapur sehari-hari.',
+      tags: ['Pilihan Terbaik', 'Indoor'],
     ),
     PlantRecommendation(
       id: 'r2',
-      name: 'Tomat Ceri',
-      scientificName: 'Solanum lycopersicum',
-      photoAsset: AppAssets.photoTomatCeri,
+      name: 'Lidah Mertua (Sansevieria)',
+      photoAsset: AppAssets.photoLidahMertua,
       description:
-          'Butuh penyiraman teratur dan sinar penuh. Hasil panen manis, cocok '
-          'untuk pekarangan rumah.',
-      suitability: 88,
-      difficulty: 'Sedang',
-      harvestAge: '60-70 hari',
+          'Berfungsi sebagai pembersih udara alami yang minim perawatan. '
+          'Mampu bertahan dengan sangat baik di dalam ruangan ber-AC maupun '
+          'area minim cahaya.',
+      tags: ['Pilihan Terbaik', 'Indoor'],
     ),
     PlantRecommendation(
       id: 'r3',
-      name: 'Cabai Rawit Keriting',
-      scientificName: 'Capsicum annuum',
-      photoAsset: AppAssets.photoCabaiKeriting,
+      name: 'Sirih Gading',
+      photoAsset: AppAssets.photoSirihGading,
       description:
-          'Pertumbuhan cepat dan produksi banyak. Perlu pemupukan rutin saat '
-          'masuk fase generatif.',
-      suitability: 82,
-      difficulty: 'Mudah',
-      harvestAge: '75-90 hari',
+          'Tanaman hias rambat yang sangat adaptif. Tumbuh sama suburnya saat '
+          'dijadikan penghias meja di dalam ruangan atau sebagai tanaman '
+          'gantung di teras.',
+      tags: ['Indoor', 'Outdoor'],
     ),
   ];
 

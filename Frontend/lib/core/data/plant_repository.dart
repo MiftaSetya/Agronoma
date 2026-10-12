@@ -79,7 +79,7 @@ class MockPlantRepository implements PlantRepository {
     final plant = Plant(
       id: 'p${_plants.length + 1}-${DateTime.now().millisecondsSinceEpoch}',
       name: name,
-      scientificName: scientificName ?? source.scientificName,
+      scientificName: scientificName,
       photoAsset: source.photoAsset,
       location: location,
       place: 'Pekarangan Rumah',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/theme/theme.dart';
 
 /// Kondisi perawatan sebuah tanaman.
@@ -52,24 +53,71 @@ enum CareStatus {
 /// Detail Tanaman: Semai Biji → Vegetatif Awal → Vegetatif Akhir → Generatif.
 /// Design memakai istilah yang lebih rinci daripada "Vegetatif/Panen", jadi
 /// labelnya disamakan supaya garis waktunya tidak perlu diterjemahkan lagi.
+///
+/// Keterangannya disalin apa adanya dari kartu langkah 5, bukan diringkas:
+/// teks itulah yang mengatur berapa baris yang dipakai tiap kartu (semuanya
+/// satu baris di design), sehingga meringkasnya mengubah tinggi kartu.
 enum GrowthPhase {
-  seedling('Semai Biji', 'Baru berkecambah, masih sangat rentan.'),
-  vegetativeEarly('Vegetatif Awal', 'Tumbuh daun dan batang, butuh nitrogen.'),
-  vegetativeLate('Vegetatif Akhir', 'Batang menguat, siap masuk masa berbunga.'),
-  generative('Generatif', 'Mulai berbunga dan berbuah.');
+  seedling('Semai Biji', 'Benih baru ditanam atau mulai berkecambah.'),
+  vegetativeEarly(
+    'Vegetatif Awal',
+    'Daun muda mulai tumbuh, ukuran tanaman masih kecil.',
+  ),
+  vegetativeLate(
+    'Vegetatif Akhir',
+    'Tanaman tampak rimbun dengan batang dan daun yang kuat.',
+  ),
+  generative('Generatif', 'Tanaman mulai berbunga, berbuah, atau membentuk biji.');
 
   const GrowthPhase(this.label, this.description);
 
   final String label;
   final String description;
-}
 
+  /// Ikon fase pada bulatan 40px langkah 5. Ukuran asli tiap ikon berbeda,
+  /// jadi pasangan lebar/tingginya ikut dikembalikan di sini — memaksa
+  /// 16x16 seperti sebelumnya meregangkan ikon vegetatif akhir yang aslinya
+  /// 16x25.
+  static const Map<GrowthPhase, (String, double, double)> _icons = {
+    GrowthPhase.seedling: (AppAssets.phaseSeedling, 16, 16),
+    GrowthPhase.vegetativeEarly: (AppAssets.phaseVegetativeEarly, 19, 17),
+    GrowthPhase.vegetativeLate: (AppAssets.phaseVegetativeLate, 16, 25.0086),
+    GrowthPhase.generative: (AppAssets.phaseGenerative, 16, 19),
+  };
+
+  /// Berkas ikon fase ini.
+  String get iconAsset => _icons[this]!.$1;
+
+  /// Lebar asli ikon pada design.
+  double get iconWidth => _icons[this]!.$2;
+
+  /// Tinggi asli ikon pada design.
+  double get iconHeight => _icons[this]!.$3;
+
+  /// Nama fase dalam huruf kecil seperti label langkah pada indikator.
+  String get slug => name;
+}
 /// Cara menanam / media tanam (langkah 2 wizard).
+///
+/// Label dan keterangannya diambil apa adanya dari kartu langkah 2 supaya
+/// teks design bisa dipakai ulang di tempat lain (mis. chip "Media Tanam" di
+/// Detail Tanaman) tanpa penerjemahan yang berbeda-beda.
 enum PlantingMedia {
-  ground('Tanah Langsung', 'Ditanam di tanah pekarangan atau kebun.'),
-  pot('Pot', 'Ditanam di pot, mudah dipindah dan diatur.'),
-  polybag('Polybag', 'Cocok untuk lahan sempit dan tanaman muda.'),
-  hydroponic('Hidroponik', 'Tanpa tanah, memakai air kaya nutrisi.');
+  pot(
+    'Pot tanaman',
+    'Cocok untuk ruangan terbatas, balkon, atau tanaman hias di dalam '
+        'wadah/pot.',
+  ),
+  ground(
+    'Pekarangan rumah',
+    'Ditanam di halaman sekitar rumah atau area tanah terbatas di sekitar '
+        'hunian.',
+  ),
+  openField(
+    'Lahan terbuka',
+    'Ditanam di area tanah yang luas tanpa batas, seperti perkebunan, sawah, '
+        'atau ladang.',
+  );
 
   const PlantingMedia(this.label, this.description);
 
