@@ -146,3 +146,20 @@ node tool/figma.mjs screenshot 461:6012 out.png # ekspor PNG
 
 > `get_design_context` mengembalikan **JSX mentah**, bukan JSON — jangan di-`JSON.parse`.
 
+### Ketika server Figma lambat / rate-limit
+
+`get_design_context` kadang hang atau kehabisan jatah permintaan. Kalau itu
+terjadi, **`metadata` dan `screenshot` tetap merespons** dan keduanya sering
+cukup:
+
+- `screenshot <node>` adalah *ground truth* tampilan — dipakai misalnya saat
+  mengonfirmasi bahwa ikon kartu "Saya Tahu Jenis Tanah" ternyata ikon daftar
+  (override komponen), bukan kamera seperti di konteks cache.
+- Konteks cache di `%TEMP%\agro-ref\decoded\ctx-*.txt` bisa **usang** bila
+  design berubah setelah konteks itu diambil — selalu silang-cek dengan
+  screenshot segar sebelum mempercayainya.
+- Kalau berkas SVG ikon tidak tersedia di server aset (kasus ikon daftar
+  itu), gambar ulang ikonnya dari trace piksel screenshot — lihat
+  `assets/icons/soil-list-manual.svg` dan catatannya di
+  `docs/asset-map.md`.
+
