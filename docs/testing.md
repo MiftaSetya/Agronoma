@@ -68,21 +68,27 @@ dipastikan lewat pengukuran, bukan dugaan:
 ## Tabel selisih
 
 Diukur setelah perbaikan tinggi baris (`leading-[normal]`) dan tinggi kartu.
+Angka wizard diperbarui setelah penataan ulang langkah 1-5 (koordinat absolut,
+jarak kartu per langkah, tombol manual melayang, ikon daftar kartu tanah).
 
 | Layar | Selisih |
 |---|---:|
+| Add plant — fase | 5.5 |
+| Add plant — tanah | 4.2 |
+| Add plant — media | 5.8 |
 | Login | 6.5 |
 | Profile | 6.8 |
 | Register | 9.8 |
+| Add plant — lokasi | 8.0 |
 | Home | 11.1 |
-| Add plant — fase | 11.8 |
 | Plant detail | 12.2 |
-| Add plant — media | 13.2 |
-| Add plant — tanah | 13.9 |
-| Add plant — rekomendasi | 17.8 |
+| Add plant — rekomendasi | 9.4 |
 | Plant chat | 18.7 |
-| Add plant — lokasi | 33.4 |
 | Deteksi Penyakit | 78.9 |
+
+> Angka wizard terakhir diukur setelah ikon daftar kartu "Saya Tahu Jenis
+> Tanah" digambar ulang. Selisih rekomendasi (9.4) didominasi perbedaan
+> kompresi JPEG foto tanaman, bukan layout.
 
 ## Alat ukur
 
