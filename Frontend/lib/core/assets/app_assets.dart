@@ -242,6 +242,16 @@ class AppAssets {
   static const String soilScan =
       '$_icons/eff00ba59f89a0c385d0f2080e5e5bf852888f81.svg';
 
+  /// Ikon kartu "Saya Tahu Jenis Tanah" (abu): dua kotak rounded dengan
+  /// garis-garis daftar di kanannya — menandakan pemilihan dari daftar.
+  ///
+  /// Di Figma ini adalah *override* ikon komponen pada kartu kedua; berkas
+  /// SVG aslinya tidak bisa diunduh (server aset hanya membawa varian kamera
+  /// `eff00ba5…`), jadi ikonnya digambar ulang mengikuti trace piksel dari
+  /// render Figma: dua kotak 9x7 (radius 2) dan dua pasang garis
+  /// 13/6-8px, warna #898B87. Asli 22x23.
+  static const String soilListManual = '$_icons/soil-list-manual.svg';
+
   /// Ikon fase: semai biji. Asli 16x16.
   static const String phaseSeedling =
       '$_icons/dd67902a30301086456de678d952b12db558ff3c.svg';

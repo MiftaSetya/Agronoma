@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/data/plant_repository.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/models/soil_type.dart';
@@ -90,7 +91,11 @@ class AddPlantController extends ChangeNotifier {
     try {
       _recommendations = await _repository.getRecommendations(
         location: _draft.locationName ?? '-',
-        soil: _draft.soil ?? _soilTypes.first,
+        // Wizard bisa dibuka langsung di langkah 4 (preview tangkapan layar)
+        // tanpa melewati langkah 3 — _soilTypes masih kosong dan .first akan
+        // melempar, membuat daftar rekomendasi kosong selamanya.
+        soil: _draft.soil ??
+            (_soilTypes.isNotEmpty ? _soilTypes.first : MockData.soilTypes.first),
       );
     } catch (e) {
       _error = e;

@@ -654,18 +654,16 @@ class _LocationMap extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         Image.asset(AppAssets.photoMap, fit: BoxFit.cover),
-        // Penanda: 34,3x41,7 px, tengah horizontal, 169px dari atas peta
-        // (baris 465 kanvas).
+        // Penanda: berkas SVG-nya 42x56,7 dan di design gambar itu sengaja
+        // dibuat meluber dari kotak penampung 34,3x41,7 (inset negatif),
+        // jadi digambar apa adanya pada ukuran aslinya. Memaksa 34x41 justru
+        // menyusutkan pinnya.
         const Positioned(
-          top: 169,
+          top: 162,
           left: 0,
           right: 0,
           child: Center(
-            child: AgroIcon(
-              AppAssets.mapPointer,
-              size: 34.286,
-              height: 41.714,
-            ),
+            child: AgroIcon(AppAssets.mapPointer, size: 42, height: 56.714),
           ),
         ),
       ],
@@ -791,6 +789,9 @@ class _MediaStep extends StatelessWidget {
                   title: media.label,
                   subtitle: media.description,
                   selected: draft.media == media.name,
+                  // Design memberi jarak 24px antar kartu di langkah ini
+                  // (kartu 96px pada baris 332, 452, dan 572).
+                  gap: AppSpacing.xxl,
                   onTap: () =>
                       context.read<AddPlantController>().setMedia(media.name),
                 ),
@@ -868,17 +869,15 @@ class _SoilStepState extends State<_SoilStep> {
             children: [
               // Kartu besar "Bantu saya scan tanah" — isi di tengah, bulatan
               // 60px, `py-32 px-24`. Saat terpilih garis + bayangan hijau.
+              // Judul/keterangan tetap seperti design; hanya ikon dan garis
+              // kartunya yang berubah saat tanah sudah dianalisis.
               _BigOptionCard(
                 icon: draft.soilDetected
                     ? AppAssets.soilScanSelected
                     : AppAssets.soilScan,
                 iconSize: 32,
-                title: draft.soilDetected
-                    ? 'Tanah sudah dianalisis'
-                    : 'Bantu Saya Scan Tanah',
-                subtitle: draft.soilDetected
-                    ? 'Hasil analisis kamera sudah tersimpan.'
-                    : 'Gunakan kamera untuk analisis otomatis',
+                title: 'Bantu Saya Scan Tanah',
+                subtitle: 'Gunakan kamera untuk analisis otomatis',
                 selected: draft.soilDetected,
                 onTap: draft.soilDetected
                     ? null
@@ -889,7 +888,7 @@ class _SoilStepState extends State<_SoilStep> {
                       ),
               ),
               _BigOptionCard(
-                icon: AppAssets.soilScan,
+                icon: AppAssets.soilListManual,
                 iconSize: 32,
                 title: 'Saya Tahu Jenis Tanah',
                 subtitle: 'Pilih dari daftar jenis tanah secara manual',
@@ -1051,13 +1050,14 @@ class _RecommendationStepState extends State<_RecommendationStep> {
         Expanded(
           child: Stack(
             children: [
-              // Daftar kartu mulai baris 384 = 264 di dalam area isi; container
-              // designnya `top-288 pt-96` dengan header menutup 120..288.
+              // Daftar kartu: container designnya `top-288 pt-96 px-16 gap-16`,
+              // jadi kartu pertama mulai 96px di bawah kartu kepala dan tombol
+              // manual melayang di 24px pertama daftar ini.
               Positioned.fill(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(
                     AppSpacing.page,
-                    264 - 120,
+                    96,
                     AppSpacing.page,
                     AppSpacing.xxl,
                   ),
@@ -1095,11 +1095,12 @@ class _RecommendationStepState extends State<_RecommendationStep> {
                 ),
               ),
               // Tombol "Tambah manual tanaman" menimpa daftar: blok
-              // `pt-24 + tombol 56 + pb-16` menempel di atas baris tombol.
+              // `pt-24 + tombol 56 + pb-16` menempel di ATAS daftar (design
+              // `sticky top-0`), bukan di bawahnya.
               Positioned(
                 left: 0,
                 right: 0,
-                bottom: 102,
+                top: 0,
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(
                     AppSpacing.page,
@@ -1212,67 +1213,80 @@ class _RecommendationCard extends StatelessWidget {
                 ]
               : AppColors.shadow1,
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            ClipRRect(
-              borderRadius: AppRadius.smAll,
-              child: Image.asset(
-                recommendation.photoAsset,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            // Kolom teks tetap 255px: 408 - 32(padding) - 12 - 80 - 12 - 32(slot)
-            // meleset 17px dari design karena slot centangnya overflow; 255
-            // adalah nilai yang benar-benar tertulis di design.
-            SizedBox(
-              width: 255,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    recommendation.name,
-                    style: AppTextStyles.titleLarge.copyWith(
-                      letterSpacing: -1,
-                    ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: AppRadius.smAll,
+                  child: Image.asset(
+                    recommendation.photoAsset,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
+                ),
+                const SizedBox(width: AppSpacing.md),
+                // Kolom teks tetap 255px seperti yang tertulis di design
+                // (`w-[255px]`). Design sendiri membiarkan slot centangnya
+                // meluber 15px melewati tepi kanan area isi (255 + 12 + 32
+                // = 299 > 284 yang tersisa), jadi di sini slotnya digambar
+                // dengan Positioned alih-alih mengikutkan di Row — sama
+                // persis hasilnya, tanpa peringatan overflow Flutter.
+                SizedBox(
+                  width: 255,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      for (var i = 0; i < recommendation.tags.length; i++) ...[
-                        if (i > 0) const SizedBox(width: 6),
-                        _RecommendationChip(
-                          label: recommendation.tags[i],
-                          highlighted:
-                              recommendation.tags[i] ==
-                              PlantRecommendation.bestForTag,
+                      Text(
+                        recommendation.name,
+                        style: AppTextStyles.titleLarge.copyWith(
+                          letterSpacing: -1,
                         ),
-                      ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Row(
+                        children: [
+                          for (var i = 0;
+                              i < recommendation.tags.length;
+                              i++) ...[
+                            if (i > 0) const SizedBox(width: 6),
+                            _RecommendationChip(
+                              label: recommendation.tags[i],
+                              highlighted:
+                                  recommendation.tags[i] ==
+                                  PlantRecommendation.bestForTag,
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        recommendation.description,
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: AppColors.grey,
+                          height: 18 / 14,
+                          letterSpacing: -0.5,
+                        ),
+                        textAlign: TextAlign.justify,
+                      ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    recommendation.description,
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.grey,
-                      height: 18 / 14,
-                      letterSpacing: -0.5,
-                    ),
-                    textAlign: TextAlign.justify,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(width: AppSpacing.sm),
-            // Slot centang selalu ada supaya lebar kolom teks stabil; pada
-            // kartu yang belum dipilih digambar transparan seperti di design
-            // (berkas `bb146b37…` yang opacity-0).
-            Opacity(
-              opacity: selected ? 1 : 0,
-              child: const AgroIcon(AppAssets.checkMarkGreen, size: 32),
+            // Slot centang 32px: transparan pada kartu yang belum dipilih
+            // (design memuat berkas `bb146b37…` opacity-0 di posisi yang
+            // sama), hijau saat dipilih.
+            Positioned(
+              top: AppSpacing.lg,
+              left: 255 + AppSpacing.md,
+              child: Opacity(
+                opacity: selected ? 1 : 0,
+                child: const AgroIcon(AppAssets.checkMarkGreen, size: 32),
+              ),
             ),
           ],
         ),
@@ -1449,6 +1463,7 @@ class _PhaseStep extends StatelessWidget {
                   title: phase.label,
                   subtitle: phase.description,
                   selected: draft.phase == phase.name,
+                  gap: 10,
                   onTap: () =>
                       context.read<AddPlantController>().setPhase(phase.name),
                 ),
@@ -1460,7 +1475,9 @@ class _PhaseStep extends StatelessWidget {
           onNext: onNext,
           enabled: enabled,
           saving: saving,
-          nextLabel: 'Simpan Tanaman',
+          // Frame `Add Plant 5` di Figma masih memakai label "Lanjut", bukan
+          // "Simpan Tanaman" — salin apa adanya.
+          nextLabel: 'Lanjut',
         ),
       ],
     );
@@ -1491,6 +1508,7 @@ class _OptionCard extends StatelessWidget {
     this.iconWidth,
     this.iconHeight,
     this.trailing,
+    this.gap = AppSpacing.lg,
   });
 
   final String icon;
@@ -1506,12 +1524,16 @@ class _OptionCard extends StatelessWidget {
 
   final Widget? trailing;
 
+  /// Jarak ke kartu berikutnya. Design memakai 24px di langkah 2, 10px di
+  /// langkah 5, dan 16px pada daftar manual.
+  final double gap;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+        margin: EdgeInsets.only(bottom: gap),
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: AppColors.surface,
