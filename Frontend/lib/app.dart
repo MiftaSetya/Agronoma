@@ -13,18 +13,11 @@ import 'package:frontend/core/state/chat_controller.dart';
 import 'package:frontend/core/state/plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:provider/provider.dart';
-///
-/// Di sinilah seluruh "kabel" aplikasi disambungkan: repositori mana yang
-/// dipakai, controller mana yang hidup sepanjang sesi, dan rute awal.
-///
-/// Yang perlu diperhatikan: repositori disuntikkan sebagai **antarmuka**
-/// ([PlantRepository], [WeatherRepository], [DiseaseRepository]), bukan sebagai
-/// kelas mock-nya. Jadi saat backend Agronoma sudah ada, cukup ganti satu baris
-/// di sini (`MockPlantRepository()` → `HttpPlantRepository(baseUrl: …)`) tanpa
-/// menyentuh satu pun layar.
-///
-/// Ketiga parameter repositori dan [initialRoute] disediakan supaya widget test
-/// bisa menyuntikkan data yang pasti dan langsung membuka layar yang diuji.
+/// Seluruh "kabel" aplikasi: repositori disuntikkan sebagai **antarmuka**
+/// ([PlantRepository] dkk., bukan kelas mock-nya) sehingga saat backend siap
+/// cukup ganti satu baris di sini tanpa menyentuh layar. Parameter repositori
+/// dan [initialRoute] juga disediakan agar widget test bisa menyuntikkan data
+/// yang pasti dan langsung membuka layar yang diuji.
 class AgronomaApp extends StatelessWidget {
   const AgronomaApp({
     super.key,
@@ -48,25 +41,23 @@ class AgronomaApp extends StatelessWidget {
   /// Rute pertama yang dibuka. Default splash.
   final String initialRoute;
 
-  /// Layar yang langsung ditampilkan tanpa lewat router.
-  ///
-  /// Dipakai widget test dan `tool/dev_preview.dart` supaya bisa membuka layar
-  /// mana pun (termasuk langkah wizard tertentu) tanpa menavigasi dari splash.
-  /// Di produksi biarkan `null` agar [initialRoute] yang berlaku.
+  /// Layar yang langsung ditampilkan tanpa lewat router; dipakai widget test
+  /// dan `tool/dev_preview.dart`. Di produksi biarkan `null` agar
+  /// [initialRoute] yang berlaku.
   final Widget? home;
 
   /// Pengguna awal. Bila diisi, sesi langsung dianggap sudah masuk.
   ///
   /// Dipakai `tool/dev_preview.dart` supaya Home dan Profile bisa dipotret
-  /// dengan data yang benar tanpa harus melewati layar Login lebih dulu —
-  /// kalau tidak, kedua layar itu hanya menampilkan nilai kosong.
+  /// dengan data yang benar tanpa melewati layar Login — kalau tidak, kedua
+  /// layar itu hanya menampilkan nilai kosong.
   final AppUser? signedInUser;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // ── Sumber data (tukar di sini saat backend siap) ──────────────────
+        // Sumber data — tukar di sini saat backend siap.
         Provider<PlantRepository>(
           create: (_) => plantRepository ?? MockPlantRepository(),
         ),
@@ -77,9 +68,9 @@ class AgronomaApp extends StatelessWidget {
           create: (_) => diseaseRepository ?? const MockDiseaseRepository(),
         ),
 
-        // ── Controller ─────────────────────────────────────────────────────
-        // Semua didaftarkan di root supaya state-nya tidak hilang saat berpindah
-        // halaman: sesi login, daftar tanaman, draft wizard, dan percakapan bot.
+        // Controller didaftarkan di root supaya state-nya tidak hilang saat
+        // berpindah halaman: sesi login, daftar tanaman, draft wizard, dan
+        // percakapan bot.
         ChangeNotifierProvider(create: (_) => AuthController(initialUser: signedInUser)),
         ChangeNotifierProvider(
           create: (ctx) => PlantController(
@@ -102,10 +93,9 @@ class AgronomaApp extends StatelessWidget {
         title: 'Agronoma',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
-        // Seluruh layar digambar pada kanvas Figma yang memakai status bar
-        // setinggi 64px (iPhone 16 Pro Max). Android memakai status bar yang
-        // lebih pendek, jadi inset-nya diseragamkan sekali di sini; kalau tidak,
-        // setiap layar akan meleset ke atas dengan jumlah yang sama. Lihat
+        // Kanvas Figma memakai status bar setinggi 64px (iPhone 16 Pro Max),
+        // sedangkan Android lebih pendek — inset-nya diseragamkan sekali di
+        // sini agar setiap layar tidak meleset ke atas. Lihat
         // [AppSizes.normalizeTopInset].
         builder: (context, child) {
           final media = MediaQuery.of(context);
@@ -118,9 +108,9 @@ class AgronomaApp extends StatelessWidget {
             child: child ?? const SizedBox.shrink(),
           );
         },
-        // `home` dan `initialRoute` tidak boleh sama-sama menentukan layar
-        // pertama, jadi salah satu dimatikan: kalau ada `home`, rute awal
-        // dibiarkan default ('/') dan `onGenerateRoute` tidak sempat dipanggil.
+        // `home` dan `initialRoute` tidak boleh dua-duanya menentukan layar
+        // pertama: kalau `home` diisi, rute awal dibiarkan null karena
+        // `onGenerateRoute` tidak akan sempat dipanggil.
         home: home,
         initialRoute: home == null ? initialRoute : null,
         onGenerateRoute: onGenerateRoute,

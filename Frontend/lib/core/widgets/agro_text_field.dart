@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:frontend/core/theme/theme.dart';
 
-/// Kolom teks dengan judul di atasnya.
-///
-/// Ini komponen `textfield/with title` di design (node `278:2802`): label
-/// SemiBold 14px, jarak 8px, lalu kotak input tinggi 44 dengan garis tepi
-/// `#E7E9E7` radius 12.
+/// Kolom teks berjudul — komponen `textfield/with title` (node `278:2802`):
+/// label SemiBold 14, jarak 8, input tinggi 44, border `#E7E9E7` radius 12.
 class AgroTextField extends StatelessWidget {
   const AgroTextField({
     super.key,

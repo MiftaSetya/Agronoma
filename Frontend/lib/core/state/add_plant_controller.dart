@@ -5,15 +5,12 @@ import 'package:frontend/core/data/plant_repository.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/models/soil_type.dart';
 
-/// Memegang data yang dikumpulkan sepanjang wizard "Tambah Tanaman".
-///
-/// Wizard ini terdiri dari lima langkah yang masing-masing punya rutenya
-/// sendiri. Dengan menyimpan pilihan di satu controller, tiap langkah bisa
-/// membaca hasil langkah sebelumnya, dan rute cukup membawa sedikit argumen.
+/// Menyimpan isian wizard "Tambah Tanaman" yang terbagi atas lima langkah
+/// dengan rute masing-masing, sehingga tiap langkah bisa membaca hasil
+/// langkah sebelumnya dari satu controller yang sama.
 class AddPlantController extends ChangeNotifier {
-  /// Nama parameter dibedakan dari nama field supaya lint
-  /// `prefer_initializing_formals` tidak menyarankan `this._repository`
-  /// (tidak mungkin untuk parameter bernama yang privat).
+  /// Nama parameter dibedakan dari field agar lint
+  /// `prefer_initializing_formals` tidak menyarankan `this._repository`.
   AddPlantController({required PlantRepository dataSource})
     : _repository = dataSource;
 
@@ -31,8 +28,6 @@ class AddPlantController extends ChangeNotifier {
   bool get isLoading => _loading;
   Object? get error => _error;
 
-  // ── Langkah 1: lokasi ────────────────────────────────────────────────────
-
   void setLocation(String name, String address) {
     _draft = _draft.copyWith(locationName: name, locationAddress: address);
     notifyListeners();
@@ -43,16 +38,11 @@ class AddPlantController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Langkah 2: media tanam ───────────────────────────────────────────────
-
   void setMedia(String media) {
     _draft = _draft.copyWith(media: media);
     notifyListeners();
   }
 
-  // ── Langkah 3: tanah ─────────────────────────────────────────────────────
-
-  /// Memuat daftar jenis tanah (sekali saja).
   Future<void> loadSoilTypes() async {
     if (_soilTypes.isNotEmpty || _loading) return;
     _loading = true;
@@ -81,9 +71,8 @@ class AddPlantController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Langkah 4: rekomendasi ───────────────────────────────────────────────
-
-  /// Meminta rekomendasi tanaman sesuai lokasi + tanah yang dipilih.
+  // Wizard bisa dibuka langsung di langkah 4 tanpa melewati langkah 3,
+  // jadi _soilTypes bisa kosong (fallback MockData mencegah lemparan .first).
   Future<void> loadRecommendations() async {
     _loading = true;
     _error = null;
@@ -91,9 +80,6 @@ class AddPlantController extends ChangeNotifier {
     try {
       _recommendations = await _repository.getRecommendations(
         location: _draft.locationName ?? '-',
-        // Wizard bisa dibuka langsung di langkah 4 (preview tangkapan layar)
-        // tanpa melewati langkah 3 — _soilTypes masih kosong dan .first akan
-        // melempar, membuat daftar rekomendasi kosong selamanya.
         soil: _draft.soil ??
             (_soilTypes.isNotEmpty ? _soilTypes.first : MockData.soilTypes.first),
       );
@@ -118,8 +104,6 @@ class AddPlantController extends ChangeNotifier {
     );
     notifyListeners();
   }
-
-  // ── Langkah 5: fase ──────────────────────────────────────────────────────
 
   void setPhase(String phase) {
     _draft = _draft.copyWith(phase: phase);

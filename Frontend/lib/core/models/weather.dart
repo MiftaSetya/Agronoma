@@ -21,16 +21,12 @@ class Weather {
   /// Suhu dalam derajat Celsius.
   final int temperature;
 
-  /// Aset SVG ikon cuaca (opsional — kalau null dipakai ikon bawaan).
   final String? iconAsset;
 
-  /// Kelembapan dalam persen.
   final int? humidity;
 
-  /// Kecepatan angin, mis. "12 km/j".
   final String? windSpeed;
 
-  /// Teks suhu siap tampil, mis. "28°C".
   String get temperatureLabel => '$temperature°C';
 
   factory Weather.fromJson(Map<String, dynamic> json) => Weather(
@@ -67,6 +63,7 @@ class WeatherForecast {
   final String day;
 
   final String condition;
+
   final int high;
   final int low;
   final String? iconAsset;

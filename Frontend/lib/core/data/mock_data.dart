@@ -7,24 +7,16 @@ import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/models/soil_type.dart';
 import 'package:frontend/core/models/weather.dart';
 
-/// Data contoh untuk seluruh alur aplikasi.
-///
-/// Isinya diambil dari teks yang benar-benar ada di design Figma (nama tanaman,
-/// kota, angka statistik) supaya tampilannya bisa dibandingkan langsung dengan
-/// frame aslinya. Semua di sini hanya *contoh* — bagian yang menggantikannya
-/// nanti adalah repositori, bukan widget-nya.
+/// Data contoh untuk seluruh alur aplikasi. Isinya diambil dari teks asli
+/// design Figma (nama tanaman, kota, angka statistik) supaya hasil render
+/// bisa dibandingkan langsung dengan frame aslinya.
 class MockData {
   MockData._();
 
-  /// Titik acuan "sekarang" supaya tanggal di data contoh tetap masuk akal
-  /// (kalau memakai `DateTime.now()` langsung, umur tanaman berubah tiap hari
-  /// dan hasil tangkapan layar tidak bisa dibandingkan).
+  /// Titik acuan waktu supaya umur tanaman di data contoh stabil untuk
+  /// screenshot (bukan berubah tiap hari).
   static DateTime _daysAgo(int days) =>
       DateTime.now().subtract(Duration(days: days));
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Pengguna
-  // ─────────────────────────────────────────────────────────────────────────
 
   static final AppUser user = AppUser(
     id: 'u1',
@@ -36,10 +28,6 @@ class MockData {
     careScore: 98,
     joinedAt: _daysAgo(180),
   );
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Tanaman
-  // ─────────────────────────────────────────────────────────────────────────
 
   static final List<CareTask> _tasksWater = [
     CareTask(
@@ -156,10 +144,6 @@ class MockData {
     ),
   ];
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Cuaca
-  // ─────────────────────────────────────────────────────────────────────────
-
   static const Weather weather = Weather(
     city: 'Surabaya',
     condition: 'Sebagian Berawan',
@@ -214,10 +198,6 @@ class MockData {
     ),
   ];
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Lokasi (langkah 1 wizard tambah tanaman)
-  // ─────────────────────────────────────────────────────────────────────────
-
   static const List<Map<String, String>> locations = [
     {
       'name': 'Politeknik Elektronika Negeri Surabaya',
@@ -235,10 +215,6 @@ class MockData {
       'address': 'Jl. Teknik Kimia, Sukolilo, Surabaya, East Java 60111',
     },
   ];
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Jenis tanah (langkah 3)
-  // ─────────────────────────────────────────────────────────────────────────
 
   static const List<SoilType> soilTypes = [
     SoilType(
@@ -270,19 +246,11 @@ class MockData {
     ),
   ];
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Rekomendasi tanaman (langkah 4)
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Isi kartu rekomendasi mengikuti frame `Add Plant 4 - AI Recommendation`
-  /// (`336:2882`) apa adanya — nama, chip, dan deskripsi persis teksnya, jadi
-  /// hasil render bisa dibandingkan langsung dengan design.
-  ///
-  /// Catatan design: chip "Pilihan Terbaik" tampil pada **dua** kartu pertama
-  /// (bukan hanya satu) menurut context-nya, dan kartu kedua menuliskan
-  /// nama dengan satu spasi di awal (`' Lidah Mertua (Sansevieria)'`).
-  /// Spasi itu sengaja tidak disalin — jelas kecelakaan pengetikan, bukan
-  /// maksud design.
+  /// Teks kartu rekomendasi diambil persis dari frame
+  /// `Add Plant 4 - AI Recommendation` (`336:2882`) untuk perbandingan
+  /// render. Chip "Pilihan Terbaik" di design tampil pada dua kartu pertama,
+  /// dan spasi nyasar di awal nama `' Lidah Mertua (Sansevieria)'` sengaja
+  /// tidak disalin (kecelakaan pengetikan, bukan maksud design).
   static final List<PlantRecommendation> recommendations = [
     PlantRecommendation(
       id: 'r1',
@@ -315,14 +283,8 @@ class MockData {
     ),
   ];
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Penyakit (layar deteksi)
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Isi hasil diagnosa mengikuti frame `Disease Drawer` (`253:2575`):
-  /// nama, nama ilmiah, persentase cocok, dan tiga langkah penanganan.
-  /// Dipakai untuk membandingkan hasil render dengan design, jadi teksnya
-  /// sengaja sama persis.
+  /// Isi hasil diagnosa persis mengikuti frame `Disease Drawer` (`253:2575`)
+  /// supaya render bisa dibandingkan langsung dengan design.
   static const Disease disease = Disease(
     name: 'Karat Daun',
     scientificName: 'Infeksi Jamur (Pucciniomycetes)',
@@ -362,10 +324,6 @@ class MockData {
     photoAsset: AppAssets.photoPlantDetection,
   );
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Chatbot
-  // ─────────────────────────────────────────────────────────────────────────
-
   static const ChatMessage greeting = ChatMessage(
     author: ChatAuthor.bot,
     text: 'Halo! Ada yang bisa saya bantu terkait perawatan tanamanmu hari ini?',
@@ -377,8 +335,8 @@ class MockData {
     'Kapan waktu terbaik memupuk tanaman?',
   ];
 
-  /// Jawaban contoh. Dicocokkan dengan kata kunci sederhana supaya
-  /// pertanyaan lanjutan tetap terdengar masuk akal walau tanpa backend.
+  /// Jawaban dicocokkan dengan kata kunci sederhana supaya pertanyaan
+  /// lanjutan tetap masuk akal tanpa backend.
   static String chatReply(String question) {
     final q = question.toLowerCase();
     if (q.contains('menggulung')) {

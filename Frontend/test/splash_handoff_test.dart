@@ -20,10 +20,9 @@ void main() {
   testWidgets('jadwal yang dipasang ulang membatalkan jadwal sebelumnya', (
     tester,
   ) async {
-    // Inti perbaikan: jaring pengaman dipasang di `initState`, lalu dihitung
-    // ulang saat animasi benar-benar mulai. Yang boleh menyala hanya jadwal
-    // terakhir — kalau yang pertama tidak dibatalkan, handoff bisa menyala dua
-    // kali, atau lebih buruk lagi memotong animasi seperti bug aslinya.
+    // Inti perbaikan: yang boleh menyala hanya jadwal terakhir; kalau jadwal
+    // pertama tidak dibatalkan, handoff bisa menyala dua kali atau memotong
+    // animasi seperti bug aslinya.
     var count = 0;
     final handoff = SplashHandoff(() => count++);
 
@@ -36,8 +35,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 350));
     expect(count, 1);
 
-    // Jadwal pertama seharusnya sudah dibatalkan; biarkan waktu terus berjalan
-    // melewatinya untuk memastikan tidak ada handoff kedua.
+    // Jadwal pertama sudah dibatalkan; lewati waktunya untuk memastikan
+    // tidak ada handoff kedua.
     await tester.pump(const Duration(seconds: 3));
     expect(count, 1);
   });

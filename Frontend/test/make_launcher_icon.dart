@@ -4,15 +4,12 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Membuat ikon launcher Agronoma dari logo SVG.
+/// Membuat ikon launcher Agronoma dari logo SVG (jalankan:
+/// `flutter test test/make_launcher_icon.dart`, lalu salin hasilnya ke
+/// `android/app/src/main/res/mipmap-*/ic_launcher.png`).
 ///
-/// Dipakai sekali: `flutter test test/make_launcher_icon.dart` lalu salin
-/// hasilnya ke `android/app/src/main/res/mipmap-*/ic_launcher.png` pada
-/// ukuran yang sesuai. Pembaruan ikon berikutnya tinggal menjalankan ulang
-/// perintah yang sama — tidak butuh alat eksternal.
-///
-/// Latar putih polos: ikon adaptif Android memotong lingkaran di tengah,
-/// jadi logo diberi margin supaya tidak tersentuh potongan.
+/// Latar putih polos: ikon adaptif Android memotong lingkaran di tengah, jadi
+/// logo diberi margin supaya tidak tersentuh potongan.
 void main() {
   test('membuat ikon launcher', () async {
     const size = 1024;

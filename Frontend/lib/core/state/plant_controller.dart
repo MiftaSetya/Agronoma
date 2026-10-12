@@ -8,10 +8,9 @@ import 'package:frontend/core/data/weather_repository.dart';
 
 /// Menyediakan daftar tanaman dan cuaca untuk Home, Profile, dan Detail.
 class PlantController extends ChangeNotifier {
-  /// Parameter sengaja diberi nama `plantRepository`/`weatherRepository`
-  /// (bukan `repository`) supaya berbeda dari nama field-nya. Kalau namanya
-  /// sama, analyzer menyarankan `this._repository`, padahal Dart tidak
-  /// mengizinkan *named initializing formal* untuk field privat.
+  /// Parameter `plantRepository`/`weatherRepository` sengaja berbeda nama dari
+  /// field-nya karena Dart tidak mengizinkan *named initializing formal* untuk
+  /// field privat (`prefer_initializing_formals`).
   PlantController({
     required PlantRepository plantRepository,
     required WeatherRepository weatherSource,
@@ -35,7 +34,6 @@ class PlantController extends ChangeNotifier {
   bool get isLoading => _loading;
   Object? get error => _error;
 
-  /// Apakah daftar tanaman masih kosong setelah pemuatan pertama.
   bool get isEmpty => !_loading && _plants.isEmpty;
 
   /// Jumlah tugas yang belum selesai di seluruh tanaman.
@@ -68,10 +66,9 @@ class PlantController extends ChangeNotifier {
     }
   }
 
-  /// Satu tanaman dari daftar yang sudah dimuat (tanpa memanggil jaringan).
-  ///
-  /// Dipakai layar Detail supaya perpindahan dari Home terasa instan; kalau
-  /// id tidak ada di daftar, repositori dipanggil sekali.
+  /// Satu tanaman dari daftar yang sudah dimuat (tanpa memanggil jaringan),
+  /// dipakai layar Detail agar perpindahan dari Home terasa instan. Kalau id
+  /// tidak ada di daftar, repositori dipanggil sekali via [fetch].
   Plant? findById(String id) {
     for (final p in _plants) {
       if (p.id == id) return p;

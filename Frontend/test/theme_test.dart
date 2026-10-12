@@ -51,8 +51,8 @@ void main() {
   });
 
   test('tinggi baris AppTextStyles sama dengan leading di Figma', () {
-    // Figma menulis tinggi baris dalam px, bukan rasio. Angka-angka ini diambil
-    // dari `leading-[Npx]` pada simpul teksnya; rumusnya height = leading / size.
+    // Figma menulis tinggi baris dalam px (dari `leading-[Npx]`), bukan rasio;
+    // rumusnya height = leading / size.
     expect(AppTextStyles.labelSmall.height, 15 / 10);
     expect(AppTextStyles.bodySmall.height, 16 / 12);
     expect(AppTextStyles.labelMedium.height, AppTextStyles.leadingNormal);
@@ -66,12 +66,9 @@ void main() {
   });
 
   test('token leading-normal memakai tinggi baris metrik hhea Inter', () {
-    // Simpul teks design yang ditulis `leading-[normal]` **tidak boleh**
-    // dibiarkan `height: null`. Kalau null, Flutter memakai metrik
-    // usWinAscent/usWinDescent Inter (1,4302 em) sementara Figma memakai
-    // hhea/typo (1984 + 494 dari 2048 = 1,21 em). Selisih 0,22 em itu membuat
-    // tiap blok teks turun ~0,11 em dan menumpuk ke seluruh layar, jadi
-    // nilainya dikunci di sini.
+    // Simpul `leading-[normal]` tidak boleh height: null — Flutter lalu memakai
+    // metrik usWin Inter (1,4302 em) sedangkan Figma memakai hhea/typo
+    // (1,21 em), dan selisih 0,22 em itu menumpuk di seluruh layar.
     const normal = AppTextStyles.leadingNormal;
     expect(normal, 1.21);
 
@@ -91,15 +88,10 @@ void main() {
   });
 
   test('setiap token AppTextStyles menuliskan letterSpacing sendiri', () {
-    // Kalau `letterSpacing` dibiarkan kosong, `TextStyle` tetap mewarisi jarak
-    // dari `Typography.englishLike2021` (+0,3px pada 14px) begitu digabung
-    // dengan `textTheme` Material. Figma memakai 0 untuk semua teks yang tidak
-    // menuliskan `tracking`, jadi jarak itu membuat teks ~2% lebih lebar dari
-    // design dan memaksa baris membungkus lebih awal (langkah 2 di panel hasil
-    // deteksi sempat jadi 5 baris padahal designnya 4).
-    //
-    // Daftar ini sengaja ditulis manual supaya menambah token baru tanpa
-    // menentukan sendiri `letterSpacing`-nya langsung ketahuan di sini.
+    // letterSpacing kosong tetap mewarisi jarak dari Typography.englishLike2021
+    // (+0,3px @14px) saat digabung textTheme Material, padahal Figma memakai 0 —
+    // teks jadi ~2% lebih lebar dan bisa membungkus baris lebih awal. Daftar ini
+    // ditulis manual agar token baru tanpa letterSpacing langsung ketahuan.
     final tokens = <String, TextStyle>{
       'greetingLarge': AppTextStyles.greetingLarge,
       'headlineSmall': AppTextStyles.headlineSmall,
@@ -153,8 +145,7 @@ void main() {
       );
     });
 
-    // Nilai tracking yang memang ada di design, supaya perubahan tak sengaja
-    // ikut ketahuan.
+    // Nilai tracking yang memang ada di design, sebagai anti-regresi.
     expect(AppTextStyles.bodyLarge.letterSpacing, 0);
     expect(AppTextStyles.titleLarge.letterSpacing, 0);
     expect(AppTextStyles.overlineValue.letterSpacing, 0.14);

@@ -9,12 +9,12 @@ enum AuthStatus { signedOut, signingIn, signedIn }
 /// Menyimpan sesi login.
 ///
 /// Autentikasi masih palsu: [signIn] selalu berhasil selama email dan kata
-/// sandi tidak kosong, dan tidak ada token yang disimpan. Yang penting,
-/// seluruh UI hanya bicara ke kelas ini — saat backend Agronoma siap, isi
-/// [signIn] tinggal diarahkan ke endpoint sungguhan tanpa mengubah layar.
+/// sandi tidak kosong, dan tidak ada token yang disimpan. Seluruh UI hanya
+/// bicara ke kelas ini, jadi saat backend siap cukup isi [signIn] tanpa
+/// mengubah layar.
 class AuthController extends ChangeNotifier {
-  /// [initialUser] dipakai test untuk memulai dalam keadaan sudah masuk.
-  /// Namanya dibedakan dari field `_user` agar tidak memicu
+  /// [initialUser] dipakai test untuk memulai dalam keadaan sudah masuk;
+  /// namanya dibedakan dari field `_user` agar tidak memicu
   /// `prefer_initializing_formals`.
   AuthController({AppUser? initialUser}) : _user = initialUser;
 

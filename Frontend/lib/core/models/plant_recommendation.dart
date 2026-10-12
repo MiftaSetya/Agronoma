@@ -2,15 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'soil_type.dart';
 
-/// Satu rekomendasi tanaman dari langkah 4 wizard tambah tanaman.
-///
-/// Ini hasil "AI Recommendation": daftar tanaman yang cocok dengan lokasi,
-/// media tanam, dan jenis tanah yang sudah dipilih pengguna.
-///
-/// Di design kartunya cuma menampilkan empat hal: foto, nama, dua chip, dan
-/// deskripsi. Model yang lama menyimpan `suitability`, `difficulty`, dan
-/// `harvestAge`, tetapi ketiganya **tidak pernah tampil** pada frame itu —
-/// angka kesesuaian hanya menambah data yang tidak terpakai, jadi dihapus.
+/// Satu rekomendasi tanaman dari langkah 4 wizard "Tambah Tanaman" (hasil
+/// "AI Recommendation"). Kartu design hanya menampilkan foto, nama, dua chip,
+/// dan deskripsi — `suitability`, `difficulty`, dan `harvestAge` lama
+/// sengaja dihapus karena tidak pernah tampil di frame itu.
 @immutable
 class PlantRecommendation {
   const PlantRecommendation({
@@ -26,18 +21,12 @@ class PlantRecommendation {
   final String photoAsset;
   final String description;
 
-  /// Chip di bawah nama tanaman.
-  ///
-  /// Design menampilkan satu chip "Pilihan Terbaik" berlatar kuning di kartu
-  /// yang paling sesuai, lalu nol atau dua chip `Indoor`/`Outdoor`. Tag lain
-  /// yang tidak ada di design sengaja tidak dimodelkan — chip-nya memang bukan
-  /// daftar bebas, melainkan tiga varian tetap itu.
+  /// Chip di bawah nama. Bukan daftar bebas: design hanya punya tiga varian —
+  /// "Pilihan Terbaik" (kartu paling sesuai), lalu `Indoor`/`Outdoor`.
   final List<String> tags;
 
-  /// Kartu ini ditandai "Pilihan Terbaik".
   bool get bestFor => tags.contains(bestForTag);
 
-  /// Nilai tag yang menandai "Pilihan Terbaik".
   static const String bestForTag = 'Pilihan Terbaik';
 
   factory PlantRecommendation.fromJson(Map<String, dynamic> json) =>
@@ -58,10 +47,9 @@ class PlantRecommendation {
   };
 }
 
-/// Data yang dikumpulkan sepanjang wizard "Tambah Tanaman".
-///
-/// Dipegang oleh [AddPlantController] supaya setiap langkah bisa membaca
-/// pilihan langkah sebelumnya tanpa harus melempar argumen lewat rute.
+/// Data yang dikumpulkan sepanjang wizard "Tambah Tanaman"; dipegang oleh
+/// [AddPlantController] agar tiap langkah bisa membaca pilihan sebelumnya
+/// tanpa melempar argumen lewat rute.
 @immutable
 class AddPlantDraft {
   const AddPlantDraft({
@@ -77,10 +65,7 @@ class AddPlantDraft {
     this.phase,
   });
 
-  /// Nama tempat, mis. "Politeknik Elektronika Negeri Surabaya".
   final String? locationName;
-
-  /// Alamat lengkap hasil pencarian lokasi.
   final String? locationAddress;
 
   /// Pengguna sudah menekan "Konfirmasi Lokasi".
@@ -100,19 +85,11 @@ class AddPlantDraft {
 
   final String? phase;
 
-  /// Langkah 1 selesai: lokasi sudah dikonfirmasi.
   bool get hasLocation => locationConfirmed || locationName != null;
-
-  /// Langkah 2 selesai: media tanam sudah dipilih.
   bool get hasMedia => media != null;
-
-  /// Langkah 3 selesai: tanah sudah ditentukan (pilih atau analisis).
   bool get hasSoil => soil != null || soilDetected;
-
-  /// Langkah 4 selesai: tanaman sudah dipilih atau diisi manual.
   bool get hasPlant => recommendation != null || manualName != null;
 
-  /// Nama tanaman yang akan disimpan.
   String get resolvedName =>
       manualName ?? recommendation?.name ?? 'Tanaman Baru';
 

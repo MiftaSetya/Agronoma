@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_text_styles.dart';
 
-/// Skala jarak. Design digambar pada kanvas 440px dengan padding halaman
-/// **16px** (diukur dari `Home`, `Profile`, dan `Plant detail`).
-///
-/// Nilai-nilainya kelipatan 4 yang lazim dipakai di Figma.
+/// Skala jarak, kelipatan 4. Design digambar pada kanvas 440px dengan
+/// padding halaman **16px** (diukur dari `Home`, `Profile`, dan
+/// `Plant detail`).
 class AppSpacing {
   AppSpacing._();
   static const double xs = 4;
@@ -17,18 +16,15 @@ class AppSpacing {
   static const double xxl = 24;
   static const double xxxl = 32;
 
-  /// Padding horizontal standar halaman (kiri-kanan).
-  ///
-  /// Diambil dari design: Home dan Profile memakai 16, sehingga lebar kartu
-  /// 408 dari kanvas 440. Ada beberapa komponen yang memakai 20 di dalam
-  /// dirinya sendiri (mis. isi kartu), tetapi **kerangka halaman** selalu 16.
+  /// Padding horizontal standar halaman. Isi kartu kadang memakai 20, tetapi
+  /// kerangka halaman selalu 16 (lebar kartu 408 dari kanvas 440).
   static const double page = 16;
 
   /// Jarak aman dari tepi bawah untuk konten di atas home indicator.
   static const double bottomGutter = 24;
 }
 
-/// Radius sudut. Diukur dari bentuk kartu, field, dan tombol pada design.
+/// Radius sudut, diukur dari bentuk kartu, field, dan tombol pada design.
 class AppRadius {
   AppRadius._();
   static const double chip = 999;
@@ -39,9 +35,8 @@ class AppRadius {
   static const double xl = 20;
   static const double sheet = 24;
 
-  /// Radius lembar hasil deteksi penyakit — `Disease Drawer` di design memakai
-  /// 32, lebih besar dari sheet biasa supaya terlihat seperti panel yang bisa
-  /// ditarik naik.
+  /// `Disease Drawer` memakai 32 — lebih besar dari sheet biasa supaya
+  /// terlihat seperti panel yang bisa ditarik naik.
   static const double sheetLarge = 32;
 
   static const BorderRadius chipAll = BorderRadius.all(Radius.circular(chip));
@@ -66,30 +61,20 @@ class AppSizes {
   static const double listImage = 64;
   static const double hitTarget = 48;
 
-  /// Lebar dan tinggi kanvas Figma. Semua jarak di design diukur pada frame
-  /// 440x956 (iPhone 16 Pro Max), jadi angka-angka di tema ini juga.
+  /// Semua jarak di design diukur pada kanvas Figma 440x956
+  /// (iPhone 16 Pro Max).
   static const double designWidth = 440;
   static const double designHeight = 956;
 
-  /// Tinggi area status bar pada kanvas Figma — status bar iPhone 16 Pro Max.
-  ///
-  /// Design menggambar seluruh isi layar **mulai dari baris 64**: status bar
-  /// setinggi itu bukan sekadar gambar, ia turut menentukan posisi judul, kartu,
-  /// dan tombol di bawahnya. Di Android status bar rata-rata hanya ~32px, jadi
-  /// kalau dibiarkan setiap layar akan meleset 32px ke atas dengan arah yang
-  /// sama dan hasilnya terlihat "mirip tapi bukan".
-  ///
-  /// Karena itu inset atas diseragamkan sekali di `app.dart`
-  /// ([normalizeTopInset]), bukan ditambal satu per satu di tiap layar.
+  /// Status bar iPhone 16 Pro Max. Design menggambar seluruh isi layar mulai
+  /// dari baris 64, sedangkan status bar Android rata-rata hanya ~32px — tanpa
+  /// normalisasi, tiap layar meleset 32px ke atas. Inset atas diseragamkan
+  /// sekali lewat [normalizeTopInset], bukan ditambal per layar.
   static const double designStatusBar = 64;
 
-  /// Menyamakan inset atas dengan area status bar pada design.
-  ///
-  /// Nilai yang dipakai adalah **nilai terbesar** antara inset sistem dan
-  /// [designStatusBar]. Sengaja tidak pernah mengecilkan inset: pada perangkat
-  /// berponi inset sistem bisa lebih tinggi dari 64, dan memaksanya jadi 64 akan
-  /// membuat konten tertutup poni. Dengan mengambil yang terbesar, layout sama
-  /// seperti design pada perangkat biasa, dan tetap aman pada perangkat berponi.
+  /// Menyamakan inset atas dengan area status bar pada design dengan mengambil
+  /// nilai terbesar antara inset sistem dan [designStatusBar] — inset sengaja
+  /// tidak pernah dikecilkan agar konten tetap aman di perangkat berponi.
   static double normalizeTopInset(BuildContext context) {
     final systemInset = MediaQuery.of(context).padding.top;
     return systemInset < designStatusBar ? designStatusBar : systemInset;

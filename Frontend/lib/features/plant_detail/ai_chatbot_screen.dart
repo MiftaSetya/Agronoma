@@ -47,7 +47,8 @@ class _PlantChatScreenState extends State<PlantChatScreen> {
     _input.clear();
     await context.read<ChatController>().send(text, reply: MockData.chatReply);
     if (!mounted) return;
-    // Gulir ke pesan terbaru.
+    // Jeda sejenak agar layout pesan baru selesai dibangun sebelum mengukur
+    // `maxScrollExtent`.
     await Future<void>.delayed(const Duration(milliseconds: 50));
     if (_scroll.hasClients) {
       await _scroll.animateTo(

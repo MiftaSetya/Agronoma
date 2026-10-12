@@ -11,11 +11,8 @@ import 'package:frontend/core/state/add_plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/add_plant/add_plant_flow.dart';
 
-/// Uji perilaku [AddPlantController] dan alur langkah wizard.
-///
-/// Fokusnya logika (enum sebagai sumber teks, urutan langkah, hasil akhir),
-/// bukan piksel — kesetiaan visual dijaga pipeline tangkapan layar di
-/// `docs/testing.md`.
+/// Uji logika [AddPlantController] dan alur langkah wizard (bukan piksel) —
+/// kesetiaan visual dijaga pipeline tangkapan layar di `docs/testing.md`.
 class _FakeRepository implements PlantRepository {
   @override
   Future<List<SoilType>> getSoilTypes() async => MockData.soilTypes;
@@ -89,7 +86,6 @@ void main() {
       await tester.tap(find.text('Konfirmasi Lokasi'));
       await tester.pumpAndSettle();
 
-      // Langkah media: pilihannya persis label enum PlantingMedia.
       expect(find.text('Pilih Media Tanam'), findsOneWidget);
       for (final media in PlantingMedia.values) {
         expect(find.text(media.label), findsOneWidget);
@@ -112,11 +108,10 @@ void main() {
       await tester.tap(find.text('Lanjut'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Saya Tahu Jenis Tanah'));
-      // Daftar jenis tanah dimuat asinkron setelah langkah terpasang.
+      // Daftar tanah dimuat asinkron (~400 ms) setelah langkah terpasang.
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pumpAndSettle();
 
-      // Daftar jenis tanah dari repositori tampil.
       expect(find.text(MockData.soilTypes.first.name), findsOneWidget);
       expect(find.text('pH ${MockData.soilTypes.first.phRange}'), findsOneWidget);
     });
@@ -137,12 +132,10 @@ void main() {
       await tester.tap(find.text('Lanjut'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Saya Tahu Jenis Tanah'));
-      // Daftar jenis tanah dimuat asinkron setelah langkah terpasang.
+      // Daftar tanah dimuat asinkron (~400 ms) setelah langkah terpasang.
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pumpAndSettle();
 
-      // Pilih jenis tanah pertama pada daftar (di-scroll ke tengah dulu
-      // supaya tidak tertutup elemen lain).
       await tester.scrollUntilVisible(
         find.text(MockData.soilTypes.first.name),
         200,
@@ -156,7 +149,6 @@ void main() {
           .read<AddPlantController>();
       expect(controller.draft.soil, isNotNull);
 
-      // Simulasi lanjut: rekomendasi dimuat dari repositori.
       await controller.loadRecommendations();
       expect(controller.recommendations, isNotEmpty);
       expect(controller.recommendations.first, isA<PlantRecommendation>());

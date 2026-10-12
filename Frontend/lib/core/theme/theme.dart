@@ -1,9 +1,4 @@
-/// Barrels untuk lapisan theme.
-///
-/// Pemakaian di screen cukup:
-/// ```dart
-/// import 'package:frontend/core/theme/theme.dart';
-/// ```
+/// Barrel untuk lapisan theme.
 library;
 
 export 'app_colors.dart';

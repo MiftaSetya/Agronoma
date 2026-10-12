@@ -6,16 +6,13 @@ import 'package:frontend/core/routing/app_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
-/// Kerangka halaman utama Agronoma.
+/// Kerangka halaman "dalam" aplikasi: top bar (wordmark/chat atau judul),
+/// daftar tab Beranda/Profil, dan FAB tambah di tengah bawah. Dipakai bersama
+/// supaya jarak, bayangan, dan tinggi navbar konsisten.
 ///
-/// Menyediakan top bar (wordmark + tombol chat), daftar tab Beranda/Profil,
-/// dan tombol tambah melayang di tengah bawah. Semua halaman "dalam" aplikasi
-/// memakainya supaya jarak, bayangan, dan tinggi navbar tidak berbeda-beda.
-///
-/// Struktur diambil dari komponen `Bottom Navigation` (node `13:1497`) dan
-/// `Top Header` (node `24:884`) pada Figma:
-/// - navbar tinggi 80, tab aktif berupa pil hijau `#6D9C25` radius 200,
-/// - tombol tengah naik 24px di atas navbar, ukuran luar 60 + padding 6.
+/// Struktur dari Figma `Bottom Navigation` (node `13:1497`) dan `Top Header`
+/// (node `24:884`): navbar 80, pil tab hijau `#6D9C25` radius 200, tombol
+/// tengah naik 24 di atas navbar (luar 60 + padding 6).
 class AppShell extends StatelessWidget {
   const AppShell({
     super.key,
@@ -25,7 +22,7 @@ class AppShell extends StatelessWidget {
     this.topBarTitle,
   });
 
-  /// 0 = Beranda, 1 = Profil.
+/// 0 = Beranda, 1 = Profil (sesuai urutan tab di design).
   final int currentIndex;
 
   final Widget child;
@@ -33,13 +30,13 @@ class AppShell extends StatelessWidget {
   /// Sembunyikan top bar untuk halaman yang punya header sendiri.
   final bool showTopBar;
 
-  /// Bila diisi, top bar menampilkan panah kembali + judul, bukan wordmark.
+  /// Bila diisi, top bar berubah jadi panah kembali + judul (bukan wordmark).
   final String? topBarTitle;
 
   /// Tinggi navbar (tanpa area aman bawah).
   static const double navBarHeight = 80;
 
-  /// Tinggi total area bawah = navbar + ruang untuk FAB yang menonjol.
+  /// Tinggi total area bawah: navbar + 24 ruang FAB yang menonjol.
   static const double bottomInset = navBarHeight + 24;
 
   @override
@@ -64,10 +61,8 @@ class AgroTopBar extends StatelessWidget {
   /// Kalau null → tampilkan wordmark; kalau diisi → tampilkan judul + back.
   final String? title;
 
-  /// Aksi tombol panah. Bila null, panah menutup halaman lewat `maybePop`.
-  ///
-  /// Wizard tambah tanaman memakai ini untuk mundur satu langkah, bukan
-  /// menutup halaman.
+  /// Aksi tombol panah. Bila null, panah menutup halaman lewat `maybePop` —
+  /// wizard tambah tanaman memakai ini untuk mundur satu langkah, bukan menutup.
   final VoidCallback? onBack;
 
   @override
@@ -93,7 +88,7 @@ class AgroTopBar extends StatelessWidget {
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Wordmark asli dari design (lebarnya 146.221 x 28).
+                    // Wordmark asli dari design: 146.221 x 28.
                     const SizedBox(
                       height: 28,
                       child: _Wordmark(),

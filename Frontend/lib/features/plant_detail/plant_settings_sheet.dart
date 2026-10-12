@@ -9,24 +9,16 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
-/// Drawer "Setelan Tanaman" (frame `EditPlant drawer`, node `291:2872`).
+/// Drawer "Setelan Tanaman" (frame `EditPlant drawer`, node `291:2872`),
+/// dibuka lewat tombol gir di kepala Detail Tanaman.
 ///
-/// Dibuka lewat tombol gir di kepala Detail Tanaman. Isinya lima isian:
-/// foto (dengan tombol kamera menimpanya), nama tanaman, lokasi, media tanam,
-/// jenis tanah, dan fase — lalu sepasang tombol Batal/Simpan.
-///
-/// Geometri frame: panel putih 440x717, `pt-24`, isi `px-32` dengan
-/// `gap-24` antar blok, tombol di baris 615 (54px tinggi).
-///
-/// Belum sesuai design (dan sengaja): foto yang bisa diganti. Tombol kameranya
-/// tampil seperti design, tetapi menekannya hanya menampilkan snackbar — ganti
-/// foto butuh plugin kamera/galeri yang belum jadi bagian Fase ini.
+/// Ganti foto sengaja belum aktif: tombol kamera di [_PhotoPicker] hanya
+/// menampilkan snackbar karena butuh plugin kamera/galeri.
 class PlantSettingsSheet extends StatefulWidget {
   const PlantSettingsSheet({super.key, required this.plant});
 
   final Plant plant;
 
-  /// Menampilkannya sebagai bottom sheet.
   static Future<void> show(BuildContext context, Plant plant) {
     return showModalBottomSheet<void>(
       context: context,
@@ -68,7 +60,6 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    // Ruang untuk keyboard: sheet bisa terbuka di atasnya.
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -85,7 +76,7 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Gagang tarik (garis 32px di tengah atas, frame "Close").
+              // Gagang tarik (frame "Close" pada design).
               Center(
                 child: Container(
                   width: 32,
@@ -124,8 +115,8 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                 label: 'Lokasi Tanaman',
                 leading: AgroIcon(AppAssets.locationTag, size: 20),
                 trailing: const AgroIcon(AppAssets.chevronRightThin, size: 20),
-                // Field lokasi di design bersifat baca: menekannya hanya
-                // menutup sheet tanpa aksi (belum ada pemilih lokasi baru).
+                // Field lokasi bersifat baca: menekannya tidak melakukan aksi
+                // (belum ada pemilih lokasi baru).
                 child: Text(
                   _location,
                   style: AppTextStyles.bodyLarge.copyWith(
@@ -220,10 +211,8 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
     );
   }
 
-  /// Pemilih sederhana berupa daftar nilai dalam sheet baru.
-  ///
-  /// Designnya tidak menggambar state "dropdown terbuka", jadi bentuknya
-  /// sengaja minimal: hanya daftar pilihan.
+  /// Pemilih sederhana berupa daftar pilihan dalam sheet baru — design tidak
+  /// menggambar state "dropdown terbuka", jadi bentuknya sengaja minimal.
   Future<void> _pick(List<String> options, String current, void Function(String) onPick) {
     return showModalBottomSheet<void>(
       context: context,
@@ -257,11 +246,8 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
   }
 }
 
-/// Foto tanaman 80px dengan tombol kamera menimpanya.
-///
-/// Design: kartu 80px `p-8 rounded-8` berisi foto, ditutupi lapisan gelap
-/// 18%, dan ikon kamera 24px di tengahnya. Menekannya belum mengganti foto —
-/// lihat catatan di kepala kelas.
+/// Foto tanaman 80px dengan tombol kamera menimpanya. Menekannya belum
+/// mengganti foto — lihat catatan di kepala kelas.
 class _PhotoPicker extends StatelessWidget {
   const _PhotoPicker({required this.photoAsset});
 
@@ -312,10 +298,8 @@ class _PhotoPicker extends StatelessWidget {
   }
 }
 
-/// Baris "label + kotak isian" seperti komponen `textfield/with title` design.
-///
-/// Kotak isian: putih, border abu, sudut 8px, tinggi 44 (py-12 + teks 20),
-/// dengan sekat vertikal abu di belakang ikon prefix (`bg #f6f6f6`).
+/// Baris "label + kotak isian" seperti komponen `textfield/with title` design,
+/// dengan sekat vertikal abu di belakang ikon prefix.
 class _LabeledField extends StatelessWidget {
   const _LabeledField({
     required this.label,

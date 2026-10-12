@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
 
-/// Satu langkah penanganan pada hasil deteksi penyakit.
-///
-/// Di design (`Disease Drawer`, node `253:2575`) penanganan digambar sebagai
-/// garis waktu bernomor: tiap langkah punya judul singkat dan satu paragraf
-/// penjelasan. Karena itu bentuknya bukan `List<String>` biasa.
+/// Penanganan dimodelkan sebagai pasangan judul+paragraf karena di design
+/// (`Disease Drawer`, node `253:2575`) langkahnya digambar sebagai garis
+/// waktu bernomor, bukan daftar teks biasa.
 @immutable
 class DiseaseStep {
   const DiseaseStep({required this.title, required this.detail});
 
-  /// Judul singkat, mis. "Karantina Tanaman".
   final String title;
-
-  /// Satu paragraf penjelasan.
   final String detail;
 
   factory DiseaseStep.fromJson(Map<String, dynamic> json) => DiseaseStep(
@@ -44,18 +39,15 @@ class Disease {
   /// Jenis, mis. "Jamur" / "Bakteri" / "Hama".
   final String diseaseType;
 
-  /// Penyebab penyakit.
-  ///
-  /// Belum ditampilkan di layar mana pun: design hanya memuat nama, nama
-  /// ilmiah, tingkat keyakinan, dan langkah penanganan. Tetap disimpan karena
-  /// ini bagian wajar dari satu hasil diagnosis dan akan dipakai saat backend
-  /// atau halaman detail penyakit dibuat.
+  /// Penyebab penyakit; belum tampil di layar mana pun, tetap disimpan
+  /// sebagai bagian wajar dari satu hasil diagnosis untuk backend/detail
+  /// penyakit nanti.
   final String cause;
 
-  /// Daftar gejala. Lihat catatan pada [cause] — juga belum ditampilkan.
+  /// Daftar gejala; juga belum ditampilkan (lihat [cause]).
   final List<String> symptoms;
 
-  /// Langkah penanganan yang digambar sebagai garis waktu di drawer hasil.
+  /// Digambar sebagai garis waktu di drawer hasil.
   final List<DiseaseStep> steps;
 
   /// Tingkat keyakinan 0–1.
@@ -64,10 +56,8 @@ class Disease {
   /// Tingkat keparahan, mis. "Ringan" / "Sedang" / "Berat".
   final String severity;
 
-  /// Foto daun/tanaman yang dianalisis.
   final String? photoAsset;
 
-  /// Teks persentase siap tampil, mis. "94%".
   String get confidenceLabel => '${(confidence * 100).round()}%';
 
   factory Disease.fromJson(Map<String, dynamic> json) => Disease(

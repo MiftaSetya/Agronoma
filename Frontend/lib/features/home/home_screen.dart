@@ -10,9 +10,6 @@ import 'package:frontend/core/widgets/agro_common.dart';
 import 'package:frontend/core/widgets/app_shell.dart';
 
 /// Layar Home — frame `Home` (node `10:29`) pada Figma.
-///
-/// Susunannya: sapaan "Hallo, User!" + "Ayo cek tanamanmu hari ini!", kartu
-/// cuaca, lalu seksi "Tanaman Saya" berisi kartu-kartu tanaman.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -24,8 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Pemuatan pertama dilakukan setelah frame pertama supaya tidak memanggil
-    // notifyListeners() saat build masih berjalan.
+    // Setelah frame pertama: menghindari notifyListeners() saat build berjalan.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) context.read<PlantController>().load();
     });
@@ -42,8 +38,8 @@ class _HomeScreenState extends State<HomeScreen> {
       currentIndex: 0,
       child: RefreshIndicator(
         onRefresh: () => controller.load(force: true),
-        // Jarak mengikuti design: 24px dari top bar, lalu antar-seksi 24px,
-        // 24px sebelum judul seksi, dan 16px ke kartu pertama.
+        // Jarak mengikuti design: antar-seksi 24px, 24px sebelum judul
+        // seksi, dan 16px ke kartu pertama.
         child: ListView(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.page,
@@ -62,9 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 iconAsset: controller.weather!.iconAsset,
               ),
             const SizedBox(height: AppSpacing.xxl),
-            // `actionLabel` sengaja tidak diisi: di frame Home, container
-            // "Lihat Semua" berstatus hidden, jadi design memang hanya
-            // menampilkan judulnya.
+            // Tanpa `actionLabel`: di frame Home, container "Lihat Semua"
+            // berstatus hidden, jadi design memang hanya menampilkan judulnya.
             const SectionHeader(title: 'Tanaman Saya'),
             const SizedBox(height: AppSpacing.lg),
             if (controller.isLoading && controller.plants.isEmpty)
@@ -108,10 +103,9 @@ class _Greeting extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Hallo, $name!', style: AppTextStyles.greetingLarge),
-        // Di design kedua baris ini berdempet: sapaan (`leading-[40px]`) lalu
-        // sub-judul (`leading-[24px]`) tanpa `gap`. Kotak barisnya sendiri sudah
-        // menyisakan jarak di atas huruf, jadi menambah 4px justru menggeser
-        // seluruh isi Home ke bawah.
+        // Di design kedua baris ini berdempet tanpa `gap`: kotak barisnya
+        // sudah menyisakan jarak, jadi menambah 4px justru menggeser seluruh
+        // isi Home ke bawah.
         Text(
           'Ayo cek tanamanmu hari ini!',
           style: AppTextStyles.titleWide.copyWith(color: AppColors.darkGrey),

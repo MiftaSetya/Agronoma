@@ -7,10 +7,8 @@ import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/core/widgets/agro_text_field.dart';
 import 'package:frontend/features/auth/widgets/auth_layout.dart';
 
-/// Layar Register — frame `Register` (node `155:1357`) pada Figma.
-///
-/// Field-nya mengikuti komponen `textfield/with title`: Nama Pengguna, Email,
-/// Password, lalu Konfirmasi Password.
+/// Layar Register — frame `Register` (node `155:1357`) pada Figma;
+/// field-nya memakai komponen `textfield/with title`.
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 

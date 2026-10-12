@@ -17,36 +17,24 @@ import 'package:frontend/features/plant_detail/ai_chatbot_screen.dart';
 import 'package:frontend/features/plant_detail/plant_detail_screen.dart';
 import 'package:frontend/features/profile/profile_screen.dart';
 
-/// Titik masuk khusus pengembangan — **bukan** bagian aplikasi.
+/// Titik masuk khusus pengembangan — **bukan** bagian aplikasi (tidak pernah
+/// dipanggil `main.dart`, jadi tidak ikut ke build rilis). Gunanya memotret
+/// satu layar langsung tanpa menavigasi dari splash, misalnya saat
+/// mencocokkan hasil render dengan frame Figma.
 ///
-/// Gunanya memotret satu layar langsung tanpa menavigasi dari splash, misalnya
-/// saat mencocokkan hasil render dengan frame Figma (`tool/shot.ps1`).
+/// Layar ditentukan lewat properti sistem Android (satu APK untuk semua
+/// layar, tanpa build ulang):
 ///
-/// Rute bisa ditentukan dengan dua cara:
+/// ```sh
+/// adb shell setprop debug.agronoma.rute /home
+/// adb shell setprop debug.agronoma.langkah 2
+/// adb shell am start -n com.agronoma.frontend/.MainActivity
+/// ```
 ///
-/// 1. Saat kompilasi — praktis kalau hanya menguji satu layar:
-///    ```sh
-///    flutter run -t lib/dev_preview.dart --dart-define=ROUTE=/add-plant
-///    ```
-/// 2. Saat jalan — lewat properti sistem Android, jadi satu APK cukup untuk
-///    semua layar dan tidak perlu build ulang tiap ganti layar:
-///    ```sh
-///    adb shell setprop debug.agronoma.rute /home
-///    adb shell am start -n com.agronoma.frontend/.MainActivity
-///    ```
-///
-/// `debug.agronoma.langkah` mengisi langkah awal untuk layar yang punya
-/// beberapa keadaan:
-///
-/// | Layar | Langkah | Arti |
-/// |---|---|---|
-/// | `/add-plant` | 0..4 | langkah wizard |
-/// | `/plant-detail` | 0 / 1 | tab Ringkasan / Perawatan |
-/// | `/disease-detection` | 0 / 1 | kamera / panel hasil |
-///
-/// Berkas ini tidak pernah dipanggil `main.dart`, jadi tidak ikut ke aplikasi
-/// rilis: `flutter build` hanya mengompilasi kode yang terjangkau dari entry
-/// point yang dipakai.
+/// `debug.agronoma.langkah` mengisi keadaan awal: langkah wizard `/add-plant`
+/// (0..4), tab `/plant-detail` (0 Ringkasan / 1 Perawatan), atau keadaan
+/// `/disease-detection` (0 kamera / 1 panel hasil). Alternatif saat kompilasi:
+/// `--dart-define=ROUTE=/add-plant --dart-define=STEP=2`.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -56,8 +44,7 @@ Future<void> main() async {
   runApp(
     AgronomaApp(
       // Sesi langsung diisi supaya Home dan Profile menampilkan data seperti
-      // setelah login — kalau tidak, keduanya hanya menampilkan nilai kosong
-      // dan tidak ada gunanya dibandingkan dengan design.
+      // setelah login (kalau tidak, keduanya hanya menampilkan nilai kosong).
       signedInUser: MockData.user,
       home: _previewFor(
         route.isEmpty ? Routes.login : route,
@@ -67,15 +54,10 @@ Future<void> main() async {
   );
 }
 
-/// Membaca pengaturan dari `--dart-define`, lalu dari properti sistem Android.
-///
-/// Properti sistem memberi keuntungan besar saat mencocokkan layar dengan
-/// design: satu APK bisa membuka layar mana pun, jadi tidak perlu build ulang
-/// setiap kali pindah layar.
-///
-/// Bila keduanya kosong, kembaliannya string kosong.
+/// Membaca pengaturan dari `--dart-define`, lalu dari properti sistem Android;
+/// keduanya kosong berarti kembalian string kosong.
 Future<String> _setting(String define, String property) async {
-  // Properti sistem hanya ada di Android; di platform lain [Process.run] gagal
+  // Properti sistem hanya ada di Android; di platform lain `getprop` gagal
   // dan `--dart-define` yang dipakai.
   try {
     final result = await Process.run('getprop', [property]);
@@ -84,7 +66,6 @@ Future<String> _setting(String define, String property) async {
   } on ProcessException {
     // Bukan Android — jatuh ke `--dart-define`.
   }
-
   return switch (define) {
     'ROUTE' => const String.fromEnvironment('ROUTE'),
     'STEP' => '${const int.fromEnvironment('STEP')}',
@@ -93,8 +74,6 @@ Future<String> _setting(String define, String property) async {
 }
 
 /// Memetakan nama rute menjadi layar, lengkap dengan argumen contoh.
-///
-/// Bila nanti ada layar baru, cukup tambahkan satu `case` di sini.
 Widget _previewFor(String route, int step) {
   switch (route) {
     case Routes.login:
@@ -120,16 +99,12 @@ Widget _previewFor(String route, int step) {
   }
 }
 
-/// Wizard dengan isian yang sudah disemai.
+/// Wizard dengan isian yang sudah disemai agar tangkapan layarnya bisa
+/// dibandingkan dengan design (yang memotret wizard dalam keadaan terisi:
+/// langkah 2 sudah memilih "Pot tanaman", langkah 3 sudah menganalisis tanah).
 ///
-/// Design memotret wizard dalam keadaan yang sudah terisi: langkah 2 sudah
-/// memilih "Pot tanaman" dan langkah 3 sudah menganalisis tanah lewat kamera.
-/// Tanpa penyemaian, tangkapan langkah itu memperlihatkan kartu-kartu kosong
-/// sehingga tidak bisa dibandingkan dengan referensinya.
-///
-/// Penyemaiannya lewat post-frame callback: controller dipakai `AddPlantFlow`
-/// sendiri di frame pertama, jadi mengubah draft harus menunggu frame itu
-/// selesai.
+/// Penyemaiannya lewat post-frame callback karena controller dipakai
+/// `AddPlantFlow` sendiri di frame pertama.
 class _AddPlantPreview extends StatelessWidget {
   const _AddPlantPreview({required this.step});
 
@@ -141,7 +116,7 @@ class _AddPlantPreview extends StatelessWidget {
     // pertama milik AddPlantFlow.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Post-frame kedua: callback yang didaftarkan saat build berjalan
-      // SEBELUM initState() AddPlantFlow mendaftarkan reset() miliknya, jadi
+      // sebelum initState() AddPlantFlow mendaftarkan reset() miliknya, jadi
       // menyemai di frame pertama justru langsung dihapus reset(). Menyemai di
       // frame kedua menjamin urutannya benar.
       WidgetsBinding.instance.addPostFrameCallback((_) {
