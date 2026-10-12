@@ -3,43 +3,31 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/theme/theme.dart';
 
-/// Kondisi perawatan sebuah tanaman.
-///
-/// Dipakai oleh kartu tanaman di Home dan oleh chip "KONDISI AMAN" /
-/// "PERLU DISIRAM" / "PERLU PUPUK" pada design. Nilainya sengaja
-/// dipisahkan dari warna supaya pemakaian di UI bisa memetakan sendiri.
+/// Kondisi perawatan tanaman (kartu Home + chip "KONDISI AMAN" dst.).
+/// Nilainya dipisahkan dari pemetaan warna supaya UI yang memetakan sendiri.
 enum CareStatus {
-  /// Butuh disiram — biru (`AppColors.careWater*`).
   needsWater,
-
-  /// Butuh dipupuk — kuning (`AppColors.careFertilize*`).
   needsFertilizer,
-
-  /// Tidak ada tindakan mendesak — hijau (`AppColors.primaryTint`).
   safe;
 
-  /// Label chip huruf kapital seperti di design.
   String get label => switch (this) {
     CareStatus.needsWater => 'Perlu Disiram',
     CareStatus.needsFertilizer => 'Perlu Pupuk',
     CareStatus.safe => 'Kondisi Aman',
   };
 
-  /// Warna latar chip.
   Color get tint => switch (this) {
     CareStatus.needsWater => AppColors.careWaterTint,
     CareStatus.needsFertilizer => AppColors.careFertilizeSurface,
     CareStatus.safe => const Color(0x4DBEF372),
   };
 
-  /// Warna garis tepi chip.
   Color get border => switch (this) {
     CareStatus.needsWater => AppColors.careWaterLight,
     CareStatus.needsFertilizer => AppColors.careFertilizeSoft,
     CareStatus.safe => const Color(0x80BEF372),
   };
 
-  /// Warna teks chip.
   Color get foreground => switch (this) {
     CareStatus.needsWater => AppColors.careWater,
     CareStatus.needsFertilizer => AppColors.careFertilize,
@@ -47,16 +35,9 @@ enum CareStatus {
   };
 }
 
-/// Fase pertumbuhan tanaman (langkah 5 wizard tambah tanaman).
-///
-/// Urutannya mengikuti empat titik pada garis waktu "Fase Pertumbuhan" di
-/// Detail Tanaman: Semai Biji → Vegetatif Awal → Vegetatif Akhir → Generatif.
-/// Design memakai istilah yang lebih rinci daripada "Vegetatif/Panen", jadi
-/// labelnya disamakan supaya garis waktunya tidak perlu diterjemahkan lagi.
-///
-/// Keterangannya disalin apa adanya dari kartu langkah 5, bukan diringkas:
-/// teks itulah yang mengatur berapa baris yang dipakai tiap kartu (semuanya
-/// satu baris di design), sehingga meringkasnya mengubah tinggi kartu.
+/// Fase pertumbuhan (langkah 5 wizard). Urutan mengikuti garis waktu
+/// "Fase Pertumbuhan" di Detail Tanaman, dan keterangan tiap fase disalin
+/// apa adanya dari kartu langkah 5 — meringkasnya akan mengubah tinggi kartu.
 enum GrowthPhase {
   seedling('Semai Biji', 'Benih baru ditanam atau mulai berkecambah.'),
   vegetativeEarly(
@@ -74,10 +55,9 @@ enum GrowthPhase {
   final String label;
   final String description;
 
-  /// Ikon fase pada bulatan 40px langkah 5. Ukuran asli tiap ikon berbeda,
-  /// jadi pasangan lebar/tingginya ikut dikembalikan di sini — memaksa
-  /// 16x16 seperti sebelumnya meregangkan ikon vegetatif akhir yang aslinya
-  /// 16x25.
+  // Ikon SVG Figma tidak berukuran persegi (mis. vegetatif akhir 16x25),
+  // jadi lebar/tinggi aslinya ikut disimpan agar tidak meregang saat
+  // dipaksa persegi oleh `preserveAspectRatio`.
   static const Map<GrowthPhase, (String, double, double)> _icons = {
     GrowthPhase.seedling: (AppAssets.phaseSeedling, 16, 16),
     GrowthPhase.vegetativeEarly: (AppAssets.phaseVegetativeEarly, 19, 17),
@@ -85,23 +65,17 @@ enum GrowthPhase {
     GrowthPhase.generative: (AppAssets.phaseGenerative, 16, 19),
   };
 
-  /// Berkas ikon fase ini.
   String get iconAsset => _icons[this]!.$1;
-
-  /// Lebar asli ikon pada design.
   double get iconWidth => _icons[this]!.$2;
-
-  /// Tinggi asli ikon pada design.
   double get iconHeight => _icons[this]!.$3;
 
-  /// Nama fase dalam huruf kecil seperti label langkah pada indikator.
+  /// Nama fase dalam huruf kecil, dipakai sebagai label langkah indikator.
   String get slug => name;
 }
-/// Cara menanam / media tanam (langkah 2 wizard).
-///
-/// Label dan keterangannya diambil apa adanya dari kartu langkah 2 supaya
-/// teks design bisa dipakai ulang di tempat lain (mis. chip "Media Tanam" di
-/// Detail Tanaman) tanpa penerjemahan yang berbeda-beda.
+
+/// Media tanam (langkah 2 wizard). Label dan keterangan disalin apa adanya
+/// dari kartu langkah 2 supaya teks design bisa dipakai ulang tanpa
+/// penerjemahan yang berbeda-beda.
 enum PlantingMedia {
   pot(
     'Pot tanaman',
@@ -130,7 +104,6 @@ enum CareTaskKind {
   watering,
   fertilizing;
 
-  /// Judul aksi seperti di design, mis. "Siram Tanaman".
   String get actionLabel => switch (this) {
     CareTaskKind.watering => 'Siram Tanaman',
     CareTaskKind.fertilizing => 'Pupuk Tanaman',
@@ -148,19 +121,10 @@ class CareTask {
     this.note,
   });
 
-  /// Judul tugas, mis. "Siram tanaman".
   final String title;
-
-  /// Tanggal tampil di kartu tugas, mis. "Hari ini".
   final String date;
-
-  /// Petunjuk singkat di bawah judul, mis. "Siram hingga tanah lembap…".
   final String description;
-
-  /// Sudah dikerjakan atau belum.
   final bool done;
-
-  /// Jenis tugas — dipakai untuk memilih ikon dan warnanya.
   final CareTaskKind kind;
 
   /// Catatan tambahan (opsional).
@@ -206,6 +170,8 @@ class GrowthMilestone {
 
   final String label;
   final String date;
+
+  /// Sudah terlewati pada timeline (menentukan tampilan titik garis waktu).
   final bool reached;
 
   factory GrowthMilestone.fromJson(Map<String, dynamic> json) =>
@@ -222,10 +188,8 @@ class GrowthMilestone {
   };
 }
 
-/// Model tanaman.
-///
-/// Immutable dan punya `fromJson`/`toJson` sejak awal supaya penggantian
-/// repositori mock ke HTTP tidak menyentuh lapisan UI sama sekali.
+/// Model tanaman — immutable dengan `fromJson`/`toJson` sejak awal supaya
+/// swap repositori mock→HTTP tidak menyentuh lapisan UI.
 @immutable
 class Plant {
   const Plant({
@@ -258,18 +222,15 @@ class Plant {
   /// Kota tempat tanaman tumbuh, mis. "Surabaya".
   final String location;
 
-  /// Tempat spesifik, mis. "Pekarangan Rumah" (titik pemisah di kartu, dan
-  /// nilai "MEDIA TANAM" pada Detail Tanaman).
+  /// Tempat spesifik; sekaligus titik pemisah di kartu dan nilai
+  /// "MEDIA TANAM" pada Detail Tanaman.
   final String place;
 
   final PlantingMedia media;
   final CareStatus status;
 
-  /// Kondisi kedua, bila tanaman butuh dua tindakan sekaligus.
-  ///
-  /// Di frame Home, kartu pertama menampilkan **dua** chip dan **dua** lencana
-  /// ("PERLU DISIRAM" + "PERLU PUPUK"), jadi modelnya memang perlu menampung
-  /// lebih dari satu kondisi. `null` berarti hanya [status] yang tampil.
+  /// Kondisi kedua saat tanaman butuh dua tindakan sekaligus (kartu pertama
+  /// frame Home menampilkan dua chip + dua lencana). `null` = hanya [status].
   final CareStatus? secondaryStatus;
 
   final GrowthPhase phase;
@@ -284,7 +245,7 @@ class Plant {
   /// Label kecil di bawah deskripsi Detail Tanaman, mis. `Indoor`/`Outdoor`.
   final List<String> tags;
 
-  /// Jenis pupuk yang dipakai ("JENIS PUPUK" pada Detail Tanaman).
+  /// Jenis pupuk ("JENIS PUPUK" pada Detail Tanaman).
   final String fertilizer;
 
   /// Jenis tanah ("JENIS TANAH" pada Detail Tanaman).
@@ -293,14 +254,9 @@ class Plant {
   final List<CareTask> tasks;
   final List<GrowthMilestone> timeline;
 
-  /// Indeks fase pada garis waktu "Fase Pertumbuhan" (0..3).
   int get phaseIndex => GrowthPhase.values.indexOf(phase);
-
-  /// Umur tanaman dalam hari.
   int get ageInDays =>
       DateTime.now().difference(plantedAt).inDays.clamp(0, 100000);
-
-  /// Umur dalam bentuk yang enak dibaca, mis. "12 hari".
   String get ageLabel => '$ageInDays hari';
 
   Plant copyWith({

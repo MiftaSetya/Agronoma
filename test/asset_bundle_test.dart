@@ -4,14 +4,10 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Memastikan seluruh aset Fase 0 benar-benar ter-bundle.
-///
-/// Dua hal yang diuji, karena keduanya bisa gagal secara diam-diam:
-/// 1. Berkas ada di disk dan isinya sesuai jenisnya (bukan halaman error HTML
-///    yang tersimpan dengan ekstensi gambar — ini pernah terjadi saat mengunduh
-///    dari server aset Figma).
-/// 2. Berkas benar-benar bisa dimuat lewat `rootBundle`, yang berarti
-///    deklarasinya di `pubspec.yaml` sudah tepat.
+/// Memastikan aset Fase 0 ter-bundle: manifest dikunci sebagai kontrak
+/// anti-duplikat/anti-usang (aset lepas dari daftar langsung ketahuan), dan
+/// isinya diverifikasi sesuai jenisnya — pernah ada file error HTML tersimpan
+/// berekstensi gambar saat mengunduh dari server aset Figma.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

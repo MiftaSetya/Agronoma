@@ -1,21 +1,15 @@
 import 'dart:async';
 
-/// Penjadwal perpindahan dari splash ke layar berikutnya.
-///
-/// Sengaja dipisah dari widget, karena inti perbaikannya ada di sini: jadwal
-/// handoff harus bisa **dipasang ulang** begitu animasi benar-benar mulai,
-/// bukan sekali di `initState`. Kalau logikanya menempel di dalam widget, jalur
-/// itu tidak akan pernah teruji — aset Lottie tidak bisa dimuat di
-/// `flutter test`, jadi `onLoaded` tidak pernah menyala di sana.
+/// Penjadwal handoff dari splash ke layar berikutnya, dipisah dari widget agar
+/// bisa diuji: jadwal harus bisa **dipasang ulang** saat animasi benar-benar
+/// mulai (`onLoaded`), dan aset Lottie tidak bisa dimuat di `flutter test`
+/// sehingga jalur itu tak teruji kalau logikanya menempel di widget.
 class SplashHandoff {
   SplashHandoff(this.onHandoff);
 
-  /// Toleransi di atas [SplashScreen.duration] untuk jaring pengaman `initState`.
-  ///
-  /// Dipakai sebelum animasi menyatakan dirinya siap: pada perangkat normal
-  /// `onLoaded` datang jauh lebih dulu (puluhan milidetik), jadi batas ini tidak
-  /// pernah tercapai. Kalau dekode benar-benar gagal atau tidak pernah selesai
-  /// (misalnya di `flutter test`, tempat bundel aset tidak tersedia), splash tetap
+  /// Toleransi di atas [SplashScreen.duration] untuk jaring pengaman `initState`:
+  /// pada perangkat normal `onLoaded` datang jauh lebih dulu, tapi bila dekode
+  /// aset gagal atau tidak pernah selesai (mis. di `flutter test`), splash tetap
   /// berpindah dan tidak menggantung selamanya.
   static const Duration loadGrace = Duration(seconds: 2);
 
@@ -24,17 +18,15 @@ class SplashHandoff {
 
   Timer? _timer;
 
-  /// Menjadwalkan [onHandoff] setelah [delay].
-  ///
-  /// Jadwal sebelumnya dibatalkan lebih dulu, sehingga pemanggilan berulang
-  /// (jaring pengaman di `initState`, lalu penyelarasan di `onLoaded`) selalu
-  /// menghasilkan satu handoff saja, dihitung dari pemanggilan terakhir.
+  /// Menjadwalkan [onHandoff] setelah [delay], membatalkan jadwal sebelumnya —
+  /// pemanggilan berulang (jaring pengaman `initState`, lalu `onLoaded`) selalu
+  /// menghasilkan tepat satu handoff dari pemanggilan terakhir.
   void arm(Duration delay) {
     _timer?.cancel();
     _timer = Timer(delay, onHandoff);
   }
 
-  /// Membatalkan jadwal yang aktif tanpa memicu [onHandoff].
+  /// Membatalkan jadwal aktif tanpa memicu [onHandoff].
   void cancel() {
     _timer?.cancel();
     _timer = null;

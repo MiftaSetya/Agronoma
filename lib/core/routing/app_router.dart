@@ -10,12 +10,8 @@ import 'package:frontend/features/plant_detail/plant_detail_screen.dart';
 import 'package:frontend/features/profile/profile_screen.dart';
 import 'package:frontend/features/splash/splash_screen.dart';
 
-/// Nama rute terpusat.
-///
-/// Design memakai istilah alur yang berbeda-beda (Splash, Login, Register,
-/// Home, Profile, Add Plant 1..5, Plant Detail, Disease Detection). Semua
-/// dikumpulkan di sini supaya tidak ada string rute yang ditulis lepas di
-/// dalam widget, dan supaya setiap tujuan splash bisa diganti dari satu tempat.
+/// Nama rute dikumpulkan di satu tempat supaya tidak ada string rute yang
+/// ditulis lepas di dalam widget, dan tujuan mana pun bisa diganti dari sini.
 class Routes {
   Routes._();
 
@@ -40,10 +36,8 @@ class PlantDetailArgs {
   final int initialTab;
 }
 
-/// Membangun halaman dari nama rute.
-///
-/// Dipakai `MaterialApp.onGenerateRoute`, jadi seluruh peta rute ada di satu
-/// berkas dan `main.dart` tetap tipis.
+/// Membangun halaman dari nama rute via `MaterialApp.onGenerateRoute`,
+/// sehingga seluruh peta rute ada di satu berkas dan `main.dart` tetap tipis.
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   switch (settings.name) {
     case Routes.splash:

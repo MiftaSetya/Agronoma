@@ -12,16 +12,9 @@ import 'package:frontend/core/widgets/agro_common.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 import 'package:frontend/features/plant_detail/plant_settings_sheet.dart';
 
-/// Layar Plant Detail — frame `Plant detail v3` (node `461:6012`).
-///
-/// Susunannya dari atas ke bawah: foto penuh selebar layar dengan gradasi gelap
-/// di bagian atas (supaya judul putih terbaca), lalu lembar putih ber-radius 16
-/// yang **naik menutupi 35px foto**, berisi nama, deskripsi, dan chip
-/// Indoor/Outdoor. Di bawahnya baris tab Ringkasan/Perawatan dengan garis bawah
-/// hijau, baru isi tabnya.
-///
-/// Angka 35px itu bukan tebakan: di design foto tingginya 287 dan lembar putih
-/// mulai di baris 252, jadi selisihnya 35.
+/// Layar Plant Detail — frame `Plant detail v3` (node `461:6012`): satu layar
+/// dua tab (Ringkasan/Perawatan); lembar putihnya menutupi 35px bagian bawah
+/// foto karena di kanvas Figma foto setinggi 287 dan lembar mulai baris 252.
 class PlantDetailScreen extends StatefulWidget {
   const PlantDetailScreen({
     super.key,
@@ -42,8 +35,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     with SingleTickerProviderStateMixin {
   static const double _photoHeight = 287;
 
-  /// Baris tempat lembar putih mulai pada kanvas Figma. Fotonya 287px, jadi
-  /// selisih 35px itu bagian yang tertutup.
+  /// Baris lembar putih di kanvas Figma; 287 (foto) − 252 = 35px tertutup.
   static const double _sheetTop = 252;
 
   late final TabController _tabs = TabController(
@@ -64,14 +56,11 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   Future<void> _load() async {
     try {
       final controller = context.read<PlantController>();
-      // Selalu pastikan daftar tanaman + cuaca sudah dimuat: kartu "Perkiraan
-      // Cuaca" di tab Ringkasan mengambil ramalan dari controller yang sama,
-      // dan `load()` tidak melakukan apa-apa kalau datanya sudah ada.
+      // Kartu "Perkiraan Cuaca" di tab Ringkasan mengambil ramalan dari
+      // controller ini; `load()` tidak melakukan apa-apa jika sudah ada.
       await controller.load();
 
-      // Tanaman pertama dipakai bila id kosong. Ini berguna saat membuka layar
-      // dari deep link / preview pengembangan yang tidak membawa argumen, dan
-      // tetap aman karena `fetch` memanggil repositori hanya bila id tidak ada.
+      // Fallback tanaman pertama untuk deep link / preview tanpa argumen.
       var id = widget.plantId;
       if (id.isEmpty) id = controller.plants.isEmpty ? '' : controller.plants.first.id;
       if (id.isEmpty) return;
@@ -104,8 +93,6 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
             )
           : Stack(
               children: [
-                // Foto digambar penuh setinggi 287px, termasuk 35px bagian
-                // bawahnya yang nanti ditutup lembar putih.
                 Positioned(
                   top: 0,
                   left: 0,
@@ -113,9 +100,6 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                   height: _photoHeight,
                   child: _PhotoHeader(plant: plant),
                 ),
-                // Lembar putih mulai 35px sebelum foto habis, sehingga
-                // menutupi bagian bawahnya — persis seperti `Section - Header`
-                // yang berada di baris 252 sementara fotonya setinggi 287.
                 Padding(
                   padding: const EdgeInsets.only(top: _sheetTop),
                   child: Column(
@@ -140,7 +124,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   }
 }
 
-/// Foto tanaman + gradasi gelap + bilah atas ("Detail Tanaman").
+/// Foto tanaman + gradasi gelap + bilah atas "Detail Tanaman".
 class _PhotoHeader extends StatelessWidget {
   const _PhotoHeader({required this.plant});
 
@@ -152,7 +136,7 @@ class _PhotoHeader extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         Image.asset(plant.photoAsset, fit: BoxFit.cover),
-        // Gradasi 152px dari atas: hitam 50% di puncak → 30% di 61% → bening.
+        // Gradasi 152px: hitam 50% → 30% (pada 61%) → bening.
         DecoratedBox(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -185,8 +169,8 @@ class _PhotoHeader extends StatelessWidget {
                       style: AppTextStyles.headlineMediumOnDark,
                     ),
                   ),
-                  // Design memakai gir pengaturan yang membuka panel "Setelan
-                  // Tanaman" (frame `EditPlant drawer`, node `291:2872`).
+                  // Membuka panel "Setelan Tanaman" (frame `EditPlant drawer`,
+                  // node `291:2872`).
                   GestureDetector(
                     onTap: () => PlantSettingsSheet.show(context, plant),
                     child: SizedBox(
@@ -221,8 +205,7 @@ class _HeaderBackButton extends StatelessWidget {
   }
 }
 
-/// Lembar putih yang menutupi bagian bawah foto: nama, deskripsi, chip, tab,
-/// dan isi tab.
+/// Lembar putih ber-radius 16 yang menutupi bagian bawah foto.
 class _SheetHeader extends StatelessWidget {
   const _SheetHeader({required this.plant, required this.tabs});
 
@@ -258,7 +241,7 @@ class _SheetHeader extends StatelessWidget {
   }
 }
 
-/// Nama, deskripsi, dan chip Indoor/Outdoor di atas lembar putih.
+/// Nama, deskripsi, dan chip Indoor/Outdoor.
 class _SheetHeading extends StatelessWidget {
   const _SheetHeading({required this.plant});
 
@@ -291,7 +274,7 @@ class _SheetHeading extends StatelessWidget {
   }
 }
 
-/// Chip kecil abu di bawah deskripsi (`Indoor` / `Outdoor`).
+/// Chip kecil abu (`Indoor` / `Outdoor`), tinggi 21 di design.
 class _TagChip extends StatelessWidget {
   const _TagChip({required this.label});
 
@@ -312,17 +295,11 @@ class _TagChip extends StatelessWidget {
   }
 }
 
-/// Baris tab dengan garis bawah hijau pada tab yang aktif.
+/// Baris tab dengan garis bawah hijau pada tab aktif.
 ///
-/// Garisnya ditaruh tepat di bawah teks (lebar 55) dan bukan selebar tab,
-/// persis seperti `Line 3` di design.
-///
-/// Satu hal yang mudah salah: di Figma `Line 3` itu kotak **setinggi 0** dengan
-/// gambar 2px yang meluber keluar (`inset-[-1px]`), jadi garisnya menumpuk
-/// border bawah baris dan **tidak menambah tinggi layout** sama sekali. Kalau
-/// garisnya diberi tinggi 2px, seluruh isi tab di bawahnya ikut turun 2px.
-/// Karena itu ruangnya dibuat tetap 8px ([AppSpacing.sm]) dan garisnya digambar
-/// meluber 1px ke bawah lewat [Transform].
+/// Di Figma `Line 3` adalah kotak setinggi 0 dengan gambar 2px yang meluber
+/// (`inset-[-1px]`), jadi garis digambar meluber 1px lewat [Transform] agar
+/// tidak menambah tinggi layout (garis 2px biasa akan menggeser isi tab 2px).
 class _TabRow extends StatelessWidget {
   const _TabRow({required this.tabs});
 
@@ -340,7 +317,7 @@ class _TabRow extends StatelessWidget {
       child: AnimatedBuilder(
         animation: tabs,
         builder: (context, _) {
-          // Nilai animasi bisa 0.4 di tengah transisi; dibulatkan supaya hanya
+          // Bulatkan nilai animasi (bisa 0.4 saat transisi) agar hanya
           // underline yang bergerak, bukan warnanya ikut pudar.
           final index = tabs.index;
           return Row(
@@ -358,8 +335,8 @@ class _TabRow extends StatelessWidget {
                           child: Text(
                             i == 0 ? 'Ringkasan' : 'Perawatan',
                             textAlign: TextAlign.center,
-                            // Tinggi barisnya `normal` di design, bukan 20px
-                            // seperti [AppTextStyles.titleLarge] yang default.
+                            // `height: normal` di design, bukan default
+                            // [AppTextStyles.titleLarge].
                             style: AppTextStyles.titleLarge.copyWith(
                               height: AppTextStyles.leadingNormal,
                               color: index == i
@@ -402,10 +379,6 @@ class _TabRow extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Tab Ringkasan
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _RingkasanTab extends StatelessWidget {
   const _RingkasanTab({required this.plant});
 
@@ -437,7 +410,7 @@ class _RingkasanTab extends StatelessWidget {
   }
 }
 
-/// Kartu "Detail Tanam" — empat kotak abu berisi lokasi, media, pupuk, tanah.
+/// Kartu "Detail Tanam" — empat kotak berisi lokasi, media, pupuk, tanah.
 class _DetailTanamCard extends StatelessWidget {
   const _DetailTanamCard({required this.plant});
 
@@ -528,9 +501,8 @@ class _GrowthPhaseCard extends StatelessWidget {
 
   final Plant plant;
 
-  /// Lebar tiap titik, diambil dari lebar labelnya di design. Dipakai sebagai
-  /// lebar kolom supaya jarak antar-titik (space-between) menghasilkan posisi
-  /// yang sama seperti frame aslinya.
+  /// Lebar tiap kolom = lebar labelnya di design, agar jarak antar-titik
+  /// (space-between) sama seperti frame aslinya.
   static const List<double> _columnWidths = [41, 73, 54, 48];
 
   @override
@@ -553,7 +525,6 @@ class _GrowthPhaseCard extends StatelessWidget {
               height: 64,
               child: Stack(
                 children: [
-                  // Garis dasar, lalu bagian yang sudah dilalui berwarna hijau.
                   const Positioned(
                     left: 0,
                     right: 0,
@@ -589,9 +560,8 @@ class _GrowthPhaseCard extends StatelessWidget {
     );
   }
 
-  /// Panjang garis hijau: 0 untuk fase pertama, lalu bertambah seperempat
-  /// bagian. Titik aktifnya sendiri tidak dihitung karena garis berhenti tepat
-  /// di tengah titik itu.
+  /// Panjang garis hijau: berhenti tepat di tengah titik aktif, jadi titik
+  /// aktifnya sendiri tidak dihitung.
   static double _activeTrackWidth(int activeIndex, double trackWidth) {
     if (activeIndex <= 0) return trackWidth * 0.34;
     return trackWidth * (0.34 + 0.32 * (activeIndex - 1));
@@ -634,8 +604,7 @@ class _PhaseNode extends StatelessWidget {
 
     return Column(
       children: [
-        // Semua titik duduk di tengah baris setinggi 32 supaya sejajar walau
-        // diameternya berbeda (24 vs 32 saat aktif).
+        // Titik sejajar walau diameternya berbeda (24 vs 32 saat aktif).
         SizedBox(
           height: 32,
           child: Center(
@@ -666,8 +635,8 @@ class _PhaseNode extends StatelessWidget {
                   ),
           ),
         ),
-        // Jarak 4px diambil dari design: kotak titik selalu 32px dan labelnya
-        // menempel 4px di bawahnya, jadi 32 + 4 + 28 (dua baris) = 64px pas.
+        // 32px kotak titik + 4px + 28px label (dua baris) = 64px total,
+        // sesuai design.
         const SizedBox(height: AppSpacing.xs),
         Text(
           label,
@@ -683,7 +652,7 @@ class _PhaseNode extends StatelessWidget {
   }
 }
 
-/// Kartu "Perkiraan Cuaca" — enam kartu kecil, yang pertama ditandai hijau.
+/// Kartu "Perkiraan Cuaca" — tile pertama ditandai hijau (terpilih).
 class _WeatherForecastCard extends StatelessWidget {
   const _WeatherForecastCard({required this.forecast});
 
@@ -753,10 +722,6 @@ class _ForecastTile extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Tab Perawatan
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _PerawatanTab extends StatelessWidget {
   const _PerawatanTab({required this.plant});
 
@@ -790,7 +755,7 @@ class _PerawatanTab extends StatelessWidget {
   }
 }
 
-/// Kartu hijau "Pindai Kesehatan" — jalan pintas ke Deteksi Penyakit.
+/// Kartu hijau "Pindai Kesehatan" — pintasan ke Deteksi Penyakit.
 class _ScanCard extends StatelessWidget {
   const _ScanCard({required this.onTap});
 
@@ -808,7 +773,7 @@ class _ScanCard extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
             borderRadius: AppRadius.lgAll,
-            // Bayangan hijau, bukan hitam: di design warnanya ikut hijau.
+            // Bayangan hijau (bukan hitam) sesuai design.
             boxShadow: const [
               BoxShadow(
                 color: Color(0x1A416600),
@@ -829,7 +794,7 @@ class _ScanCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  // Kaca buram: putih 30% di atas latar hijau.
+                  // Kaca buram: putih 30% di atas hijau.
                   color: const Color(0x4DFFFFFF),
                   borderRadius: AppRadius.mdAll,
                 ),
@@ -842,9 +807,8 @@ class _ScanCard extends StatelessWidget {
                   children: [
                     Text('Pindai Kesehatan', style: AppTextStyles.scanTitle),
                     SizedBox(height: AppSpacing.xs),
-                    // Di design keterangannya memang dipotong dua baris tepat
-                    // setelah "penyakit" (dua simpul `<p>` terpisah), bukan
-                    // dibiarkan membungkus sendiri oleh lebar kartu.
+                    // Di design caption ini dipotong dua baris (dua simpul
+                    // `<p>` terpisah), bukan membungkus sendiri.
                     Text(
                       'Deteksi dini hama & penyakit\ndengan AI',
                       style: AppTextStyles.scanCaption,
@@ -866,11 +830,10 @@ class _ScanCard extends StatelessWidget {
   }
 }
 
-/// Kartu "Kalender Perawatan" — tujuh kolom tanggal + keterangan ikon.
+/// Kartu "Kalender Perawatan" — tujuh kolom tanggal + legenda ikon.
 class _CareCalendarCard extends StatelessWidget {
   const _CareCalendarCard();
 
-  /// Sen–Min dengan nomor tanggal dan tugas yang jatuh pada hari itu.
   static const List<({String day, String date, bool active, bool fertilizer})>
   _days = [
     (day: 'Sen', date: '10', active: true, fertilizer: false),
@@ -1101,10 +1064,6 @@ class _TaskRow extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Bagian bersama
-// ─────────────────────────────────────────────────────────────────────────────
-
 /// Kartu putih ber-border dengan bayangan `shadow` (bukan `shadow1`).
 class _DetailCard extends StatelessWidget {
   const _DetailCard({required this.child, required this.padding});
@@ -1130,8 +1089,8 @@ class _DetailCard extends StatelessWidget {
 
 /// Dua tombol bulat di kanan bawah: peringatan hujan dan obrolan AI.
 ///
-/// Di design kolomnya mulai di baris 764 dan berakhir di 892, jadi jaraknya
-/// 64px dari dasar kanvas 956 — bukan 16px dari navbar seperti kartu biasa.
+/// Kolomnya diposisikan di `top: 764` (berakhir 64px dari dasar kanvas 956),
+/// bukan menempel navbar seperti kartu biasa.
 class _DetailFabs extends StatelessWidget {
   const _DetailFabs({required this.plant});
 

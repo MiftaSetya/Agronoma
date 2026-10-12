@@ -19,9 +19,8 @@ Widget _app(Widget child) => MaterialApp(home: child);
 
 /// Waktu (ms) keyframe terakhir yang **masih mengubah nilai** di `splash.json`.
 ///
-/// Semua track berhenti pada frame terakhir komposisi (5 detik) karena nilai
-/// terakhir hanya ditahan, jadi "frame terakhir" saja tidak berguna untuk
-/// keperluan timing. Yang dicari adalah keyframe terakhir yang nilainya berbeda
+/// "Frame terakhir" saja tidak berguna karena semua track hanya menahan nilai
+/// di frame akhir; yang dicari adalah keyframe terakhir yang nilainya berbeda
 /// dari nilai akhir — di situlah gerakan sungguh-sungguh berhenti.
 Future<int> _lastMovementMs() async {
   final json = jsonDecode(
@@ -76,8 +75,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('NEXT'), findsNothing);
 
-    // Aset Lottie tidak bisa dimuat di `flutter test`, jadi yang menyelamatkan
-    // di sini adalah jaring pengaman: duration + loadGrace (300 ms + 2 detik).
+    // Jaring pengaman (duration + loadGrace) yang menyelamatkan: aset Lottie
+    // tidak bisa dimuat di `flutter test`.
     await tester.pump(const Duration(milliseconds: 2400));
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump();
@@ -99,9 +98,9 @@ void main() {
       ),
     );
 
-    // Lepas splash sebelum timernya menyala. `dispose` harus membatalkan timer,
-    // jadi tidak boleh ada navigasi ke route yang sudah tiada — termasuk setelah
-    // lewat jaring pengaman (duration + loadGrace).
+    // `dispose` harus membatalkan timer, jadi tidak boleh ada navigasi ke
+    // route yang sudah tiada — termasuk setelah lewat jaring pengaman
+    // (duration + loadGrace).
     await tester.pumpWidget(_app(const Scaffold(body: Text('OTHER'))));
     await tester.pump(const Duration(milliseconds: 2500));
 
@@ -120,9 +119,8 @@ void main() {
           'cadangan (teks "Agronoma"), bukan animasi logo.',
     );
 
-    // Diurai dengan paket yang benar-benar dipakai di runtime, bukan dengan
-    // pemeriksa JSON biasa — jadi kegagalan parsing ketahuan di sini, bukan di
-    // layar pengguna.
+    // Diurai dengan paket yang benar-benar dipakai di runtime, bukan pemeriksa
+    // JSON biasa — kegagalan parsing ketahuan di sini, bukan di layar pengguna.
     final bytes = file.readAsBytesSync();
     final composition = await LottieComposition.fromBytes(bytes);
 
@@ -133,10 +131,9 @@ void main() {
   });
 
   test('durasi animasi cocok dengan jeda handoff splash', () async {
-    // Kontrak yang mudah rusak tanpa ketahuan: kalau berkas Lottie diekspor
-    // ulang dengan durasi lebih pendek, handoff bisa memotong gerakan terakhir.
-    // Ambangnya dihitung dari berkas itu sendiri, bukan ditulis tangan, supaya
-    // test ini tetap benar setelah ekspor ulang.
+    // Kontrak mudah rusak tanpa ketahuan: Lottie diekspor ulang lebih pendek
+    // bisa membuat handoff memotong gerakan terakhir. Ambang dihitung dari
+    // berkasnya sendiri supaya tetap benar setelah ekspor ulang.
     final lastMovement = await _lastMovementMs();
     expect(
       lastMovement,
@@ -179,10 +176,9 @@ void main() {
   });
 
   test('Lottie tidak memakai aset raster (semua glyph vektor)', () async {
-    // Kontrak kualitas: seluruh glyph harus berupa path vektor supaya tajam di
-    // layar padat. Ekspor Figma sempat menanam huruf "g", "o", dan "a" sebagai
-    // PNG 1x; ketiganya sudah dikonversi ke vektor. Test ini gagal kalau ada
-    // ekspor ulang yang diam-diam mengembalikannya menjadi gambar.
+    // Kontrak kualitas: seluruh glyph harus vektor supaya tajam di layar
+    // padat. Ekspor Figma sempat menanam "g", "o", "a" sebagai PNG 1x; test
+    // ini gagal jika ekspor ulang diam-diam mengembalikannya jadi gambar.
     final json = jsonDecode(
       File(SplashScreen.assetPath).readAsStringSync(),
     ) as Map<String, dynamic>;
@@ -214,9 +210,9 @@ void main() {
   });
 
   test('glyph hasil konversi tetap punya animasi aslinya', () async {
-    // Konversi image -> shape hanya boleh mengubah representasi, bukan timing.
-    // Ketiga glyph itu ("a" ind 8, "o" ind 10, "g" ind 11) harus tetap punya
-    // keyframe opacity dan posisi-x yang menggerakkannya masuk.
+    // Konversi image -> shape hanya boleh mengubah representasi, bukan timing:
+    // glyph ("a" ind 8, "o" ind 10, "g" ind 11) tetap harus punya keyframe
+    // opacity dan posisi-x yang menggerakkannya masuk.
     final json = jsonDecode(
       File(SplashScreen.assetPath).readAsStringSync(),
     ) as Map<String, dynamic>;
@@ -239,9 +235,9 @@ void main() {
   });
 
   test('kanvas Lottie memakai rasio design 440x956', () async {
-    // Rasio ini yang membuat logo duduk di posisi dan margin yang sama seperti
-    // Figma tanpa perhitungan manual: layer "agronoma full" ada di (51, 309)
-    // di dalam kanvas 440x956.
+    // Rasio inilah yang membuat logo duduk di posisi/margin yang sama seperti
+    // Figma tanpa perhitungan manual (layer "agronoma full" di (51, 309)
+    // pada kanvas 440x956).
     final bytes = File(SplashScreen.assetPath).readAsBytesSync();
     final composition = await LottieComposition.fromBytes(bytes);
     expect(

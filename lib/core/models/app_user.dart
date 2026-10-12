@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Data pengguna yang sedang masuk.
-///
-/// Sesi masih palsu (mock): [AuthController] membuatnya saat login berhasil.
-/// Modelnya sudah berbentuk data nyata supaya penggantian ke autentikasi
-/// sungguhan tidak mengubah UI.
+/// Data pengguna yang sedang masuk. Sesi masih mock, tapi bentuknya data
+/// nyata supaya penggantian ke autentikasi sungguhan tidak menyentuh UI.
 @immutable
 class AppUser {
   const AppUser({
@@ -22,13 +19,10 @@ class AppUser {
   final String name;
   final String email;
 
-  /// Path aset foto profil.
+  /// Path aset lokal foto profil.
   final String photoAsset;
 
-  /// Jumlah tanaman yang sedang tumbuh.
   final int totalPlants;
-
-  /// Jumlah tanaman yang sudah dipanen musim ini.
   final int harvestedThisSeason;
 
   /// Skor perawatan 0–100.
@@ -36,13 +30,8 @@ class AppUser {
 
   final DateTime? joinedAt;
 
-  /// Sebutan singkat pada sapaan Home, mis. "User".
   String get firstName => name.split(' ').first;
-
-  /// Teks skor siap tampil, mis. "98%".
   String get careScoreLabel => '${careScore.round()}%';
-
-  /// Deskripsi skor, mis. "Sangat baik".
   String get careScoreCaption => switch (careScore) {
     >= 90 => 'Sangat baik',
     >= 75 => 'Baik',

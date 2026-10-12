@@ -7,34 +7,20 @@ import 'package:frontend/core/state/chat_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
-/// Layar Plant Disease Detection — frame `Plant Disease Detection`
-/// (node `106:1124`) beserta hasilnya pada `Plant Disease Detection Result`
-/// (node `176:1219`) yang memakai `Disease Drawer` (node `253:2575`).
+/// Layar Plant Disease Detection (node `106:1124`) dengan panel hasil (frame
+/// `176:1219`, drawer `253:2575`) yang digabung dalam satu layar. Tata letak
+/// memakai koordinat design pada kanvas 440x956 supaya angka Figma bisa
+/// dipakai apa adanya.
 ///
-/// Di design ada dua frame terpisah; di sini keduanya digabung dalam satu layar
-/// karena alurnya berurutan: arahkan kamera → analisis → hasil muncul sebagai
-/// panel yang naik dari bawah.
-///
-/// **Tata letak memakai koordinat design.**
-/// Seluruh layar digambar pada kanvas 440x956 dan isinya diposisikan dengan
-/// `Positioned` memakai angka yang sama seperti Figma (bingkai bidik di
-/// (92, 299), tombol bawah di baris 734, dan seterusnya). Cara ini dipilih
-/// ketimbang menyusun `Column`/`Row`: pada layar kamera hampir semua elemen
-/// mengambang di atas foto dengan jarak yang tidak berhubungan satu sama lain,
-/// jadi menyusunnya secara relatif justru menambah banyak angka tambahan yang
-/// harus dijaga tetap sama dengan design.
-///
-/// **Catatan implementasi:** plugin `camera` belum dipasang (lihat catatan di
-/// akhir berkas), jadi yang ditampilkan adalah foto contoh — bukan aliran
-/// kamera sungguhan — dan hasil diagnosis diambil dari
-/// [MockDiseaseRepository].
+/// Kamera asli sengaja belum dipasang (butuh izin platform dan belum ada
+/// backend — hasil diagnosis dari [MockDiseaseRepository]), jadi bingkainya
+/// menampilkan foto contoh dari aset; saat plugin `camera` terpasang, yang
+/// berubah hanya sumber gambar di [_CameraFrame] dan aksi tombol rana.
 class DiseaseDetectionScreen extends StatefulWidget {
   const DiseaseDetectionScreen({super.key, this.initialResult});
 
-  /// Hasil yang langsung ditampilkan (mode kamera dilewati).
-  ///
-  /// Dipakai preview pengembangan untuk memotret panel hasil tanpa menekan
-  /// tombol rana lebih dulu. Di aplikasi biasa biarkan `null`.
+  /// Hasil yang langsung ditampilkan (mode kamera dilewati); dipakai preview
+  /// pengembangan. Di aplikasi biasa biarkan `null`.
   final Disease? initialResult;
 
   @override
@@ -76,8 +62,6 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
           // bagian bawahnya, sama seperti design.
           _CameraFrame(analyzing: _analyzing, onCapture: _capture),
           if (_result != null)
-            // Posisi diambil dari design: panel mulai di baris 341 dan
-            // tingginya 623, jadi 8px bawahnya memang melewati kanvas.
             Positioned(
               left: 0,
               right: 0,
@@ -91,23 +75,21 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
   }
 }
 
-/// Satu bingkai kamera lengkap: foto, dua gradasi, top bar, bingkai bidik,
-/// pil petunjuk, dan tiga kontrol bawah.
-///
-/// Dipakai ulang oleh tampilan hasil karena di design (`176:1219`) bingkai
-/// kamera tetap tergambar di belakang panel hasil.
+/// Bingkai kamera lengkap (foto, gradasi, top bar, bidik, kontrol) — dipakai
+/// ulang di tampilan hasil karena bingkai tetap tergambar di belakang panel
+/// hasil (design `176:1219`).
 class _CameraFrame extends StatelessWidget {
   const _CameraFrame({required this.analyzing, required this.onCapture});
 
   final bool analyzing;
   final VoidCallback onCapture;
 
-  /// Lebar foto pada design: simpulnya 539px, tetapi gambarnya sendiri
-  /// digambar 115,08% dari lebar simpul itu.
+  /// Lebar foto pada design: simpulnya 539px tetapi gambarnya digambar
+  /// 115,08% dari lebar simpul itu.
   static const double _photoWidth = 539 * 1.1508;
   static const double _photoHeight = 958;
 
-  /// Geser kiri foto pada design: `left-[-50px]` ditambah `left-[-11,69%]`.
+  /// `left-[-50px]` ditambah `left-[-11,69%]` pada design.
   static const double _photoLeft = -50 + 539 * (-0.1169);
 
   @override
@@ -115,10 +97,8 @@ class _CameraFrame extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Foto latar. Karena plugin kamera belum dipasang, ini foto contoh —
-        // bukan aliran kamera sungguhan. Tanpa efek peredup tambahan: design
-        // hanya memakai dua gradasi di bawah ini untuk menjaga teks tetap
-        // terbaca.
+        // Foto latar (aset contoh, bukan kamera sungguhan — lihat header
+        // kelas). Tanpa peredup tambahan: cukup dua gradasi di bawah.
         Positioned(
           left: _photoLeft,
           top: 0,
@@ -127,9 +107,8 @@ class _CameraFrame extends StatelessWidget {
           child: Image.asset(AppAssets.photoPlantDetection, fit: BoxFit.fill),
         ),
 
-        // Gradasi atas: gelap 90% di baris 0, 60% di tengah, hilang di baris
-        // 170. Arahnya dibalik oleh design (`-rotate-180 -scale-x-100`), jadi
-        // bagian paling gelap ada di atas.
+        // Gradasi atas: arahnya dibalik oleh design (`-rotate-180
+        // -scale-x-100`), jadi bagian paling gelap ada di atas.
         const Positioned(
           left: 0,
           right: 0,
@@ -151,7 +130,7 @@ class _CameraFrame extends StatelessWidget {
           ),
         ),
 
-        // Gradasi bawah: hilang di baris 734, 60% di tengah, 90% di bawah.
+        // Gradasi bawah.
         const Positioned(
           left: 0,
           right: 0,
@@ -221,11 +200,8 @@ class _CameraFrame extends StatelessWidget {
   }
 }
 
-/// Top bar kamera: silang di kiri, judul di tengah, ruang kosong 24px di kanan.
-///
-/// Sisi kanan memang **kosong** di design: simpul `arrow container` ada, tetapi
-/// gambarnya ditulis dengan `opacity="0"`. Menaruh panah di sana (seperti yang
-/// sempat dilakukan) menambah satu ikon yang tidak pernah terlihat di design.
+/// Top bar kamera: silang di kiri, judul di tengah. Sisi kanan memang kosong
+/// di design — simpul `arrow container` ada tetapi gambarnya `opacity="0"`.
 class _CameraTopBar extends StatelessWidget {
   const _CameraTopBar();
 
@@ -255,12 +231,9 @@ class _CameraTopBar extends StatelessWidget {
   }
 }
 
-/// Silang `close-line` pada ukuran aslinya.
-///
-/// Berkas SVG-nya hanya 14,7x19,2 sedangkan simpul di design 24x24; isinya
-/// diletakkan lewat `inset` 19,37% kiri-kanan dan 0,78% bawah. Ukuran dan
-/// inset itu ditulis ulang di sini supaya silangnya persis sebesar design —
-/// kalau SVG-nya hanya "dipasang di kotak 24", isinya ikut membesar.
+/// Silang `close-line` pada ukuran aslinya. SVG-nya hanya 14,7x19,2 sedangkan
+/// simpul di design 24x24; kalau SVG dipasang di kotak 24 utuh, isinya ikut
+/// membesar — makanya ukurannya ditulis eksplisit dengan inset.
 class _CloseGlyph extends StatelessWidget {
   const _CloseGlyph();
 
@@ -297,8 +270,7 @@ class _Reticle extends StatefulWidget {
 
 class _ReticleState extends State<_Reticle>
     with SingleTickerProviderStateMixin {
-  /// Garis pemindai naik-turun di dalam bingkai, sesuai animasi
-  /// "Scanning animation line" pada design.
+  /// Garis pemindai naik-turun, sesuai "Scanning animation line" pada design.
   late final AnimationController _scan = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 2200),
@@ -324,7 +296,6 @@ class _ReticleState extends State<_Reticle>
           top: false,
           left: false,
         ),
-        // Garis pemindai bergerak dari atas ke bawah bingkai.
         AnimatedBuilder(
           animation: _scan,
           builder: (context, _) => Positioned(
@@ -387,7 +358,7 @@ class _Corner extends StatelessWidget {
   }
 }
 
-/// Pil petunjuk di bawah bingkai bidik.
+/// Pil petunjuk di bawah bingkai bidik (penggantinya saat analisis: [_AnalyzingPill]).
 class _InstructionPill extends StatelessWidget {
   const _InstructionPill();
 
@@ -413,7 +384,7 @@ class _InstructionPill extends StatelessWidget {
   }
 }
 
-/// Pil yang muncul saat analisis berjalan — menggantikan teks petunjuk.
+/// Pil yang muncul saat analisis berjalan.
 class _AnalyzingPill extends StatelessWidget {
   const _AnalyzingPill();
 
@@ -451,9 +422,8 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Design memakai p-[17px]/p-[9px] dengan border 1px; karena border
-      // Flutter dihitung di luar padding (design menghitungnya di dalam),
-      // angkanya dikurangi satu.
+      // Padding dikurangi 1px dari design (p-[17px]/p-[9px] + border 1px)
+      // karena border Flutter dihitung di luar padding, design di dalam.
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0x99000000),
@@ -473,8 +443,6 @@ class _RoundButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ukuran isinya berbeda antara galeri (20x20) dan kilat (18x22,8); angka
-    // itu diambil dari design supaya ikon tidak ikut membesar.
     final isGallery = asset == AppAssets.galleryFill;
     return Container(
       width: 48,
@@ -527,15 +495,8 @@ class _ShutterButton extends StatelessWidget {
   }
 }
 
-/// Panel hasil diagnosis — `Disease Drawer` (node `253:2575`).
-///
-/// Di design panel ini tingginya 623px dan menempel di baris 341, dengan radius
-/// atas 32. Isinya: gagang, nama penyakit + pil akurasi, garis pemisah, judul
-/// "TINDAKAN SEGERA DIBUTUHKAN", lalu tiga langkah penanganan berbentuk garis
-/// waktu.
-///
-/// Dibuat publik supaya bisa dipakai ulang oleh drawer "Disease Drawer"
-/// (node `253:2575`) yang isinya sama.
+/// Panel hasil diagnosis — `Disease Drawer` (node `253:2575`), tinggi 623px di
+/// baris 341 dengan radius atas 32. Dibuat publik agar bisa dipakai ulang.
 class DiseaseResultDrawer extends StatelessWidget {
   const DiseaseResultDrawer({
     super.key,
@@ -561,7 +522,6 @@ class DiseaseResultDrawer extends StatelessWidget {
           ),
         ),
         child: Padding(
-          // `px-[24px] pb-[24px]` pada design.
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.xxl,
             0,
@@ -599,17 +559,12 @@ class DiseaseResultDrawer extends StatelessWidget {
   }
 }
 
-/// Gagang panel — garis abu 32x4 di tengah kanvas.
-///
-/// Gagang ini sekaligus **satu-satunya** cara menutup panel. Di design tidak
-/// ada tombol tutup di dalam panel; yang ada hanya gagang dan judul "TINDAKAN
-/// SEGERA DIBUTUHKAN" yang mengisyaratkan isinya bisa digulir. Karena itu
-/// menutup dilakukan dengan menarik gagangnya ke bawah, bukan dengan menambah
-/// tombol yang akan menggeser seluruh isi panel dari design.
+/// Gagang panel — garis abu 32x4 di tengah kanvas. Ini **satu-satunya** cara
+/// menutup panel (di design tidak ada tombol tutup); menambahkan tombol akan
+/// menggeser seluruh isi panel dari design.
 class _DrawerHandle extends StatefulWidget {
   const _DrawerHandle({this.onDismiss});
 
-  /// Dipanggil saat gagang ditarik ke bawah cukup jauh.
   final VoidCallback? onDismiss;
 
   @override
@@ -617,7 +572,7 @@ class _DrawerHandle extends StatefulWidget {
 }
 
 class _DrawerHandleState extends State<_DrawerHandle> {
-  /// Jarak tarikan yang sudah dianggap "sengaja" (px).
+  /// Jarak tarikan minimal agar dianggap "sengaja" (px).
   static const double _threshold = 24;
 
   double _dragged = 0;
@@ -636,8 +591,8 @@ class _DrawerHandleState extends State<_DrawerHandle> {
       },
       child: const SizedBox(
         height: 24,
-        // Di design (`close` 440x24) garisnya digambar di baris 16..20, bukan
-        // di tengah kotak. Memusatkannya membuat gagangnya naik 6px.
+        // Di design garisnya di baris 16..20, bukan di tengah kotak —
+        // memusatkannya membuat gagang naik 6px.
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
@@ -714,8 +669,6 @@ class _AccuracyPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // `px-[8px] py-[6px]` dengan border 0px, jadi padding-nya dipakai apa
-      // adanya.
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
       decoration: const BoxDecoration(
         color: AppColors.primary,
@@ -754,8 +707,7 @@ class _TreatmentTimeline extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Garis penghubung: `left-[16px] top-[24px] bottom-[24px]` pada design,
-        // jadi tepat di tengah nomor bulat (16 = 32/2).
+        // Garis penghubung tepat di tengah nomor bulat (16 = 32/2).
         Positioned(
           left: 16,
           top: 24,
@@ -807,8 +759,8 @@ class _TreatmentStep extends StatelessWidget {
         const SizedBox(width: AppSpacing.lg),
         Expanded(
           child: Container(
-            // Design memakai `p-[17px]`; dikurangi satu karena border Flutter
-            // dihitung di luar padding.
+            // Padding dikurangi 1px dari design (p-[17px]) karena border
+            // Flutter dihitung di luar padding.
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.surface,
@@ -837,24 +789,8 @@ class _TreatmentStep extends StatelessWidget {
   }
 }
 
-// ───────────────────────────────────────────────────────────────────────────
-// Catatan: kenapa layar ini belum memakai kamera sungguhan
-// ───────────────────────────────────────────────────────────────────────────
-//
-// Plugin `camera` sengaja belum dipasang. Alasannya:
-//
-// 1. **Izin & hak akses.** Menambahkan plugin kamera berarti menambah entri
-//    `AndroidManifest.xml` dan `Info.plist`. Repo ini belum punya jalur uji
-//    untuk kedua platform itu, jadi izinnya tidak bisa diverifikasi.
-// 2. **Belum ada backend.** Hasil deteksi sekarang datang dari
-//    [MockDiseaseRepository], jadi gambar dari kamera tidak akan dikirim ke
-//    mana pun. Menyalakan kamera sungguhan hanya menambah biaya tanpa manfaat.
-// 3. **Tampilannya sudah pasti.** Yang perlu dicocokkan dengan design adalah
-//    tata letaknya — bingkai bidik, pil petunjuk, dan kontrol bawah. Ketiganya
-//    tidak berubah saat sumber gambarnya berganti.
-//
-// Saat plugin dipasang, yang berubah hanya sumber gambar di [_CameraFrame]:
-// [`Image.asset(AppAssets.photoPlantDetection)`] diganti dengan pratinjau
-// `CameraPreview`, dan tombol rana memanggil `takePicture()` lalu mengirim
-// hasilnya ke `ChatController.diagnose(imagePath: …)`. Sisa layar, termasuk
-// panel hasilnya, tidak perlu disentuh.
+// Catatan kamera: plugin `camera` sengaja belum dipasang — butuh izin
+// Android/iOS yang belum bisa diverifikasi, dan belum ada backend untuk gambar.
+// Saat dipasang: ganti `Image.asset(AppAssets.photoPlantDetection)` di
+// [_CameraFrame] dengan `CameraPreview`, lalu tombol rana memanggil
+// `takePicture()` dan mengirimnya ke `ChatController.diagnose(imagePath: …)`.

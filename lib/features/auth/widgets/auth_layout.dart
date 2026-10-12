@@ -4,28 +4,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/theme/theme.dart';
 
-/// Kerangka bersama untuk Login dan Register.
-///
-/// Keduanya memakai susunan yang sama persis di design, jadi jaraknya diukur
-/// sekali di sini (node `150:951` / `155:1357`, blok `Frame 63`, `Frame 64`)
-/// dan pemanggilnya cukup mengisi [fields] + [submit] tanpa mengatur jarak
-/// sendiri. Kalau tiap layar mengatur jaraknya masing-masing, cepat atau lambat
-/// keduanya akan berbeda satu-dua piksel tanpa ada yang tahu mana yang benar.
-///
-/// Ukuran dari design (relatif terhadap area di bawah status bar):
-///
-/// | Bagian | Jarak |
-/// |---|---|
-/// | tepi atas → logo | 60 |
-/// | logo → judul | 40 |
-/// | judul → subjudul | 8 |
-/// | subjudul → field pertama | 32 |
-/// | antar field | 24 |
-/// | field terakhir → tombol | 40 |
-/// | tombol → teks tautan | 32 |
-///
-/// Lebar blok judul 293 (bukan selebar halaman) supaya subjudul membungkus
-/// menjadi dua baris tepat seperti di design.
+/// Kerangka bersama Login & Register: geometrinya (node `150:951` / `155:1357`,
+/// blok `Frame 63`/`Frame 64`) diukur sekali di sini supaya kedua layar tidak
+/// berbeda satu-dua piksel. Jarak dari design (relatif area di bawah status bar):
+/// 60 → logo, 40 → judul, 8 → subjudul, 32 → field pertama, 24 antar field,
+/// 40 → tombol, 32 → tautan. Lebar blok judul 293 (bukan selebar halaman)
+/// agar subjudul membungkus jadi dua baris seperti di design.
 class AuthLayout extends StatelessWidget {
   const AuthLayout({
     super.key,
@@ -39,27 +23,22 @@ class AuthLayout extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  /// Field-field form, diberi jarak 24 satu sama lain.
   final List<Widget> fields;
 
-  /// Tombol utama di bawah form.
   final Widget submit;
 
-  /// Teks tautan paling bawah, mis. "Belum punya akun? Daftar".
   final Widget footer;
 
-  /// Jarak dari baris area status bar ke logo. Pada design, blok logo
-  /// (`Frame 63`) berada 60px di bawah `Frame 65` yang mulai tepat di bawah
-  /// status bar.
+  /// Jarak dari baris area status bar ke logo: blok logo (`Frame 63`) berada
+  /// 60px di bawah `Frame 65` yang mulai tepat di bawah status bar.
   static const double _logoTopOffset = 60;
 
-  /// Lebar blok judul pada design.
+  /// Lebar blok judul pada design; lihat doc kelas.
   static const double _headerWidth = 293;
 
   @override
   Widget build(BuildContext context) {
-    // Inset atas sudah diseragamkan di `app.dart`, jadi di sini cukup 60px:
-    // blok logo (`Frame 63`) berada 60px di bawah area status bar pada design.
+    // Inset atas sudah diseragamkan di `app.dart`, jadi di sini cukup 60px.
     const topPadding = _logoTopOffset;
 
     return Scaffold(
@@ -75,7 +54,7 @@ class AuthLayout extends StatelessWidget {
                 width: _headerWidth,
                 child: Column(
                   children: [
-                    // Logo "A" berdaun; tinggi aslinya 60 pada design.
+                    // Logo "A" berdaun; tinggi 60 mengikuti design.
                     Semantics(
                       label: 'Agronoma',
                       image: true,
@@ -119,7 +98,7 @@ class AuthLayout extends StatelessWidget {
   }
 }
 
-/// Teks tautan "Sudah punya akun? Masuk" dengan bagian yang bisa ditekan.
+/// Tautan footer auth: teks polos + bagian berwarna yang bisa ditekan.
 class AuthFooterLink extends StatelessWidget {
   const AuthFooterLink({
     super.key,

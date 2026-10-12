@@ -7,14 +7,10 @@ import 'package:frontend/core/widgets/agro_icon.dart';
 
 /// Judul seksi, mis. "Tanaman Saya".
 ///
-/// Di design, "Lihat Semua" berada di dalam container `Frame 24:1101` yang
-/// **disetel tersembunyi** (`hidden="true"` pada node itu), jadi di Home hanya
-/// judulnya yang tampak. [actionLabel] tetap disediakan karena komponen yang
-/// sama dipakai di layar lain (mis. Disease Detection) dengan tautan aktif.
-///
-/// Ukurannya juga mengikuti design: baris setinggi 28px, judul 20px SemiBold,
-/// dan tautan 14px. Tinggi barisnya penting karena menjadi acuan jarak ke kartu
-/// di bawahnya.
+/// "Lihat Semua" di Home tersembunyi di design (node `Frame 24:1101`,
+/// `hidden="true"`), jadi hanya judul yang tampak — [actionLabel] tetap ada
+/// karena komponen yang sama dipakai di layar lain dengan tautan aktif.
+/// Baris tinggi 28 jadi acuan jarak ke kartu di bawahnya.
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,
@@ -59,10 +55,8 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-/// Kartu tanaman — komponen `Plant card` di design (node `56:670`).
-///
-/// Susunan aslinya: padding 17, jarak 12, foto 80x80 radius 8, lalu kolom
-/// judul + baris lokasi + chip status, dan lencana status bulat 32px di kanan.
+/// Kartu tanaman — `Plant card` di design (node `56:670`); foto 80x80 radius 8,
+/// lencana bulat 32px di kanan.
 class PlantCard extends StatelessWidget {
   const PlantCard({
     super.key,
@@ -86,12 +80,10 @@ class PlantCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: AppRadius.lgAll,
           child: Container(
-            // Tailwind menghitung border di dalam padding (`box-sizing:
-            // border-box`), sedangkan Flutter menambahkannya di luar. Jadi
-            // supaya kotak kartunya tetap 114px seperti design — 80px foto +
-            // 17px padding + 1px border di tiap sisi — padding di sini dipakai
-            // 16px. Kalau ditulis 17px, tiap kartu jadi 2px lebih tinggi dan
-            // selisihnya menumpuk ke bawah.
+            // Tailwind menghitung border di dalam padding, Flutter di luar.
+            // Supaya kotak kartu tetap 114px seperti design (80 foto + 17
+            // padding + 1 border per sisi), padding dipakai 16 — kalau 17,
+            // tiap kartu 2px lebih tinggi dan selisihnya menumpuk ke bawah.
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: AppRadius.lgAll,
@@ -150,11 +142,8 @@ class PlantCard extends StatelessWidget {
   }
 }
 
-/// Lencana kondisi di sisi kanan kartu tanaman.
-///
-/// Satu kondisi tampil sebagai satu bulatan; dua kondisi (lihat
-/// [Plant.secondaryStatus]) ditumpuk ke bawah dengan jarak 8px persis seperti
-/// varian kartu di design.
+/// Lencana kondisi di kanan kartu; dua kondisi ditumpuk ke bawah dengan
+/// jarak 8px persis seperti varian kartu di design.
 class _CardBadges extends StatelessWidget {
   const _CardBadges({required this.plant});
 
@@ -199,9 +188,8 @@ class _LocationLine extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        // `Media Tanam` di design lebar kolomnya terbatas: teks panjang dipotong
-        // dengan elipsis ("Pekarangan Ru…"), bukan dibiarkan melebar. Karena itu
-        // kolomnya dibatasi, bukan memakai Expanded yang mengisi sisa ruang.
+        // Kolom `Media Tanam` di design dibatasi lebarnya (teks panjang
+        // terpotong elipsis), bukan mengisi sisa ruang seperti Expanded.
         Flexible(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 118),
@@ -271,15 +259,11 @@ class CareStatusBadge extends StatelessWidget {
   }
 }
 
-/// Kartu ringkasan angka (dipakai di Profile: "Tanaman 24", "Dipanen 12").
+/// Kartu ringkasan angka (dipakai di Profile).
 ///
-/// Ukurannya mengikuti komponen `Total Plants` / `Harvested` pada design:
-/// padding 17, radius 12, jarak antar-baris **4** (bukan 8), border
-/// `#E1E3E4` — abu yang sedikit lebih dingin dari border kartu biasa.
-/// Lebarnya 196px karena dua kartu + jarak 16 harus pas 408 pada kanvas 440.
-///
-/// Warnanya hanya berbeda di angka ([valueColor]): hijau untuk tanaman yang
-/// sedang tumbuh, cokelat untuk hasil panen.
+/// Geometri dari design: padding 17, radius 12, jarak antar-baris 4 (bukan 8),
+/// border `#E1E3E4` (lebih dingin dari border kartu biasa). Lebar 196 karena
+/// dua kartu + jarak 16 harus pas 408 pada kanvas 440.
 class StatCard extends StatelessWidget {
   const StatCard({
     super.key,
@@ -334,16 +318,11 @@ class StatCard extends StatelessWidget {
   }
 }
 
-/// Kartu cuaca — komponen `Weather card` (node `239:2591`).
+/// Kartu cuaca — `Weather card` (node `239:2591`), 408x82, padding 17, radius 16.
 ///
-/// Ukuran aslinya dari design: **408x82**, padding 17, radius 16. Komposisinya
-/// ikon 48 di kiri, lalu judul 20px SemiBold (`Surabaya`) dengan keterangan
-/// 14px Regular di bawahnya, dan suhu 32px Medium di kanan.
-///
-/// Kartu ini **putih**, bukan biru: kesan kebiruan datang dari satu lingkaran
-/// `rgba(223,244,251,0.59)` berukuran 128px yang di-blur 20px dan diposisikan
-/// keluar di sudut kanan atas (`right -40, top -40`). Karena itu latarnya
-/// direplikasi sebagai lapisan terpisah di bawah isi kartu.
+/// Kartunya putih; kesan kebiruan datang dari satu lingkaran
+/// `rgba(223,244,251,0.59)` 128px yang di-blur 20px dan menonjol keluar di
+/// sudut kanan atas — direplikasi sebagai lapisan terpisah di bawah isi kartu.
 class WeatherCard extends StatelessWidget {
   const WeatherCard({
     super.key,
@@ -369,10 +348,9 @@ class WeatherCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: SizedBox(
-            // Diukur langsung dari frame Home: border atas kartu ini mendarat di
-            // baris 232 dan border bawahnya di 313, jadi tingginya 82px.
-            // (Komponen `WeatherCard` di design punya empat varian dengan tinggi
-            // berbeda-beda; yang dipakai Home adalah yang 82px ini.)
+            // Diukur langsung dari frame Home: border atas kartu ini di baris
+            // 232, bawahnya di 313 → tinggi 82. (Komponen WeatherCard di design
+            // punya empat varian dengan tinggi berbeda; Home memakai varian 82.)
             height: 82,
             child: Stack(
               children: [
@@ -444,7 +422,6 @@ class WeatherCard extends StatelessWidget {
   }
 }
 
-/// Tampilan kosong dengan ikon, judul, dan keterangan.
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,

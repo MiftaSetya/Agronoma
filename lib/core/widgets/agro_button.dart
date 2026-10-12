@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:frontend/core/theme/theme.dart';
 
-/// Tombol utama (hijau penuh) — komponen "Big button" di design (node `66:678`).
-///
-/// Tingginya 54px di design (bukan 50 seperti tombol lain), radius 16, teks
-/// putih SemiBold.
+/// Tombol utama (hijau penuh, node `66:678`) — tingginya 54 bukan 50, radius 16, teks putih SemiBold.
 class AgroButton extends StatelessWidget {
   const AgroButton({
     super.key,

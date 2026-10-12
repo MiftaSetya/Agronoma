@@ -4,13 +4,12 @@ import 'package:frontend/core/data/disease_repository.dart';
 import 'package:frontend/core/models/chat_message.dart';
 import 'package:frontend/core/models/disease.dart';
 
-/// Menangani chatbot AI dan diagnosis penyakit.
-///
-/// Keduanya digabung karena di design keduanya berbagi layar yang sama
-/// (Plant Detail), dan diagnosis bisa langsung "dibicarakan" di chat.
+/// Menangani chatbot AI dan diagnosis penyakit. Keduanya digabung karena
+/// berbagi layar yang sama (Plant Detail), dan diagnosis bisa langsung
+/// "dibicarakan" di chat.
 class ChatController extends ChangeNotifier {
-  /// Nama parameter dibedakan dari nama field (lihat catatan di
-  /// [PlantController]) supaya tidak memicu `prefer_initializing_formals`.
+  /// Nama parameter dibedakan dari nama field (lihat [PlantController])
+  /// supaya tidak memicu `prefer_initializing_formals`.
   ChatController({required DiseaseRepository detector})
     : _diseaseRepository = detector;
 

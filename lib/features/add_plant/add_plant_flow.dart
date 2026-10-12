@@ -14,35 +14,25 @@ import 'package:frontend/core/widgets/agro_icon.dart';
 import 'package:frontend/core/widgets/agro_text_field.dart';
 import 'package:frontend/core/widgets/app_shell.dart';
 
-/// Alur "Tambah Tanaman" — lima langkah pada design:
+/// Alur "Tambah Tanaman" — lima frame Figma dijadikan **satu** wizard
+/// berindeks supaya isian dibawa antar langkah: `Add Plant 1 - Location`
+/// (58:222, 127:721), `2 - Planting Media` (70:411), `3 - Soil Types`
+/// (88:361, 113:765) + `Detect Soil` (101:701), `4 - AI Recommendation`
+/// (336:2882), `5 - Plant phase` (145:1624).
 ///
-/// 1. `Add Plant 1 - Location` (`58:222`, `127:721`) — izin & pilih lokasi
-/// 2. `Add Plant 2 - Planting Media` (`70:411`) — media tanam
-/// 3. `Add Plant 3 - Soil Types` (`88:361`, `113:765`) & `Detect Soil` (`101:701`)
-/// 4. `Add Plant 4 - AI Recommendation` (`336:2882`) + tambah manual
-/// 5. `Add Plant 5 - Plant phase` (`145:1624`)
-///
-/// Di Figma setiap langkah adalah frame tersendiri. Di kode, semuanya dijadikan
-/// **satu** alur dengan indeks langkah supaya data yang dipilih bisa dibawa
-/// antar langkah dan pengguna bisa menekan "Kembali" tanpa kehilangan isian.
-///
-/// Penataan isinya mengikuti kanvas Figma apa adanya: kartu kepala menempel di
-/// baris 120, daftar pilihan mulai baris 312, dan baris tombol Kembali/Lanjut
-/// di baris 830. Karena ada langkah yang elemennya **saling menimpa** (peta dan
-/// kartu konfirmasi di langkah 1), isi digambar dengan koordinat absolut
-/// ([Stack] + [Positioned]) — bukan [Column] yang tidak bisa saling menumpuk.
+/// Isi digambar dengan koordinat absolut ([Stack] + [Positioned]) karena ada
+/// elemen design yang saling menimpa (peta dan kartu konfirmasi langkah 1).
 class AddPlantFlow extends StatefulWidget {
   const AddPlantFlow({super.key, this.initialStep = 0});
 
-  /// Langkah yang langsung dibuka (0..4). Dipakai preview pengembangan untuk
-  /// memotret langkah tertentu tanpa menjawab langkah sebelumnya.
+  /// Langkah yang langsung dibuka (0..4) — untuk preview pengembangan.
   final int initialStep;
 
-  /// Judul top bar. Di design kelima langkah memakai judul yang sama.
+  /// Judul top bar; kelima langkah design memakai judul yang sama.
   static const String topBarTitle = 'Tambah tanaman';
 
-  /// Label langkah pada indikator kemajuan, dalam huruf kecil seperti design
-  /// (mis. "Lokasi penanaman"), bukan judul yang dikapitalkan.
+  /// Label langkah dalam huruf kecil seperti design ("Lokasi penanaman"),
+  /// bukan versi dikapitalkan.
   static const List<String> stepLabels = [
     'Lokasi penanaman',
     'Media tanam',
@@ -122,14 +112,12 @@ class _AddPlantFlowState extends State<AddPlantFlow> {
 
   @override
   Widget build(BuildContext context) {
-    // Dengarkan perubahan draft supaya tombol di bawah ikut hidup/mati.
     context.watch<AddPlantController>();
 
     return Scaffold(
       backgroundColor: AppColors.surface,
-      // Tombol kembali perangkat dipakai untuk mundur satu langkah, bukan
-      // menutup wizard. `canPop` hanya benar di langkah pertama supaya
-      // "Kembali" dari situ benar-benar keluar dari alur ini.
+      // Tombol kembali perangkat = mundur satu langkah, bukan keluar wizard;
+      // `canPop` hanya benar di langkah pertama.
       body: PopScope(
         canPop: _step == 0,
         onPopInvokedWithResult: (didPop, _) {
@@ -139,11 +127,9 @@ class _AddPlantFlowState extends State<AddPlantFlow> {
           children: [
             AgroTopBar(title: AddPlantFlow.topBarTitle, onBack: _back),
             Expanded(
-              // Isi langkah digambar pada baris 120..932 kanvas Figma. Sisa
-              // 932..956 di design dipakai `Bottom/Home Bar`, dan di Android
-              // ruang itu setara dengan inset sistem bawah — jadi dikurangi di
-              // sini. Tanpa ini semua isi yang menempel ke bawah (tombol
-              // "Lanjut", kartu lokasi) tampak 24px terlalu rendah.
+              // Baris 932..956 kanvas design dipakai Bottom/Home Bar, setara
+              // inset sistem bawah Android — tanpa ini isi yang menempel di
+              // bawah tampak 24px terlalu rendah.
               child: Padding(
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).padding.bottom,
@@ -191,16 +177,9 @@ class _AddPlantFlowState extends State<AddPlantFlow> {
 }
 
 /// Kartu kepala yang sama di kelima langkah: indikator kemajuan, judul, dan
-/// satu paragraf pengantar.
-///
-/// Di design kartunya menempel penuh dari tepi kiri ke tepi kanan (`left-0
-/// w-[440px]`) dengan `pt-24 pb-16 px-16`, jadi **tanpa** lekuk sudut — yang
-/// terlihat hanya garis tipis di kanan-kiri dan satu garis pemisah di bawahnya.
-///
-/// Tingginya tidak dipatok: Figma juga tidak mematoknya, tinggi itu hasil dari
-/// isi (`gap-24` + paragraf yang jumlah barisnya berbeda tiap langkah). Yang
-/// dijaga adalah **tinggi tiap baris** — label 16px, judul 20px, keterangan
-/// 20px — karena salah satu saja membuat seluruh isi di bawahnya bergeser.
+/// satu paragraf pengantar. Menempel penuh kiri-kanan tanpa sudut
+/// (`left-0 w-[440px] pt-24 pb-16 px-16`). Tingginya tidak dipatok — yang
+/// dijaga tinggi tiap baris (16/20/20px) agar isi di bawah tidak bergeser.
 class _HeaderCard extends StatelessWidget {
   const _HeaderCard({
     required this.step,
@@ -235,9 +214,8 @@ class _HeaderCard extends StatelessWidget {
             label: AddPlantFlow.stepLabels[step],
           ),
           const SizedBox(height: AppSpacing.xxl),
-          // Judul di design `text-[20px] leading-[20px]`, jadi
-          // [AppTextStyles.sectionTitle] (20/20) — bukan [headlineLarge] (20/28)
-          // yang membuat kartunya 8px lebih tinggi dari design.
+          // Design `text-[20px] leading-[20px]` — [sectionTitle] (20/20),
+          // bukan [headlineLarge] (20/28) yang membuat kartu 8px lebih tinggi.
           Text(title, style: AppTextStyles.sectionTitle),
           const SizedBox(height: AppSpacing.lg),
           Text(
@@ -250,14 +228,9 @@ class _HeaderCard extends StatelessWidget {
   }
 }
 
-/// Indikator langkah — bagian "Linear Progress Bar" dari `Progress Step`
-/// (node `66:647`).
-///
-/// Di design komponennya menumpuk satu label dan satu baris segmen:
-/// "Langkah 1 dari 5: Lokasi penanaman" di atas, lalu **lima** batang 6px
-/// (bukan dua seperti yang terlihat sekilas di beberapa varian). Batang yang
-/// sudah dilewati berwarna hijau tua, yang sedang dibuka hijau muda, sisanya
-/// abu-abu.
+/// Indikator langkah — "Linear Progress Bar" dari `Progress Step` (66:647):
+/// label di atas, lalu **lima** batang 6px (lewat = hijau tua, sedang = hijau
+/// muda, sisa = abu-abu) — bukan dua seperti yang terlihat sekilas di varian.
 class ProgressStepIndicator extends StatelessWidget {
   const ProgressStepIndicator({
     super.key,
@@ -283,9 +256,8 @@ class ProgressStepIndicator extends StatelessWidget {
               children: [
                 TextSpan(
                   text: 'Langkah ${current + 1} dari $total:',
-                  // Di design baris ini `text-[14px] leading-[16px]`, bukan
-                  // leading-20 seperti isi biasa: memakai [bodyLarge] apa adanya
-                  // membuat kartu kepala 4px lebih tinggi dari design.
+                  // Design `text-[14px] leading-[16px]` — memakai [bodyLarge]
+                  // apa adanya membuat kartu kepala 4px lebih tinggi.
                   style: AppTextStyles.bodyLarge.copyWith(
                     color: AppColors.darkGrey,
                     fontWeight: FontWeight.w500,
@@ -329,10 +301,8 @@ class ProgressStepIndicator extends StatelessWidget {
   }
 }
 
-/// Baris tombol "Kembali"/"Lanjut" yang menempel di baris 830 pada design.
-///
-/// Dipakai langkah 2-5. Tinggi tombol 54px, jarak antar tombol 16px, dan kartu
-/// pembungkusnya `pt-16 pb-32`.
+/// Baris tombol "Kembali"/"Lanjut" yang menempel di baris 830 pada design;
+/// dipakai langkah 2-5 (tombol 54px, jarak 16px, kartu `pt-16 pb-32`).
 class _StepActions extends StatelessWidget {
   const _StepActions({
     required this.onBack,
@@ -384,17 +354,11 @@ class _StepActions extends StatelessWidget {
 // Langkah 1 — lokasi
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Langkah 1 — peta dan kartu konfirmasi yang menimpa peta.
-///
-/// Geometri pada design (`Add Plant 1 - Location`, node `58:222`):
-/// - peta: baris 296..676 (tinggi 380), selebar kanvas;
-/// - kartu bawah: baris 662..932 — jadi **menimpa** 14px bagian bawah peta;
-/// - penanda peta: tengah horizontal, 169px dari atas peta.
-///
-/// Karena saling menimpa, keduanya disusun dengan koordinat absolut
-/// ([Positioned]) terhadap area isi (yang mulai di baris 120): peta di 176,
-/// kartu di 542. Di dalam kartu, ruang antara alamat dan tombol mengembang
-/// ([Spacer]) — kartunya di-pinch dari atas dan bawah, bukan dihitung.
+/// Langkah 1 — peta (baris 296..676) dan kartu konfirmasi yang **menimpa** 14px
+/// bagian bawah peta (baris 662..932, node `58:222`). Karena saling menimpa,
+/// keduanya disusun dengan [Positioned] terhadap area isi (mulai baris 120):
+/// peta di 176, kartu di 542. Di dalam kartu, ruang antara alamat dan tombol
+/// mengembang ([Spacer]), bukan dihitung.
 class _LocationStep extends StatelessWidget {
   const _LocationStep({required this.onNext, required this.enabled});
 
@@ -417,7 +381,6 @@ class _LocationStep extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // Peta menempel di bawah kartu kepala dan berhenti di baris 676.
         Positioned(
           top: _mapTop,
           left: 0,
@@ -425,7 +388,6 @@ class _LocationStep extends StatelessWidget {
           height: _mapHeight,
           child: const _LocationMap(),
         ),
-        // Kartu bawah: dari baris 662 sampai bawah, menimpa 14px peta.
         Positioned(
           top: _cardTop,
           left: 0,
@@ -448,11 +410,8 @@ class _LocationStep extends StatelessWidget {
     );
   }
 
-  /// "Ubah Lokasi" membuka daftar lokasi contoh dalam sheet.
-  ///
-  /// Designnya belum punya frame untuk sheet ini, jadi bentuknya sengaja
-  /// sederhana dan memakai komponen yang sudah ada. Tanpa ini tombolnya jadi
-  /// hiasan yang tidak melakukan apa pun.
+  /// "Ubah Lokasi" membuka sheet daftar lokasi contoh; design belum punya
+  /// frame untuk sheet ini, jadi bentuknya sengaja memakai komponen yang ada.
   void _showLocationPicker(BuildContext context) {
     final add = context.read<AddPlantController>();
     showModalBottomSheet<void>(
@@ -496,12 +455,9 @@ class _LocationStep extends StatelessWidget {
   }
 }
 
-/// Kartu konfirmasi lokasi (node `70:280`) — bagian yang menimpa peta.
-///
-/// Paddingnya `pt-24 px-16 pb-32` dengan `gap-32` antara blok alamat dan blok
-/// tombol. Di design tingginya 270px dan isinya pas; di perangkat nyata inset
-/// bawah bisa berbeda, jadi gap tengah dibuat [Spacer] — teks tetap di atas,
-/// tombol tetap menempel di bawah.
+/// Kartu konfirmasi lokasi (node `70:280`) — padding `pt-24 px-16 pb-32`,
+/// `gap-32` di design, tapi gap tengah dibuat [Spacer] karena tinggi kartu
+/// di perangkat nyata bisa berbeda dari 270px design.
 class _LocationConfirmCard extends StatelessWidget {
   const _LocationConfirmCard({
     required this.name,
@@ -555,9 +511,9 @@ class _LocationConfirmCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     height: 29 / 20,
                   ),
-                  // Design menulis `leading-[29px]` untuk teks 20px, dan
-                  // simpulnya di-trim `cap_alphabetic` — tanpa kompensasi judul
-                  // tampak ~4px terlalu rendah.
+                  // Design `leading-[29px]` untuk teks 20px dengan trim
+                  // `cap_alphabetic` — tanpa kompensasi judul tampak ~4px
+                  // terlalu rendah.
                   trimAdjust: _capTrimAdjust(20, 29),
                   maxLines: 1,
                 ),
@@ -572,8 +528,7 @@ class _LocationConfirmCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
               height: 16 / 14,
             ),
-            // Alamat ini dua baris; trim-nya menjadikan tinggi blok
-            // (2-1)*16 + capHeight.
+            // Alamat dua baris: trim menjadikan tinggi blok (2-1)*16 + capHeight.
             trimAdjust: _capTrimAdjust(14, 16),
             maxLines: 2,
           ),
@@ -586,29 +541,24 @@ class _LocationConfirmCard extends StatelessWidget {
     );
   }
 
-  /// Pergeseran ke atas untuk meniru `text-box-trim: cap_alphabetic`.
-  ///
-  /// CSS memotong ruang kosong di atas huruf kapital dan di bawah baseline;
-  /// Flutter selalu menggambar kotak baris penuh. Setengah kelebihan itu ada di
-  /// atas teks, jadi teksnya perlu digeser ke atas sebanyak itu. Perhitungan
+  /// Pergeseran ke atas untuk meniru `text-box-trim: cap_alphabetic`: CSS
+  /// memotong ruang kosong di atas huruf kapital dan di bawah baseline,
+  /// sedangkan Flutter selalu menggambar kotak baris penuh. Perhitungan
   /// lengkapnya didokumentasikan di [AppTextStyles.leadingNormal].
   static double _capTrimAdjust(double fontSize, double lineHeight) {
-    // Metrik usWin Inter yang dipakai Flutter: ascent 2269, descent 660 (per
-    // 2048 unit). Cap height 1490.
+    // Metrik usWin Inter (per 2048 unit): ascent 2269, descent 660, cap 1490.
     const ascent = 2269 / 2048;
     const descent = 660 / 2048;
     const capHeight = 1490 / 2048;
     final halfLeading = (lineHeight - (ascent + descent) * fontSize) / 2;
     // Jarak dari tepi atas kotak baris sampai puncak huruf kapital.
     final capTop = halfLeading + (ascent - capHeight) * fontSize;
-    // Setengah bagian bawah (dari baseline sampai bawah kotak) juga hilang,
-    // tetapi karena blok sesudahnya menghitung dari bawah kotak penuh, hanya
-    // bagian atas yang perlu dikompensasi agar pusat optikalnya pas.
+    // Hanya bagian atas yang dikompensasi agar pusat optikalnya pas.
     return capTop - (lineHeight - fontSize * (ascent + descent)) / 2 - (capHeight * fontSize - fontSize * (ascent + descent)) / 2;
   }
 }
 
-/// Teks yang digeser sedikit untuk meniru pemotongan `cap_alphabetic`.
+/// Teks yang digeser sedikit untuk meniru pemotongan `cap_alphabetic` design.
 class _TrimmedText extends StatelessWidget {
   const _TrimmedText({
     required this.text,
@@ -636,14 +586,9 @@ class _TrimmedText extends StatelessWidget {
   }
 }
 
-/// Peta statis dengan penanda lokasi.
-///
-/// Designnya memakai gambar ubin peta, bukan peta sungguhan. Mengganti ini
-/// dengan plugin peta berarti menambah kunci API dan izin akses; fotonya
-/// sudah cukup untuk mencocokkan tampilan.
-///
-/// Gambar peta aslinya 428x679 dipasang `w-full h-[183.69%] top-[-41.78%]` —
-/// artinya `BoxFit.cover` yang dipusatkan.
+/// Peta statis dengan penanda lokasi — gambar ubin, bukan peta sungguhan
+/// (ganti plugin = tambah kunci API & izin). Gambar asli 428x679 dipasang
+/// `w-full h-[183.69%] top-[-41.78%]` = `BoxFit.cover` yang dipusatkan.
 class _LocationMap extends StatelessWidget {
   const _LocationMap();
 
@@ -654,10 +599,8 @@ class _LocationMap extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         Image.asset(AppAssets.photoMap, fit: BoxFit.cover),
-        // Penanda: berkas SVG-nya 42x56,7 dan di design gambar itu sengaja
-        // dibuat meluber dari kotak penampung 34,3x41,7 (inset negatif),
-        // jadi digambar apa adanya pada ukuran aslinya. Memaksa 34x41 justru
-        // menyusutkan pinnya.
+        // Pin SVG 42x56,7 sengaja meluber dari kotak 34,3x41,7 (inset negatif);
+        // memaksa 34x41 justru menyusutkan pinnya.
         const Positioned(
           top: 162,
           left: 0,
@@ -726,15 +669,8 @@ class _LocationOption extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Langkah 2 — media tanam
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Langkah 2 — memilih media tanam (`70:411`).
-///
-/// Urutan dan teksnya mengikuti [PlantingMedia] langsung: enum itulah sumber
-/// kebenaran label design ("Pot tanaman", "Pekarangan rumah", "Lahan
-/// terbuka"), sehingga wizard dan tempat lain tidak bisa berbeda.
+/// Langkah 2 — memilih media tanam (`70:411`). [PlantingMedia] adalah sumber
+/// kebenaran label design, sehingga wizard dan tempat lain tidak bisa berbeda.
 class _MediaStep extends StatelessWidget {
   const _MediaStep({
     required this.onBack,
@@ -742,9 +678,8 @@ class _MediaStep extends StatelessWidget {
     required this.enabled,
   });
 
-  /// Ikon media tanam pada bulatan 40px. Ukurannya diambil dari ukuran asli
-  /// berkas SVG-nya, bukan dipaksa 16x16 — pot aslinya 18x19,9, rumah 20x20,
-  /// dan lahan 20x19,9; memaksa sama akan meregangkan bentuknya.
+  /// Ikon media tanam pada bulatan 40px — ukuran asli berkas SVG-nya (pot
+  /// 18x19,9, rumah 20x20, lahan 20x19,9); dipaksa sama akan meregang.
   static const List<(PlantingMedia, String, double, double)> _options = [
     (PlantingMedia.pot, AppAssets.mediaPot, 18, 19.908),
     (PlantingMedia.ground, AppAssets.mediaHouse, 20, 20),
@@ -764,9 +699,8 @@ class _MediaStep extends StatelessWidget {
         const _HeaderCard(
           step: 1,
           title: 'Pilih Media Tanam',
-          // Teks pengantar di design dibungkus manual menjadi tiga baris
-          // (`mb-0` beruntun pada tiga `<p>`), bukan dibungkus otomatis. Yang
-          // ketiga tanpa `mb-0` menandai akhir paragraf.
+          // Teks pengantar dibungkus manual 3 baris di design (`mb-0` beruntun
+          // pada tiga `<p>`), bukan dibungkus otomatis.
           description:
               'Pilih di mana Anda akan menanam tanaman ini\n'
               'agar kami dapat memberikan panduan\n'
@@ -789,8 +723,8 @@ class _MediaStep extends StatelessWidget {
                   title: media.label,
                   subtitle: media.description,
                   selected: draft.media == media.name,
-                  // Design memberi jarak 24px antar kartu di langkah ini
-                  // (kartu 96px pada baris 332, 452, dan 572).
+                  // Jarak 24px antar kartu di langkah ini (kartu 96px di
+                  // baris 332, 452, 572).
                   gap: AppSpacing.xxl,
                   onTap: () =>
                       context.read<AddPlantController>().setMedia(media.name),
@@ -804,15 +738,8 @@ class _MediaStep extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Langkah 3 — analisis tanah
-// ─────────────────────────────────────────────────────────────────────────────
-
 /// Langkah 3 — analisis tanah atau pilih jenis tanah sendiri (`88:361`).
-///
-/// Di design langkahnya menampilkan dua kartu **besar berisi di tengah**:
-/// "Bantu saya scan tanah" dan "Saya Tahu Jenis Tanah". Daftar jenis tanah
-/// baru muncul setelah pilihan kedua ditekan.
+/// Daftar jenis tanah baru muncul setelah "Saya Tahu Jenis Tanah" ditekan.
 class _SoilStep extends StatefulWidget {
   const _SoilStep({
     required this.onBack,
@@ -829,7 +756,7 @@ class _SoilStep extends StatefulWidget {
 }
 
 class _SoilStepState extends State<_SoilStep> {
-  /// Pemakai memilih "Saya Tahu Jenis Tanah" sehingga daftarnya dibuka.
+  /// "Saya Tahu Jenis Tanah" dipilih sehingga daftarnya dibuka.
   bool _manual = false;
 
   @override
@@ -844,7 +771,7 @@ class _SoilStepState extends State<_SoilStep> {
   Widget build(BuildContext context) {
     final add = context.watch<AddPlantController>();
     final draft = add.draft;
-    // Daftar manual hanya dibuka lewat tombol kedua. Kalau tanah sudah
+    // Daftar manual hanya dibuka lewat tombol kedua; kalau tanah sudah
     // terdeteksi lewat kamera, kartunya tetap dua — sesuai design.
     final openList = _manual;
 
@@ -867,10 +794,6 @@ class _SoilStepState extends State<_SoilStep> {
               AppSpacing.xxl,
             ),
             children: [
-              // Kartu besar "Bantu saya scan tanah" — isi di tengah, bulatan
-              // 60px, `py-32 px-24`. Saat terpilih garis + bayangan hijau.
-              // Judul/keterangan tetap seperti design; hanya ikon dan garis
-              // kartunya yang berubah saat tanah sudah dianalisis.
               _BigOptionCard(
                 icon: draft.soilDetected
                     ? AppAssets.soilScanSelected
@@ -932,11 +855,9 @@ class _SoilStepState extends State<_SoilStep> {
   }
 }
 
-/// Tiruan layar "Arahkan kamera ke permukaan tanah" (`101:701`).
-///
-/// Design memakai layar kamera sungguhan; di sini disederhanakan jadi sheet
-/// dengan pratinjau statis, karena alur intinya (analisis → hasil tersimpan)
-/// tetap bisa dicoba tanpa plugin kamera.
+/// Tiruan layar "Arahkan kamera ke permukaan tanah" (`101:701`) — kamera fake:
+/// pratinjau statis + delay 1400ms, karena alur inti tetap bisa dicoba tanpa
+/// plugin kamera.
 class _DetectSoilSheet extends StatefulWidget {
   const _DetectSoilSheet();
 
@@ -992,17 +913,12 @@ class _DetectSoilSheetState extends State<_DetectSoilSheet> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Langkah 4 — rekomendasi tanaman
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Langkah 4 — rekomendasi tanaman (`336:2882`).
-///
-/// Strukturnya berbeda dari langkah lain: daftar kartunya **ditarik sampai di
-/// atas baris tombol** (mulai baris 288), sementara tombol "Tambah manual
-/// tanaman" melayang **menimpa** daftar itu (menempel di atas baris 830).
-/// Karena itu daftar diberi ruang atas 96px dan tombolnya diletakkan dalam
-/// [Stack], bukan di dalam daftar.
+/// Langkah 4 — rekomendasi tanaman (`336:2882`). Strukturnya beda dari
+/// langkah lain: daftar kartu ditarik sampai di atas baris tombol (mulai
+/// baris 288, kontainer `top-288 pt-96 px-16 gap-16`) dan tombol "Tambah
+/// manual tanaman" melayang menimpa daftar (design `sticky top-0`) — karena
+/// itu daftar diberi ruang atas 96px dan tombolnya dalam [Stack], bukan di
+/// dalam daftar.
 class _RecommendationStep extends StatefulWidget {
   const _RecommendationStep({
     required this.onBack,
@@ -1050,9 +966,6 @@ class _RecommendationStepState extends State<_RecommendationStep> {
         Expanded(
           child: Stack(
             children: [
-              // Daftar kartu: container designnya `top-288 pt-96 px-16 gap-16`,
-              // jadi kartu pertama mulai 96px di bawah kartu kepala dan tombol
-              // manual melayang di 24px pertama daftar ini.
               Positioned.fill(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(
@@ -1094,9 +1007,8 @@ class _RecommendationStepState extends State<_RecommendationStep> {
                   ],
                 ),
               ),
-              // Tombol "Tambah manual tanaman" menimpa daftar: blok
-              // `pt-24 + tombol 56 + pb-16` menempel di ATAS daftar (design
-              // `sticky top-0`), bukan di bawahnya.
+              // Tombol manual menimpa daftar: `pt-24 + tombol 56 + pb-16`
+              // menempel di ATAS daftar (design `sticky top-0`).
               Positioned(
                 left: 0,
                 right: 0,
@@ -1131,11 +1043,9 @@ class _RecommendationStepState extends State<_RecommendationStep> {
   }
 }
 
-/// Tombol "Tambah manual tanaman" (node `338:2988`).
-///
-/// Bukan [AgroOutlineButton]: designnya latar putih dengan garis hijau penuh,
-/// ikon tambah di bulatan 24px di kiri, dan teks 16px SemiBold hijau. Padding
-/// vertikalnya membuat tinggi totalnya 56px.
+/// Tombol "Tambah manual tanaman" (node `338:2988`) — bukan
+/// [AgroOutlineButton]: latar putih, garis hijau penuh, ikon di bulatan 24px,
+/// teks 16px SemiBold hijau; padding vertikal membuat tingginya 56px.
 class _ManualAddButton extends StatelessWidget {
   const _ManualAddButton({required this.onTap});
 
@@ -1173,12 +1083,10 @@ class _ManualAddButton extends StatelessWidget {
   }
 }
 
-/// Kartu rekomendasi tanaman (node `144:1250`).
-///
-/// Tata letaknya: foto 80px di kiri, kolom teks **255px tetap** di tengah, dan
-/// slot centang 32px di kanan. Lebar kolom yang dipatok membuat deskripsi
-/// membungkus di titik yang sama dengan design — memakai `Expanded` justru
-/// membuat teksnya mengisi sisa ruang yang tidak sama.
+/// Kartu rekomendasi tanaman (node `144:1250`): foto 80px, kolom teks
+/// **255px tetap** (`w-[255px]` — patok ini yang membuat deskripsi membungkus
+/// di titik yang sama dengan design; `Expanded` malah menghasilkan lebar tak
+/// sama), dan slot centang 32px di kanan.
 class _RecommendationCard extends StatelessWidget {
   const _RecommendationCard({
     required this.recommendation,
@@ -1229,12 +1137,9 @@ class _RecommendationCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
-                // Kolom teks tetap 255px seperti yang tertulis di design
-                // (`w-[255px]`). Design sendiri membiarkan slot centangnya
-                // meluber 15px melewati tepi kanan area isi (255 + 12 + 32
-                // = 299 > 284 yang tersisa), jadi di sini slotnya digambar
-                // dengan Positioned alih-alih mengikutkan di Row — sama
-                // persis hasilnya, tanpa peringatan overflow Flutter.
+                // Slot centang design meluber 15px melewati tepi kanan area
+                // isi (255 + 12 + 32 = 299 > 284) — jadi digambar dengan
+                // Positioned, bukan diikutkan di Row, agar tanpa overflow.
                 SizedBox(
                   width: 255,
                   child: Column(
@@ -1277,9 +1182,8 @@ class _RecommendationCard extends StatelessWidget {
                 ),
               ],
             ),
-            // Slot centang 32px: transparan pada kartu yang belum dipilih
-            // (design memuat berkas `bb146b37…` opacity-0 di posisi yang
-            // sama), hijau saat dipilih.
+            // Slot centang 32px: transparan saat belum dipilih (design
+            // memuat berkas `bb146b37…` opacity-0 di posisi yang sama).
             Positioned(
               top: AppSpacing.lg,
               left: 255 + AppSpacing.md,
@@ -1295,11 +1199,8 @@ class _RecommendationCard extends StatelessWidget {
   }
 }
 
-/// Chip di bawah nama tanaman (`Chips`, node `141:923` dan `141:967`).
-///
-/// Dua varian: "Pilihan Terbaik" berlatar kuning dengan bintang, dan
-/// `Indoor`/`Outdoor` berlatar abu muda. Tingginya 21px (12px teks + 4px
-/// padding atas bawah + sisa dari tinggi baris 18).
+/// Chip di bawah nama tanaman (`Chips`, node `141:923`/`141:967`): "Pilihan
+/// Terbaik" berlatar kuning dengan bintang, lainnya abu muda. Tinggi 21px.
 class _RecommendationChip extends StatelessWidget {
   const _RecommendationChip({
     required this.label,
@@ -1412,14 +1313,8 @@ class _ManualPlantSheetState extends State<_ManualPlantSheet> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Langkah 5 — fase pertumbuhan
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Langkah 5 — memilih fase pertumbuhan (`145:1624`).
-///
-/// Sumber ikon dan keterangannya adalah [GrowthPhase] sendiri; wizard hanya
-/// menampilkannya berurutan.
+/// Langkah 5 — memilih fase pertumbuhan (`145:1624`). Sumber ikon dan
+/// keterangannya adalah [GrowthPhase] sendiri; wizard hanya menampilkannya.
 class _PhaseStep extends StatelessWidget {
   const _PhaseStep({
     required this.onBack,
@@ -1448,8 +1343,8 @@ class _PhaseStep extends StatelessWidget {
         ),
         Expanded(
           child: ListView(
-            // Design memakai `py-24` dengan jarak antar kartu 10px — lebih
-            // rapat daripada langkah 2/3 yang memakai 24.
+            // Langkah ini `py-24` dengan jarak antar kartu 10px — lebih rapat
+            // daripada langkah 2/3 yang memakai 24.
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.page,
               vertical: AppSpacing.xxl,
@@ -1475,7 +1370,7 @@ class _PhaseStep extends StatelessWidget {
           onNext: onNext,
           enabled: enabled,
           saving: saving,
-          // Frame `Add Plant 5` di Figma masih memakai label "Lanjut", bukan
+          // Frame `Add Plant 5` di Figma masih memakai "Lanjut", bukan
           // "Simpan Tanaman" — salin apa adanya.
           nextLabel: 'Lanjut',
         ),
@@ -1484,20 +1379,13 @@ class _PhaseStep extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Kartu pilihan bersama
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Kartu pilihan kecil yang dipakai langkah 2 dan daftar manual langkah 3/4.
+/// Kartu pilihan kecil yang dipakai langkah 2 dan daftar manual langkah 3/4
+/// (`p-16 gap-12 rounded-16`, ikon di bulatan 40px, judul 16px SemiBold,
+/// keterangan 14px).
 ///
-/// Bentuknya dari design: `p-16 gap-12 rounded-16`, ikon dalam bulatan 40px
-/// (hijau penuh saat terpilih, abu muda saat belum), judul 16px SemiBold
-/// (`tracking-[-1px]`), dan keterangan 14px (`tracking-[-0.5px]`).
-///
-/// Slot centang 32px **selalu ada**: di design kartu yang belum dipilih tetap
-/// menampung berkas `bb146b37…` yang `opacity="0"`, jadi lebar kolom teksnya
-/// tidak berubah saat kartu terpilih. Menghilangkan slot sama sekali membuat
-/// teks melompat 32px ke kanan saat kartu dipilih.
+/// Slot centang 32px **selalu ada** (design menampung berkas `bb146b37…`
+/// `opacity="0"` pada kartu yang belum dipilih) — menghilangkan slot membuat
+/// teks melompat 32px ke kanan saat kartu terpilih.
 class _OptionCard extends StatelessWidget {
   const _OptionCard({
     required this.icon,
@@ -1517,15 +1405,14 @@ class _OptionCard extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  /// Ukuran asli ikon di dalam bulatan 40px. Kosong berarti persegi 18px
-  /// (ukuran yang paling umum di design).
+  /// Ukuran asli ikon di dalam bulatan 40px; kosong = persegi (default).
   final double? iconWidth;
   final double? iconHeight;
 
   final Widget? trailing;
 
-  /// Jarak ke kartu berikutnya. Design memakai 24px di langkah 2, 10px di
-  /// langkah 5, dan 16px pada daftar manual.
+  /// Jarak ke kartu berikutnya: 24px (langkah 2), 10px (langkah 5), 16px
+  /// (daftar manual).
   final double gap;
 
   @override
@@ -1587,8 +1474,7 @@ class _OptionCard extends StatelessWidget {
               trailing!,
             ],
             const SizedBox(width: AppSpacing.sm),
-            // Centang hijau saat terpilih, transparan saat belum — slotnya
-            // selalu 32px.
+            // Centang hijau saat terpilih, transparan saat belum.
             Opacity(
               opacity: selected ? 1 : 0,
               child: const AgroIcon(AppAssets.checkMarkGreen, size: 32),
@@ -1600,10 +1486,8 @@ class _OptionCard extends StatelessWidget {
   }
 }
 
-/// Kartu pilihan besar langkah 3 (`88:533` dan `88:540`).
-///
-/// Berbeda dari [_OptionCard]: isi di tengah (teks dan ikon di tengah kartu),
-/// bulatan ikonnya 60px, dan padding vertikalnya 32px sehingga tingginya 184px.
+/// Kartu pilihan besar langkah 3 (`88:533`/`88:540`) — isi di tengah, bulatan
+/// ikon 60px, padding vertikal 32px (tinggi 184px).
 class _BigOptionCard extends StatelessWidget {
   const _BigOptionCard({
     required this.icon,
@@ -1662,8 +1546,7 @@ class _BigOptionCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.lg),
             Column(
               children: [
-                // Design menulis `capitalize` di simpul judulnya, sehingga
-                // kalimat biasa tampil dengan huruf kapital di tiap kata.
+                // Design menulis `capitalize` di simpul judulnya.
                 Text(
                   _capitalize(title),
                   textAlign: TextAlign.center,
@@ -1695,7 +1578,7 @@ class _BigOptionCard extends StatelessWidget {
       .join(' ');
 }
 
-/// Bulatan ikon pada kartu pilihan — hijau saat terpilih, abu saat belum.
+/// Bulatan ikon pada kartu pilihan.
 class _IconCircle extends StatelessWidget {
   const _IconCircle({
     required this.icon,
