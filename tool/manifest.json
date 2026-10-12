@@ -1,1225 +1,1234 @@
-﻿{
-    "generatedAt":  "2026-10-08T23:58:03",
-    "counts":  {
-                   "total":  135,
-                   "icons":  117,
-                   "images":  18
-               },
-    "assets":  [
-                   {
-                       "sha":  "02130f480c80f906befa3baa5ab1fdf6d327fd82",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/02130f480c80f906befa3baa5ab1fdf6d327fd82.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1197
-                   },
-                   {
-                       "sha":  "042357eb72843fcc732cf87814a881f75d3a8aba",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/042357eb72843fcc732cf87814a881f75d3a8aba.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1246
-                   },
-                   {
-                       "sha":  "064950e4ba668408d3433650bac624cf05a0c626",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/064950e4ba668408d3433650bac624cf05a0c626.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  832
-                   },
-                   {
-                       "sha":  "091d3ab263f91469af9789033f53ae49543eb966",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/091d3ab263f91469af9789033f53ae49543eb966.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1174
-                   },
-                   {
-                       "sha":  "0984935e8e6fa6f64e8c91c02ba3643a23e05f35",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/0984935e8e6fa6f64e8c91c02ba3643a23e05f35.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  2453
-                   },
-                   {
-                       "sha":  "0c97f46d4f8317ec513f81177c282912226141c2",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/0c97f46d4f8317ec513f81177c282912226141c2.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  345
-                   },
-                   {
-                       "sha":  "0f266937dbc7f47ae09ead6161676490e57424f2",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/0f266937dbc7f47ae09ead6161676490e57424f2.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  574
-                   },
-                   {
-                       "sha":  "13655dc5f4f5c913570be0285f420059a4df9167",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/13655dc5f4f5c913570be0285f420059a4df9167.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1764
-                   },
-                   {
-                       "sha":  "1422e538c2c6069584f2be50ff8d8a1df87507c0",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/1422e538c2c6069584f2be50ff8d8a1df87507c0.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  335
-                   },
-                   {
-                       "sha":  "1633b862dd265c0272284a2162ca7f0f56104f4c",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/1633b862dd265c0272284a2162ca7f0f56104f4c.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1496
-                   },
-                   {
-                       "sha":  "16e0c83d12c6c41291f02c27fd2cd0019740595f",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/16e0c83d12c6c41291f02c27fd2cd0019740595f.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1574
-                   },
-                   {
-                       "sha":  "17ff6b81d5a4ce835ab648a932a53a492539509c",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/17ff6b81d5a4ce835ab648a932a53a492539509c.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  745
-                   },
-                   {
-                       "sha":  "1bc17606b2180b12291e17a8b9239ccfe9282fc7",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/1bc17606b2180b12291e17a8b9239ccfe9282fc7.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1067
-                   },
-                   {
-                       "sha":  "200d5ec8666be0da1473ff5b003f26fdc460de58",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/200d5ec8666be0da1473ff5b003f26fdc460de58.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  3244
-                   },
-                   {
-                       "sha":  "232621d7fc41d275216ae4958c8a51d19a457a3a",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/232621d7fc41d275216ae4958c8a51d19a457a3a.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  585
-                   },
-                   {
-                       "sha":  "2681f967727b559d12b95a177cb34563fa88c3c2",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/2681f967727b559d12b95a177cb34563fa88c3c2.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  508
-                   },
-                   {
-                       "sha":  "277e53b539780ab8332228aed88ed415049ceba2",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/277e53b539780ab8332228aed88ed415049ceba2.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  6541
-                   },
-                   {
-                       "sha":  "284d83d1607bcf4841f417f1e61535a592d60489",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/284d83d1607bcf4841f417f1e61535a592d60489.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1046
-                   },
-                   {
-                       "sha":  "2c51ffd1bf8dcd5ac3b37960817784fcdbffac42",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/2c51ffd1bf8dcd5ac3b37960817784fcdbffac42.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  990
-                   },
-                   {
-                       "sha":  "2e6408ac1b3fac5f48f1b88828bb3fac7f8c00fc",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/2e6408ac1b3fac5f48f1b88828bb3fac7f8c00fc.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  283
-                   },
-                   {
-                       "sha":  "2fa8343d259af84d9bf2691f0331c1677b703040",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/2fa8343d259af84d9bf2691f0331c1677b703040.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  4263
-                   },
-                   {
-                       "sha":  "31a2dc7cf9b51123d1fe48f4b7791761038cc104",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/31a2dc7cf9b51123d1fe48f4b7791761038cc104.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  479
-                   },
-                   {
-                       "sha":  "3484631a58aeb12eb4b1ca0859c14cdee65a5991",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/3484631a58aeb12eb4b1ca0859c14cdee65a5991.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  2411
-                   },
-                   {
-                       "sha":  "374e1449c0e2a79c1133cb271726b8629001c3e6",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/374e1449c0e2a79c1133cb271726b8629001c3e6.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1625
-                   },
-                   {
-                       "sha":  "38f7dd194df12f703e8c2bcd87e4e6c39201801a",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/38f7dd194df12f703e8c2bcd87e4e6c39201801a.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  832
-                   },
-                   {
-                       "sha":  "39e90148463a205633460bcfcba12bf6f83db64a",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/39e90148463a205633460bcfcba12bf6f83db64a.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1449
-                   },
-                   {
-                       "sha":  "3ab2a16f06867678af0e9bf237ad440ece3141fa",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/3ab2a16f06867678af0e9bf237ad440ece3141fa.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1294
-                   },
-                   {
-                       "sha":  "3c4a16316f4fc77064326da38a9e6111d77f1a01",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/3c4a16316f4fc77064326da38a9e6111d77f1a01.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  6472
-                   },
-                   {
-                       "sha":  "3cc16617bca9652e3982eef86d8e3df2ab4a2ec2",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/3cc16617bca9652e3982eef86d8e3df2ab4a2ec2.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  3536
-                   },
-                   {
-                       "sha":  "3de30bfd240ec309374535a8edd16a2e24b08f07",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/3de30bfd240ec309374535a8edd16a2e24b08f07.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1625
-                   },
-                   {
-                       "sha":  "3e8fa98f234a1d513786c84bc4a1e15dc1feaea6",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/3e8fa98f234a1d513786c84bc4a1e15dc1feaea6.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1627
-                   },
-                   {
-                       "sha":  "3fc8a3bedb27a05d125fe5010a63fd9bd0783b43",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/3fc8a3bedb27a05d125fe5010a63fd9bd0783b43.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1953
-                   },
-                   {
-                       "sha":  "4398fe693c8dac56de10c52c50bbbaa7e9b2a207",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/4398fe693c8dac56de10c52c50bbbaa7e9b2a207.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1123
-                   },
-                   {
-                       "sha":  "47969e0c2ecbd2885404bd8cbd67767533d2a3c3",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/47969e0c2ecbd2885404bd8cbd67767533d2a3c3.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1555
-                   },
-                   {
-                       "sha":  "515651936e1841aad38808d964faa4c98b8bba0a",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/515651936e1841aad38808d964faa4c98b8bba0a.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1479
-                   },
-                   {
-                       "sha":  "57920ea7ee9109763b28b8e8b35d87a1dbfdce4c",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/57920ea7ee9109763b28b8e8b35d87a1dbfdce4c.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  350
-                   },
-                   {
-                       "sha":  "582a8ddb04f1242063e58741fe02c93560b55cc5",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/582a8ddb04f1242063e58741fe02c93560b55cc5.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  2323
-                   },
-                   {
-                       "sha":  "58a5d2eac5ce61ecdcbfacb0c870c71abac51886",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/58a5d2eac5ce61ecdcbfacb0c870c71abac51886.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  3003
-                   },
-                   {
-                       "sha":  "5aaaa51f244abcfb56f8da61543bb79b2144f90a",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/5aaaa51f244abcfb56f8da61543bb79b2144f90a.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  3670
-                   },
-                   {
-                       "sha":  "61e410580a1154c9d0e46fe0bbc09d055ca75034",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/61e410580a1154c9d0e46fe0bbc09d055ca75034.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1597
-                   },
-                   {
-                       "sha":  "6336823ca0e4785e6d79804711688087b86e6289",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/6336823ca0e4785e6d79804711688087b86e6289.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  841
-                   },
-                   {
-                       "sha":  "63bd523e40fe86456993c5dc397b57c50ddaf3a7",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/63bd523e40fe86456993c5dc397b57c50ddaf3a7.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1007
-                   },
-                   {
-                       "sha":  "69aded8418e740d6bda9f92bfeef8d864a84fe7f",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/69aded8418e740d6bda9f92bfeef8d864a84fe7f.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  2755
-                   },
-                   {
-                       "sha":  "69cd7a79cb4172c2d6b85e732ff94aea63378d4c",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/69cd7a79cb4172c2d6b85e732ff94aea63378d4c.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1171
-                   },
-                   {
-                       "sha":  "6a70a53d996b3f923a1d490f9aab3b2896b9e220",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/6a70a53d996b3f923a1d490f9aab3b2896b9e220.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1005
-                   },
-                   {
-                       "sha":  "6e06a745ee1bbc9b5d3db70ee27cadf1535ef3a6",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/6e06a745ee1bbc9b5d3db70ee27cadf1535ef3a6.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1134
-                   },
-                   {
-                       "sha":  "6f62cf306191c3a4566cde0b8c08a2c2bff60a80",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/6f62cf306191c3a4566cde0b8c08a2c2bff60a80.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1382
-                   },
-                   {
-                       "sha":  "6fe50b8e12b3491cb364b67205a8656d1e9fc141",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/6fe50b8e12b3491cb364b67205a8656d1e9fc141.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1262
-                   },
-                   {
-                       "sha":  "7360fdf6fcb97da9a8596989f80c5862221146cd",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/7360fdf6fcb97da9a8596989f80c5862221146cd.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  272
-                   },
-                   {
-                       "sha":  "746c5a179d5139b05592888c60dde480e03891fd",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/746c5a179d5139b05592888c60dde480e03891fd.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  5351
-                   },
-                   {
-                       "sha":  "756880f66dbb2c1c46a221bcb89b919fa395b4fc",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/756880f66dbb2c1c46a221bcb89b919fa395b4fc.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  911
-                   },
-                   {
-                       "sha":  "770a02f455cd831c886a3cb47071494d7a089a40",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/770a02f455cd831c886a3cb47071494d7a089a40.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1563
-                   },
-                   {
-                       "sha":  "795eded994b37bb1d12d3d5d792ee7fa0bd116cb",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/795eded994b37bb1d12d3d5d792ee7fa0bd116cb.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  274
-                   },
-                   {
-                       "sha":  "7c1bfeeab8abbce777d4a8167432ac79152b568f",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/7c1bfeeab8abbce777d4a8167432ac79152b568f.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1122
-                   },
-                   {
-                       "sha":  "82c379a7225b48bf2a156b5e7cbf7cfc3287e792",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/82c379a7225b48bf2a156b5e7cbf7cfc3287e792.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1557
-                   },
-                   {
-                       "sha":  "83fa194c6dbe83a4361e999218ba218625294047",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/83fa194c6dbe83a4361e999218ba218625294047.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1152
-                   },
-                   {
-                       "sha":  "8463a5d6644c3e3287755842d99620b29794033c",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/8463a5d6644c3e3287755842d99620b29794033c.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  229
-                   },
-                   {
-                       "sha":  "8637549cd036f77b062483c5cb4d60910a8c92ab",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/8637549cd036f77b062483c5cb4d60910a8c92ab.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  662
-                   },
-                   {
-                       "sha":  "86fcf6188b602b790546f60663c6049b287264fd",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/86fcf6188b602b790546f60663c6049b287264fd.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1415
-                   },
-                   {
-                       "sha":  "8832c9f72a47e02a3bbffc64b85f1ff410274900",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/8832c9f72a47e02a3bbffc64b85f1ff410274900.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  260
-                   },
-                   {
-                       "sha":  "88bffc6ff73d42552309c4499e67fb62a125610e",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/88bffc6ff73d42552309c4499e67fb62a125610e.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1774
-                   },
-                   {
-                       "sha":  "8936dfb0c38474f79a77cfbfcb81277f53fb701e",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/8936dfb0c38474f79a77cfbfcb81277f53fb701e.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1674
-                   },
-                   {
-                       "sha":  "89e633c0b7f09b64d85d3fe221bf884c6a28e687",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/89e633c0b7f09b64d85d3fe221bf884c6a28e687.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  828
-                   },
-                   {
-                       "sha":  "8bcc67bdd8ea6bacf5302fbd05a5ad2f1f2926cb",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/8bcc67bdd8ea6bacf5302fbd05a5ad2f1f2926cb.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  636
-                   },
-                   {
-                       "sha":  "901b8b3d55a5ad056e7fa6f658f50a50f0b7cd88",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/901b8b3d55a5ad056e7fa6f658f50a50f0b7cd88.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1317
-                   },
-                   {
-                       "sha":  "93dee2dbdbb548c6edee280137d0d6248f66edd2",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/93dee2dbdbb548c6edee280137d0d6248f66edd2.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1407
-                   },
-                   {
-                       "sha":  "94312fbfd7eb7a516ff388c59c4dafa9851503ba",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/94312fbfd7eb7a516ff388c59c4dafa9851503ba.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  347
-                   },
-                   {
-                       "sha":  "94bcff3fff34c3ecd002a0cd551cf71f7bbef393",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/94bcff3fff34c3ecd002a0cd551cf71f7bbef393.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  658
-                   },
-                   {
-                       "sha":  "98832cea57af00afa1ed2540a2499464115251f3",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/98832cea57af00afa1ed2540a2499464115251f3.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  3816
-                   },
-                   {
-                       "sha":  "9a842c4b65e2591f55bfb50fa02c42b6ad7af785",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/9a842c4b65e2591f55bfb50fa02c42b6ad7af785.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  960
-                   },
-                   {
-                       "sha":  "9b2be4d4fe2969ff3fb5aaeaf1ae7f2900e84c7a",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/9b2be4d4fe2969ff3fb5aaeaf1ae7f2900e84c7a.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  5209
-                   },
-                   {
-                       "sha":  "9b5154c0a340bbf8b66fab07d8b56c81d033d19e",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/9b5154c0a340bbf8b66fab07d8b56c81d033d19e.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1947
-                   },
-                   {
-                       "sha":  "9d0d832e994ea5410e308af8f604666e8a837a1c",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/9d0d832e994ea5410e308af8f604666e8a837a1c.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1424
-                   },
-                   {
-                       "sha":  "9e3e7ad618d45456e1f259c40703d756bea890aa",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/9e3e7ad618d45456e1f259c40703d756bea890aa.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1358
-                   },
-                   {
-                       "sha":  "a0a7f93bd94de47b5b65ca2e78b7106ffce27179",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/a0a7f93bd94de47b5b65ca2e78b7106ffce27179.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1054
-                   },
-                   {
-                       "sha":  "a6f91e88e5d5585c53aff52712cabf3d40a75bc2",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/a6f91e88e5d5585c53aff52712cabf3d40a75bc2.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  3893
-                   },
-                   {
-                       "sha":  "a7ce4d8f5b3d6d8e199c650a5675b1ebd8ae3c7b",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/a7ce4d8f5b3d6d8e199c650a5675b1ebd8ae3c7b.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  335
-                   },
-                   {
-                       "sha":  "ae9c38a8ef9c9b218f15df152c1da515082ce4e1",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/ae9c38a8ef9c9b218f15df152c1da515082ce4e1.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  565
-                   },
-                   {
-                       "sha":  "b0edba78cbc793858bc2a5725e002e56704df17b",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/b0edba78cbc793858bc2a5725e002e56704df17b.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  345
-                   },
-                   {
-                       "sha":  "b209a8b63b014c4a955c74fbaa5044b471c1dfcb",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/b209a8b63b014c4a955c74fbaa5044b471c1dfcb.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1501
-                   },
-                   {
-                       "sha":  "b29cf6263f25e6b7d930eb277ced477bb23100db",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/b29cf6263f25e6b7d930eb277ced477bb23100db.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1282
-                   },
-                   {
-                       "sha":  "b2af88a34e62691e1ab0d1c509b60cca02a24810",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/b2af88a34e62691e1ab0d1c509b60cca02a24810.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  832
-                   },
-                   {
-                       "sha":  "b3045c453da252dd1ffdbc2320190e60977f8149",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/b3045c453da252dd1ffdbc2320190e60977f8149.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  3672
-                   },
-                   {
-                       "sha":  "b41322841d9cc5ec959151cb36809d1d452fd03d",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/b41322841d9cc5ec959151cb36809d1d452fd03d.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1555
-                   },
-                   {
-                       "sha":  "b4c075c20e5454ae81cb78880782db187c0e912c",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/b4c075c20e5454ae81cb78880782db187c0e912c.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1008
-                   },
-                   {
-                       "sha":  "b572431490cf3ccf3fb165bb477a21fafcdc703f",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/b572431490cf3ccf3fb165bb477a21fafcdc703f.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  8846
-                   },
-                   {
-                       "sha":  "b632715990d9673b171c047e16807cf288ad1b35",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/b632715990d9673b171c047e16807cf288ad1b35.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1173
-                   },
-                   {
-                       "sha":  "b818387941d0611786f8a41b0e7a9506b43535a9",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/b818387941d0611786f8a41b0e7a9506b43535a9.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  818
-                   },
-                   {
-                       "sha":  "ba991d7e479e4e44ea62a2b9766eecee92c0ca66",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/ba991d7e479e4e44ea62a2b9766eecee92c0ca66.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  700
-                   },
-                   {
-                       "sha":  "bb146b370aba54db44c73f219625c5fb514167c3",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/bb146b370aba54db44c73f219625c5fb514167c3.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  357
-                   },
-                   {
-                       "sha":  "bd49f2e97f904542a18c894beae4631902b5b775",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/bd49f2e97f904542a18c894beae4631902b5b775.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1709
-                   },
-                   {
-                       "sha":  "bd5068fb86e5bb40e6d92e9ff619fc668f52e7a9",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/bd5068fb86e5bb40e6d92e9ff619fc668f52e7a9.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  6052
-                   },
-                   {
-                       "sha":  "c6991985d9ffa3d6fee95dd7897c9b90ecb93fc5",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/c6991985d9ffa3d6fee95dd7897c9b90ecb93fc5.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1029
-                   },
-                   {
-                       "sha":  "cc68dec2da50f29b52a52705b3d1089e62b6e816",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/cc68dec2da50f29b52a52705b3d1089e62b6e816.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  2096
-                   },
-                   {
-                       "sha":  "d4923294986d45c05f568a95865b2104835b6f1a",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/d4923294986d45c05f568a95865b2104835b6f1a.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  288
-                   },
-                   {
-                       "sha":  "d73e86bc3385251b71e62c490f2a0ad3ad443285",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/d73e86bc3385251b71e62c490f2a0ad3ad443285.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1800
-                   },
-                   {
-                       "sha":  "d886046b2c60058e6f92f3b67da61fd8fc3a83e1",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/d886046b2c60058e6f92f3b67da61fd8fc3a83e1.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1048
-                   },
-                   {
-                       "sha":  "d8af34bfcf27bd9d8f46b92286b1939e790bc1c7",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/d8af34bfcf27bd9d8f46b92286b1939e790bc1c7.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1039
-                   },
-                   {
-                       "sha":  "d9987165e4f0b5809476e0b4c33f2f47af4c161b",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/d9987165e4f0b5809476e0b4c33f2f47af4c161b.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1098
-                   },
-                   {
-                       "sha":  "dcf9c6b62c5cb236e611a7732c2bbd8fa12cde37",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/dcf9c6b62c5cb236e611a7732c2bbd8fa12cde37.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1936
-                   },
-                   {
-                       "sha":  "dd67902a30301086456de678d952b12db558ff3c",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/dd67902a30301086456de678d952b12db558ff3c.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  540
-                   },
-                   {
-                       "sha":  "dee016e42fc6a7eec95851cfbdbe0624c0b041af",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/dee016e42fc6a7eec95851cfbdbe0624c0b041af.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1981
-                   },
-                   {
-                       "sha":  "e17f53b79a44ac5f5579d798ed031741559f1057",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/e17f53b79a44ac5f5579d798ed031741559f1057.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  634
-                   },
-                   {
-                       "sha":  "e25b7a487deb3f597644a23437d85ddb9bb17d9a",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/e25b7a487deb3f597644a23437d85ddb9bb17d9a.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  229
-                   },
-                   {
-                       "sha":  "e3efd504eaf63201af35fdce0d696bb38c53395f",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/e3efd504eaf63201af35fdce0d696bb38c53395f.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1277
-                   },
-                   {
-                       "sha":  "e49bbb9c2a7503b4c030f0694067d5cd2cf5e81a",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/e49bbb9c2a7503b4c030f0694067d5cd2cf5e81a.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  347
-                   },
-                   {
-                       "sha":  "e49f39185afb4a5f6ab2b994b1a046aefb686511",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/e49f39185afb4a5f6ab2b994b1a046aefb686511.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1313
-                   },
-                   {
-                       "sha":  "e865fadf07013f42b665c39486e5928bc7f26d2d",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/e865fadf07013f42b665c39486e5928bc7f26d2d.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  350
-                   },
-                   {
-                       "sha":  "ef737f2fd5f77ee8b2373bcd192ef31ba14d492b",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/ef737f2fd5f77ee8b2373bcd192ef31ba14d492b.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  333
-                   },
-                   {
-                       "sha":  "efadcb3d07316ca86a8ff994b2bcfc744865280a",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/efadcb3d07316ca86a8ff994b2bcfc744865280a.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1557
-                   },
-                   {
-                       "sha":  "eff00ba59f89a0c385d0f2080e5e5bf852888f81",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/eff00ba59f89a0c385d0f2080e5e5bf852888f81.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  3538
-                   },
-                   {
-                       "sha":  "f03253ccd9c730f318a31e8d54c5718364947c47",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/f03253ccd9c730f318a31e8d54c5718364947c47.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  958
-                   },
-                   {
-                       "sha":  "f1f021666ca3890cc161dc24b3d319afd9542150",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/f1f021666ca3890cc161dc24b3d319afd9542150.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1342
-                   },
-                   {
-                       "sha":  "f8be6d49ce2aaac578242cfb78d0cef318955acc",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/f8be6d49ce2aaac578242cfb78d0cef318955acc.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  350
-                   },
-                   {
-                       "sha":  "fce7e399a8278f3f99643b151ac4f22372d87c6b",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/fce7e399a8278f3f99643b151ac4f22372d87c6b.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  2321
-                   },
-                   {
-                       "sha":  "fd34997884e8aad2a5b3c926d0676dc5d1935bbc",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/fd34997884e8aad2a5b3c926d0676dc5d1935bbc.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  1171
-                   },
-                   {
-                       "sha":  "fe532cf4fc291f9c9007ee4aeaa5f0055d0def3a",
-                       "kind":  "icon",
-                       "ext":  "svg",
-                       "path":  "assets/icons/fe532cf4fc291f9c9007ee4aeaa5f0055d0def3a.svg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  4063
-                   },
-                   {
-                       "sha":  "0b2e0f5be47ba56050c9b3b67807a7ad737bcc8e",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/0b2e0f5be47ba56050c9b3b67807a7ad737bcc8e.jpg",
-                       "w":  428,
-                       "h":  679,
-                       "bytes":  68854
-                   },
-                   {
-                       "sha":  "1f81b734e8934189c58e15c350cf1556b1cf3ad0",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/1f81b734e8934189c58e15c350cf1556b1cf3ad0.jpg",
-                       "w":  720,
-                       "h":  1280,
-                       "bytes":  199778
-                   },
-                   {
-                       "sha":  "23f81969f628ad06296438584f978298573d10b8",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/23f81969f628ad06296438584f978298573d10b8.jpg",
-                       "w":  1024,
-                       "h":  1024,
-                       "bytes":  367207
-                   },
-                   {
-                       "sha":  "4ea7e0d87f3073adabcb4d15aeeedd740cd07643",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/4ea7e0d87f3073adabcb4d15aeeedd740cd07643.jpg",
-                       "w":  1024,
-                       "h":  1024,
-                       "bytes":  468593
-                   },
-                   {
-                       "sha":  "5a06f9d9aeec8929dfbecc58242370ade180d192",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/5a06f9d9aeec8929dfbecc58242370ade180d192.jpg",
-                       "w":  1024,
-                       "h":  1024,
-                       "bytes":  517507
-                   },
-                   {
-                       "sha":  "5aee898294f2a3a69c294ff46e01c96c14261f84",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/5aee898294f2a3a69c294ff46e01c96c14261f84.jpg",
-                       "w":  549,
-                       "h":  364,
-                       "bytes":  56079
-                   },
-                   {
-                       "sha":  "5fd926b61cce8291149523be00289d78b3b7b5d2",
-                       "kind":  "image",
-                       "ext":  "png",
-                       "path":  "assets/images/5fd926b61cce8291149523be00289d78b3b7b5d2.png",
-                       "w":  522,
-                       "h":  522,
-                       "bytes":  9156
-                   },
-                   {
-                       "sha":  "615dabecf180b9cddab902d35ca29700fd9d4c40",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/615dabecf180b9cddab902d35ca29700fd9d4c40.jpg",
-                       "w":  1200,
-                       "h":  1200,
-                       "bytes":  364017
-                   },
-                   {
-                       "sha":  "680c6f3c54087f01bbcdf6f9bafbe5ef3ef0d457",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/680c6f3c54087f01bbcdf6f9bafbe5ef3ef0d457.jpg",
-                       "w":  1024,
-                       "h":  1024,
-                       "bytes":  582671
-                   },
-                   {
-                       "sha":  "83fcae546fbfaec4e5b6e7980bb5365d0cf4c9e4",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/83fcae546fbfaec4e5b6e7980bb5365d0cf4c9e4.jpg",
-                       "w":  1200,
-                       "h":  1200,
-                       "bytes":  364017
-                   },
-                   {
-                       "sha":  "8bffd86102f472123f3e7fe0cfccb0b1e275a15e",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/8bffd86102f472123f3e7fe0cfccb0b1e275a15e.jpg",
-                       "w":  1024,
-                       "h":  1024,
-                       "bytes":  513055
-                   },
-                   {
-                       "sha":  "916ce803e52a4c51b4d9c8f4994668da852dcff1",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/916ce803e52a4c51b4d9c8f4994668da852dcff1.jpg",
-                       "w":  1024,
-                       "h":  559,
-                       "bytes":  242524
-                   },
-                   {
-                       "sha":  "a1d9f55fba0c922f702df6312dfc730d481d9c46",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/a1d9f55fba0c922f702df6312dfc730d481d9c46.jpg",
-                       "w":  1200,
-                       "h":  800,
-                       "bytes":  126265
-                   },
-                   {
-                       "sha":  "ad9f407e510c9863d23e9f4536be7df515b3bed2",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/ad9f407e510c9863d23e9f4536be7df515b3bed2.jpg",
-                       "w":  750,
-                       "h":  500,
-                       "bytes":  169541
-                   },
-                   {
-                       "sha":  "be6aadfe318be2836140ef486475976009e32a34",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/be6aadfe318be2836140ef486475976009e32a34.jpg",
-                       "w":  1024,
-                       "h":  1024,
-                       "bytes":  421352
-                   },
-                   {
-                       "sha":  "d41d5e0848924bc81706be83a6c9fe6a1e60c0e8",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/d41d5e0848924bc81706be83a6c9fe6a1e60c0e8.jpg",
-                       "w":  518,
-                       "h":  800,
-                       "bytes":  140505
-                   },
-                   {
-                       "sha":  "e1af5d24963f1de953445cc053705d89d49130fd",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/e1af5d24963f1de953445cc053705d89d49130fd.jpg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  225521
-                   },
-                   {
-                       "sha":  "e1c380d0fe338c6467944659e846a0f9c64879df",
-                       "kind":  "image",
-                       "ext":  "jpg",
-                       "path":  "assets/images/e1c380d0fe338c6467944659e846a0f9c64879df.jpg",
-                       "w":  null,
-                       "h":  null,
-                       "bytes":  204646
-                   }
-               ]
+{
+    "generatedAt": "2026-10-13T00:00:00",
+    "counts": {
+        "total": 136,
+        "icons": 118,
+        "images": 18
+    },
+    "assets": [
+        {
+            "sha": "02130f480c80f906befa3baa5ab1fdf6d327fd82",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/02130f480c80f906befa3baa5ab1fdf6d327fd82.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1197
+        },
+        {
+            "sha": "042357eb72843fcc732cf87814a881f75d3a8aba",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/042357eb72843fcc732cf87814a881f75d3a8aba.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1246
+        },
+        {
+            "sha": "064950e4ba668408d3433650bac624cf05a0c626",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/064950e4ba668408d3433650bac624cf05a0c626.svg",
+            "w": null,
+            "h": null,
+            "bytes": 832
+        },
+        {
+            "sha": "091d3ab263f91469af9789033f53ae49543eb966",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/091d3ab263f91469af9789033f53ae49543eb966.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1174
+        },
+        {
+            "sha": "0984935e8e6fa6f64e8c91c02ba3643a23e05f35",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/0984935e8e6fa6f64e8c91c02ba3643a23e05f35.svg",
+            "w": null,
+            "h": null,
+            "bytes": 2453
+        },
+        {
+            "sha": "0c97f46d4f8317ec513f81177c282912226141c2",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/0c97f46d4f8317ec513f81177c282912226141c2.svg",
+            "w": null,
+            "h": null,
+            "bytes": 345
+        },
+        {
+            "sha": "0f266937dbc7f47ae09ead6161676490e57424f2",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/0f266937dbc7f47ae09ead6161676490e57424f2.svg",
+            "w": null,
+            "h": null,
+            "bytes": 574
+        },
+        {
+            "sha": "13655dc5f4f5c913570be0285f420059a4df9167",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/13655dc5f4f5c913570be0285f420059a4df9167.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1764
+        },
+        {
+            "sha": "1422e538c2c6069584f2be50ff8d8a1df87507c0",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/1422e538c2c6069584f2be50ff8d8a1df87507c0.svg",
+            "w": null,
+            "h": null,
+            "bytes": 335
+        },
+        {
+            "sha": "1633b862dd265c0272284a2162ca7f0f56104f4c",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/1633b862dd265c0272284a2162ca7f0f56104f4c.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1496
+        },
+        {
+            "sha": "16e0c83d12c6c41291f02c27fd2cd0019740595f",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/16e0c83d12c6c41291f02c27fd2cd0019740595f.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1574
+        },
+        {
+            "sha": "17ff6b81d5a4ce835ab648a932a53a492539509c",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/17ff6b81d5a4ce835ab648a932a53a492539509c.svg",
+            "w": null,
+            "h": null,
+            "bytes": 745
+        },
+        {
+            "sha": "1bc17606b2180b12291e17a8b9239ccfe9282fc7",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/1bc17606b2180b12291e17a8b9239ccfe9282fc7.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1067
+        },
+        {
+            "sha": "200d5ec8666be0da1473ff5b003f26fdc460de58",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/200d5ec8666be0da1473ff5b003f26fdc460de58.svg",
+            "w": null,
+            "h": null,
+            "bytes": 3244
+        },
+        {
+            "sha": "232621d7fc41d275216ae4958c8a51d19a457a3a",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/232621d7fc41d275216ae4958c8a51d19a457a3a.svg",
+            "w": null,
+            "h": null,
+            "bytes": 585
+        },
+        {
+            "sha": "2681f967727b559d12b95a177cb34563fa88c3c2",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/2681f967727b559d12b95a177cb34563fa88c3c2.svg",
+            "w": null,
+            "h": null,
+            "bytes": 508
+        },
+        {
+            "sha": "277e53b539780ab8332228aed88ed415049ceba2",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/277e53b539780ab8332228aed88ed415049ceba2.svg",
+            "w": null,
+            "h": null,
+            "bytes": 6541
+        },
+        {
+            "sha": "284d83d1607bcf4841f417f1e61535a592d60489",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/284d83d1607bcf4841f417f1e61535a592d60489.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1046
+        },
+        {
+            "sha": "2c51ffd1bf8dcd5ac3b37960817784fcdbffac42",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/2c51ffd1bf8dcd5ac3b37960817784fcdbffac42.svg",
+            "w": null,
+            "h": null,
+            "bytes": 990
+        },
+        {
+            "sha": "2e6408ac1b3fac5f48f1b88828bb3fac7f8c00fc",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/2e6408ac1b3fac5f48f1b88828bb3fac7f8c00fc.svg",
+            "w": null,
+            "h": null,
+            "bytes": 283
+        },
+        {
+            "sha": "2fa8343d259af84d9bf2691f0331c1677b703040",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/2fa8343d259af84d9bf2691f0331c1677b703040.svg",
+            "w": null,
+            "h": null,
+            "bytes": 4263
+        },
+        {
+            "sha": "31a2dc7cf9b51123d1fe48f4b7791761038cc104",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/31a2dc7cf9b51123d1fe48f4b7791761038cc104.svg",
+            "w": null,
+            "h": null,
+            "bytes": 479
+        },
+        {
+            "sha": "3484631a58aeb12eb4b1ca0859c14cdee65a5991",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/3484631a58aeb12eb4b1ca0859c14cdee65a5991.svg",
+            "w": null,
+            "h": null,
+            "bytes": 2411
+        },
+        {
+            "sha": "374e1449c0e2a79c1133cb271726b8629001c3e6",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/374e1449c0e2a79c1133cb271726b8629001c3e6.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1625
+        },
+        {
+            "sha": "38f7dd194df12f703e8c2bcd87e4e6c39201801a",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/38f7dd194df12f703e8c2bcd87e4e6c39201801a.svg",
+            "w": null,
+            "h": null,
+            "bytes": 832
+        },
+        {
+            "sha": "39e90148463a205633460bcfcba12bf6f83db64a",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/39e90148463a205633460bcfcba12bf6f83db64a.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1449
+        },
+        {
+            "sha": "3ab2a16f06867678af0e9bf237ad440ece3141fa",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/3ab2a16f06867678af0e9bf237ad440ece3141fa.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1294
+        },
+        {
+            "sha": "3c4a16316f4fc77064326da38a9e6111d77f1a01",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/3c4a16316f4fc77064326da38a9e6111d77f1a01.svg",
+            "w": null,
+            "h": null,
+            "bytes": 6472
+        },
+        {
+            "sha": "3cc16617bca9652e3982eef86d8e3df2ab4a2ec2",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/3cc16617bca9652e3982eef86d8e3df2ab4a2ec2.svg",
+            "w": null,
+            "h": null,
+            "bytes": 3536
+        },
+        {
+            "sha": "3de30bfd240ec309374535a8edd16a2e24b08f07",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/3de30bfd240ec309374535a8edd16a2e24b08f07.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1625
+        },
+        {
+            "sha": "3e8fa98f234a1d513786c84bc4a1e15dc1feaea6",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/3e8fa98f234a1d513786c84bc4a1e15dc1feaea6.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1627
+        },
+        {
+            "sha": "3fc8a3bedb27a05d125fe5010a63fd9bd0783b43",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/3fc8a3bedb27a05d125fe5010a63fd9bd0783b43.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1953
+        },
+        {
+            "sha": "4398fe693c8dac56de10c52c50bbbaa7e9b2a207",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/4398fe693c8dac56de10c52c50bbbaa7e9b2a207.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1123
+        },
+        {
+            "sha": "47969e0c2ecbd2885404bd8cbd67767533d2a3c3",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/47969e0c2ecbd2885404bd8cbd67767533d2a3c3.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1555
+        },
+        {
+            "sha": "515651936e1841aad38808d964faa4c98b8bba0a",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/515651936e1841aad38808d964faa4c98b8bba0a.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1479
+        },
+        {
+            "sha": "57920ea7ee9109763b28b8e8b35d87a1dbfdce4c",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/57920ea7ee9109763b28b8e8b35d87a1dbfdce4c.svg",
+            "w": null,
+            "h": null,
+            "bytes": 350
+        },
+        {
+            "sha": "582a8ddb04f1242063e58741fe02c93560b55cc5",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/582a8ddb04f1242063e58741fe02c93560b55cc5.svg",
+            "w": null,
+            "h": null,
+            "bytes": 2323
+        },
+        {
+            "sha": "58a5d2eac5ce61ecdcbfacb0c870c71abac51886",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/58a5d2eac5ce61ecdcbfacb0c870c71abac51886.svg",
+            "w": null,
+            "h": null,
+            "bytes": 3003
+        },
+        {
+            "sha": "5aaaa51f244abcfb56f8da61543bb79b2144f90a",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/5aaaa51f244abcfb56f8da61543bb79b2144f90a.svg",
+            "w": null,
+            "h": null,
+            "bytes": 3670
+        },
+        {
+            "sha": "61e410580a1154c9d0e46fe0bbc09d055ca75034",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/61e410580a1154c9d0e46fe0bbc09d055ca75034.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1597
+        },
+        {
+            "sha": "6336823ca0e4785e6d79804711688087b86e6289",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/6336823ca0e4785e6d79804711688087b86e6289.svg",
+            "w": null,
+            "h": null,
+            "bytes": 841
+        },
+        {
+            "sha": "63bd523e40fe86456993c5dc397b57c50ddaf3a7",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/63bd523e40fe86456993c5dc397b57c50ddaf3a7.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1007
+        },
+        {
+            "sha": "69aded8418e740d6bda9f92bfeef8d864a84fe7f",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/69aded8418e740d6bda9f92bfeef8d864a84fe7f.svg",
+            "w": null,
+            "h": null,
+            "bytes": 2755
+        },
+        {
+            "sha": "69cd7a79cb4172c2d6b85e732ff94aea63378d4c",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/69cd7a79cb4172c2d6b85e732ff94aea63378d4c.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1171
+        },
+        {
+            "sha": "6a70a53d996b3f923a1d490f9aab3b2896b9e220",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/6a70a53d996b3f923a1d490f9aab3b2896b9e220.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1005
+        },
+        {
+            "sha": "6e06a745ee1bbc9b5d3db70ee27cadf1535ef3a6",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/6e06a745ee1bbc9b5d3db70ee27cadf1535ef3a6.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1134
+        },
+        {
+            "sha": "6f62cf306191c3a4566cde0b8c08a2c2bff60a80",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/6f62cf306191c3a4566cde0b8c08a2c2bff60a80.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1382
+        },
+        {
+            "sha": "6fe50b8e12b3491cb364b67205a8656d1e9fc141",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/6fe50b8e12b3491cb364b67205a8656d1e9fc141.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1262
+        },
+        {
+            "sha": "7360fdf6fcb97da9a8596989f80c5862221146cd",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/7360fdf6fcb97da9a8596989f80c5862221146cd.svg",
+            "w": null,
+            "h": null,
+            "bytes": 272
+        },
+        {
+            "sha": "746c5a179d5139b05592888c60dde480e03891fd",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/746c5a179d5139b05592888c60dde480e03891fd.svg",
+            "w": null,
+            "h": null,
+            "bytes": 5351
+        },
+        {
+            "sha": "756880f66dbb2c1c46a221bcb89b919fa395b4fc",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/756880f66dbb2c1c46a221bcb89b919fa395b4fc.svg",
+            "w": null,
+            "h": null,
+            "bytes": 911
+        },
+        {
+            "sha": "770a02f455cd831c886a3cb47071494d7a089a40",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/770a02f455cd831c886a3cb47071494d7a089a40.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1563
+        },
+        {
+            "sha": "795eded994b37bb1d12d3d5d792ee7fa0bd116cb",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/795eded994b37bb1d12d3d5d792ee7fa0bd116cb.svg",
+            "w": null,
+            "h": null,
+            "bytes": 274
+        },
+        {
+            "sha": "7c1bfeeab8abbce777d4a8167432ac79152b568f",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/7c1bfeeab8abbce777d4a8167432ac79152b568f.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1122
+        },
+        {
+            "sha": "82c379a7225b48bf2a156b5e7cbf7cfc3287e792",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/82c379a7225b48bf2a156b5e7cbf7cfc3287e792.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1557
+        },
+        {
+            "sha": "83fa194c6dbe83a4361e999218ba218625294047",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/83fa194c6dbe83a4361e999218ba218625294047.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1152
+        },
+        {
+            "sha": "8463a5d6644c3e3287755842d99620b29794033c",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/8463a5d6644c3e3287755842d99620b29794033c.svg",
+            "w": null,
+            "h": null,
+            "bytes": 229
+        },
+        {
+            "sha": "8637549cd036f77b062483c5cb4d60910a8c92ab",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/8637549cd036f77b062483c5cb4d60910a8c92ab.svg",
+            "w": null,
+            "h": null,
+            "bytes": 662
+        },
+        {
+            "sha": "86fcf6188b602b790546f60663c6049b287264fd",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/86fcf6188b602b790546f60663c6049b287264fd.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1415
+        },
+        {
+            "sha": "8832c9f72a47e02a3bbffc64b85f1ff410274900",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/8832c9f72a47e02a3bbffc64b85f1ff410274900.svg",
+            "w": null,
+            "h": null,
+            "bytes": 260
+        },
+        {
+            "sha": "88bffc6ff73d42552309c4499e67fb62a125610e",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/88bffc6ff73d42552309c4499e67fb62a125610e.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1774
+        },
+        {
+            "sha": "8936dfb0c38474f79a77cfbfcb81277f53fb701e",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/8936dfb0c38474f79a77cfbfcb81277f53fb701e.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1674
+        },
+        {
+            "sha": "89e633c0b7f09b64d85d3fe221bf884c6a28e687",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/89e633c0b7f09b64d85d3fe221bf884c6a28e687.svg",
+            "w": null,
+            "h": null,
+            "bytes": 828
+        },
+        {
+            "sha": "8bcc67bdd8ea6bacf5302fbd05a5ad2f1f2926cb",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/8bcc67bdd8ea6bacf5302fbd05a5ad2f1f2926cb.svg",
+            "w": null,
+            "h": null,
+            "bytes": 636
+        },
+        {
+            "sha": "901b8b3d55a5ad056e7fa6f658f50a50f0b7cd88",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/901b8b3d55a5ad056e7fa6f658f50a50f0b7cd88.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1317
+        },
+        {
+            "sha": "93dee2dbdbb548c6edee280137d0d6248f66edd2",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/93dee2dbdbb548c6edee280137d0d6248f66edd2.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1407
+        },
+        {
+            "sha": "94312fbfd7eb7a516ff388c59c4dafa9851503ba",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/94312fbfd7eb7a516ff388c59c4dafa9851503ba.svg",
+            "w": null,
+            "h": null,
+            "bytes": 347
+        },
+        {
+            "sha": "94bcff3fff34c3ecd002a0cd551cf71f7bbef393",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/94bcff3fff34c3ecd002a0cd551cf71f7bbef393.svg",
+            "w": null,
+            "h": null,
+            "bytes": 658
+        },
+        {
+            "sha": "98832cea57af00afa1ed2540a2499464115251f3",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/98832cea57af00afa1ed2540a2499464115251f3.svg",
+            "w": null,
+            "h": null,
+            "bytes": 3816
+        },
+        {
+            "sha": "9a842c4b65e2591f55bfb50fa02c42b6ad7af785",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/9a842c4b65e2591f55bfb50fa02c42b6ad7af785.svg",
+            "w": null,
+            "h": null,
+            "bytes": 960
+        },
+        {
+            "sha": "9b2be4d4fe2969ff3fb5aaeaf1ae7f2900e84c7a",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/9b2be4d4fe2969ff3fb5aaeaf1ae7f2900e84c7a.svg",
+            "w": null,
+            "h": null,
+            "bytes": 5209
+        },
+        {
+            "sha": "9b5154c0a340bbf8b66fab07d8b56c81d033d19e",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/9b5154c0a340bbf8b66fab07d8b56c81d033d19e.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1947
+        },
+        {
+            "sha": "9d0d832e994ea5410e308af8f604666e8a837a1c",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/9d0d832e994ea5410e308af8f604666e8a837a1c.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1424
+        },
+        {
+            "sha": "9e3e7ad618d45456e1f259c40703d756bea890aa",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/9e3e7ad618d45456e1f259c40703d756bea890aa.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1358
+        },
+        {
+            "sha": "a0a7f93bd94de47b5b65ca2e78b7106ffce27179",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/a0a7f93bd94de47b5b65ca2e78b7106ffce27179.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1054
+        },
+        {
+            "sha": "a6f91e88e5d5585c53aff52712cabf3d40a75bc2",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/a6f91e88e5d5585c53aff52712cabf3d40a75bc2.svg",
+            "w": null,
+            "h": null,
+            "bytes": 3893
+        },
+        {
+            "sha": "a7ce4d8f5b3d6d8e199c650a5675b1ebd8ae3c7b",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/a7ce4d8f5b3d6d8e199c650a5675b1ebd8ae3c7b.svg",
+            "w": null,
+            "h": null,
+            "bytes": 335
+        },
+        {
+            "sha": "ae9c38a8ef9c9b218f15df152c1da515082ce4e1",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/ae9c38a8ef9c9b218f15df152c1da515082ce4e1.svg",
+            "w": null,
+            "h": null,
+            "bytes": 565
+        },
+        {
+            "sha": "b0edba78cbc793858bc2a5725e002e56704df17b",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/b0edba78cbc793858bc2a5725e002e56704df17b.svg",
+            "w": null,
+            "h": null,
+            "bytes": 345
+        },
+        {
+            "sha": "b209a8b63b014c4a955c74fbaa5044b471c1dfcb",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/b209a8b63b014c4a955c74fbaa5044b471c1dfcb.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1501
+        },
+        {
+            "sha": "b29cf6263f25e6b7d930eb277ced477bb23100db",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/b29cf6263f25e6b7d930eb277ced477bb23100db.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1282
+        },
+        {
+            "sha": "b2af88a34e62691e1ab0d1c509b60cca02a24810",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/b2af88a34e62691e1ab0d1c509b60cca02a24810.svg",
+            "w": null,
+            "h": null,
+            "bytes": 832
+        },
+        {
+            "sha": "b3045c453da252dd1ffdbc2320190e60977f8149",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/b3045c453da252dd1ffdbc2320190e60977f8149.svg",
+            "w": null,
+            "h": null,
+            "bytes": 3672
+        },
+        {
+            "sha": "b41322841d9cc5ec959151cb36809d1d452fd03d",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/b41322841d9cc5ec959151cb36809d1d452fd03d.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1555
+        },
+        {
+            "sha": "b4c075c20e5454ae81cb78880782db187c0e912c",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/b4c075c20e5454ae81cb78880782db187c0e912c.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1008
+        },
+        {
+            "sha": "b572431490cf3ccf3fb165bb477a21fafcdc703f",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/b572431490cf3ccf3fb165bb477a21fafcdc703f.svg",
+            "w": null,
+            "h": null,
+            "bytes": 8846
+        },
+        {
+            "sha": "b632715990d9673b171c047e16807cf288ad1b35",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/b632715990d9673b171c047e16807cf288ad1b35.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1173
+        },
+        {
+            "sha": "b818387941d0611786f8a41b0e7a9506b43535a9",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/b818387941d0611786f8a41b0e7a9506b43535a9.svg",
+            "w": null,
+            "h": null,
+            "bytes": 818
+        },
+        {
+            "sha": "ba991d7e479e4e44ea62a2b9766eecee92c0ca66",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/ba991d7e479e4e44ea62a2b9766eecee92c0ca66.svg",
+            "w": null,
+            "h": null,
+            "bytes": 700
+        },
+        {
+            "sha": "bb146b370aba54db44c73f219625c5fb514167c3",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/bb146b370aba54db44c73f219625c5fb514167c3.svg",
+            "w": null,
+            "h": null,
+            "bytes": 357
+        },
+        {
+            "sha": "bd49f2e97f904542a18c894beae4631902b5b775",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/bd49f2e97f904542a18c894beae4631902b5b775.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1709
+        },
+        {
+            "sha": "bd5068fb86e5bb40e6d92e9ff619fc668f52e7a9",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/bd5068fb86e5bb40e6d92e9ff619fc668f52e7a9.svg",
+            "w": null,
+            "h": null,
+            "bytes": 6052
+        },
+        {
+            "sha": "c6991985d9ffa3d6fee95dd7897c9b90ecb93fc5",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/c6991985d9ffa3d6fee95dd7897c9b90ecb93fc5.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1029
+        },
+        {
+            "sha": "cc68dec2da50f29b52a52705b3d1089e62b6e816",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/cc68dec2da50f29b52a52705b3d1089e62b6e816.svg",
+            "w": null,
+            "h": null,
+            "bytes": 2096
+        },
+        {
+            "sha": "d4923294986d45c05f568a95865b2104835b6f1a",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/d4923294986d45c05f568a95865b2104835b6f1a.svg",
+            "w": null,
+            "h": null,
+            "bytes": 288
+        },
+        {
+            "sha": "d73e86bc3385251b71e62c490f2a0ad3ad443285",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/d73e86bc3385251b71e62c490f2a0ad3ad443285.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1800
+        },
+        {
+            "sha": "d886046b2c60058e6f92f3b67da61fd8fc3a83e1",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/d886046b2c60058e6f92f3b67da61fd8fc3a83e1.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1048
+        },
+        {
+            "sha": "d8af34bfcf27bd9d8f46b92286b1939e790bc1c7",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/d8af34bfcf27bd9d8f46b92286b1939e790bc1c7.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1039
+        },
+        {
+            "sha": "d9987165e4f0b5809476e0b4c33f2f47af4c161b",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/d9987165e4f0b5809476e0b4c33f2f47af4c161b.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1098
+        },
+        {
+            "sha": "dcf9c6b62c5cb236e611a7732c2bbd8fa12cde37",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/dcf9c6b62c5cb236e611a7732c2bbd8fa12cde37.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1936
+        },
+        {
+            "sha": "dd67902a30301086456de678d952b12db558ff3c",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/dd67902a30301086456de678d952b12db558ff3c.svg",
+            "w": null,
+            "h": null,
+            "bytes": 540
+        },
+        {
+            "sha": "dee016e42fc6a7eec95851cfbdbe0624c0b041af",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/dee016e42fc6a7eec95851cfbdbe0624c0b041af.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1981
+        },
+        {
+            "sha": "e17f53b79a44ac5f5579d798ed031741559f1057",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/e17f53b79a44ac5f5579d798ed031741559f1057.svg",
+            "w": null,
+            "h": null,
+            "bytes": 634
+        },
+        {
+            "sha": "e25b7a487deb3f597644a23437d85ddb9bb17d9a",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/e25b7a487deb3f597644a23437d85ddb9bb17d9a.svg",
+            "w": null,
+            "h": null,
+            "bytes": 229
+        },
+        {
+            "sha": "e3efd504eaf63201af35fdce0d696bb38c53395f",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/e3efd504eaf63201af35fdce0d696bb38c53395f.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1277
+        },
+        {
+            "sha": "e49bbb9c2a7503b4c030f0694067d5cd2cf5e81a",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/e49bbb9c2a7503b4c030f0694067d5cd2cf5e81a.svg",
+            "w": null,
+            "h": null,
+            "bytes": 347
+        },
+        {
+            "sha": "e49f39185afb4a5f6ab2b994b1a046aefb686511",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/e49f39185afb4a5f6ab2b994b1a046aefb686511.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1313
+        },
+        {
+            "sha": "e865fadf07013f42b665c39486e5928bc7f26d2d",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/e865fadf07013f42b665c39486e5928bc7f26d2d.svg",
+            "w": null,
+            "h": null,
+            "bytes": 350
+        },
+        {
+            "sha": "ef737f2fd5f77ee8b2373bcd192ef31ba14d492b",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/ef737f2fd5f77ee8b2373bcd192ef31ba14d492b.svg",
+            "w": null,
+            "h": null,
+            "bytes": 333
+        },
+        {
+            "sha": "efadcb3d07316ca86a8ff994b2bcfc744865280a",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/efadcb3d07316ca86a8ff994b2bcfc744865280a.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1557
+        },
+        {
+            "sha": "eff00ba59f89a0c385d0f2080e5e5bf852888f81",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/eff00ba59f89a0c385d0f2080e5e5bf852888f81.svg",
+            "w": null,
+            "h": null,
+            "bytes": 3538
+        },
+        {
+            "sha": "f03253ccd9c730f318a31e8d54c5718364947c47",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/f03253ccd9c730f318a31e8d54c5718364947c47.svg",
+            "w": null,
+            "h": null,
+            "bytes": 958
+        },
+        {
+            "sha": "f1f021666ca3890cc161dc24b3d319afd9542150",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/f1f021666ca3890cc161dc24b3d319afd9542150.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1342
+        },
+        {
+            "sha": "f8be6d49ce2aaac578242cfb78d0cef318955acc",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/f8be6d49ce2aaac578242cfb78d0cef318955acc.svg",
+            "w": null,
+            "h": null,
+            "bytes": 350
+        },
+        {
+            "sha": "fce7e399a8278f3f99643b151ac4f22372d87c6b",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/fce7e399a8278f3f99643b151ac4f22372d87c6b.svg",
+            "w": null,
+            "h": null,
+            "bytes": 2321
+        },
+        {
+            "sha": "fd34997884e8aad2a5b3c926d0676dc5d1935bbc",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/fd34997884e8aad2a5b3c926d0676dc5d1935bbc.svg",
+            "w": null,
+            "h": null,
+            "bytes": 1171
+        },
+        {
+            "sha": "fe532cf4fc291f9c9007ee4aeaa5f0055d0def3a",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/fe532cf4fc291f9c9007ee4aeaa5f0055d0def3a.svg",
+            "w": null,
+            "h": null,
+            "bytes": 4063
+        },
+        {
+            "sha": "soil-list-manual",
+            "kind": "icon",
+            "ext": "svg",
+            "path": "assets/icons/soil-list-manual.svg",
+            "w": null,
+            "h": null,
+            "bytes": 516
+        },
+        {
+            "sha": "0b2e0f5be47ba56050c9b3b67807a7ad737bcc8e",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/0b2e0f5be47ba56050c9b3b67807a7ad737bcc8e.jpg",
+            "w": 428,
+            "h": 679,
+            "bytes": 68854
+        },
+        {
+            "sha": "1f81b734e8934189c58e15c350cf1556b1cf3ad0",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/1f81b734e8934189c58e15c350cf1556b1cf3ad0.jpg",
+            "w": 720,
+            "h": 1280,
+            "bytes": 199778
+        },
+        {
+            "sha": "23f81969f628ad06296438584f978298573d10b8",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/23f81969f628ad06296438584f978298573d10b8.jpg",
+            "w": 1024,
+            "h": 1024,
+            "bytes": 367207
+        },
+        {
+            "sha": "4ea7e0d87f3073adabcb4d15aeeedd740cd07643",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/4ea7e0d87f3073adabcb4d15aeeedd740cd07643.jpg",
+            "w": 1024,
+            "h": 1024,
+            "bytes": 468593
+        },
+        {
+            "sha": "5a06f9d9aeec8929dfbecc58242370ade180d192",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/5a06f9d9aeec8929dfbecc58242370ade180d192.jpg",
+            "w": 1024,
+            "h": 1024,
+            "bytes": 517507
+        },
+        {
+            "sha": "5aee898294f2a3a69c294ff46e01c96c14261f84",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/5aee898294f2a3a69c294ff46e01c96c14261f84.jpg",
+            "w": 549,
+            "h": 364,
+            "bytes": 56079
+        },
+        {
+            "sha": "5fd926b61cce8291149523be00289d78b3b7b5d2",
+            "kind": "image",
+            "ext": "png",
+            "path": "assets/images/5fd926b61cce8291149523be00289d78b3b7b5d2.png",
+            "w": 522,
+            "h": 522,
+            "bytes": 9156
+        },
+        {
+            "sha": "615dabecf180b9cddab902d35ca29700fd9d4c40",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/615dabecf180b9cddab902d35ca29700fd9d4c40.jpg",
+            "w": 1200,
+            "h": 1200,
+            "bytes": 364017
+        },
+        {
+            "sha": "680c6f3c54087f01bbcdf6f9bafbe5ef3ef0d457",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/680c6f3c54087f01bbcdf6f9bafbe5ef3ef0d457.jpg",
+            "w": 1024,
+            "h": 1024,
+            "bytes": 582671
+        },
+        {
+            "sha": "83fcae546fbfaec4e5b6e7980bb5365d0cf4c9e4",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/83fcae546fbfaec4e5b6e7980bb5365d0cf4c9e4.jpg",
+            "w": 1200,
+            "h": 1200,
+            "bytes": 364017
+        },
+        {
+            "sha": "8bffd86102f472123f3e7fe0cfccb0b1e275a15e",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/8bffd86102f472123f3e7fe0cfccb0b1e275a15e.jpg",
+            "w": 1024,
+            "h": 1024,
+            "bytes": 513055
+        },
+        {
+            "sha": "916ce803e52a4c51b4d9c8f4994668da852dcff1",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/916ce803e52a4c51b4d9c8f4994668da852dcff1.jpg",
+            "w": 1024,
+            "h": 559,
+            "bytes": 242524
+        },
+        {
+            "sha": "a1d9f55fba0c922f702df6312dfc730d481d9c46",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/a1d9f55fba0c922f702df6312dfc730d481d9c46.jpg",
+            "w": 1200,
+            "h": 800,
+            "bytes": 126265
+        },
+        {
+            "sha": "ad9f407e510c9863d23e9f4536be7df515b3bed2",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/ad9f407e510c9863d23e9f4536be7df515b3bed2.jpg",
+            "w": 750,
+            "h": 500,
+            "bytes": 169541
+        },
+        {
+            "sha": "be6aadfe318be2836140ef486475976009e32a34",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/be6aadfe318be2836140ef486475976009e32a34.jpg",
+            "w": 1024,
+            "h": 1024,
+            "bytes": 421352
+        },
+        {
+            "sha": "d41d5e0848924bc81706be83a6c9fe6a1e60c0e8",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/d41d5e0848924bc81706be83a6c9fe6a1e60c0e8.jpg",
+            "w": 518,
+            "h": 800,
+            "bytes": 140505
+        },
+        {
+            "sha": "e1af5d24963f1de953445cc053705d89d49130fd",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/e1af5d24963f1de953445cc053705d89d49130fd.jpg",
+            "w": null,
+            "h": null,
+            "bytes": 225521
+        },
+        {
+            "sha": "e1c380d0fe338c6467944659e846a0f9c64879df",
+            "kind": "image",
+            "ext": "jpg",
+            "path": "assets/images/e1c380d0fe338c6467944659e846a0f9c64879df.jpg",
+            "w": null,
+            "h": null,
+            "bytes": 204646
+        }
+    ]
 }

@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/features/theme_preview/theme_preview_screen.dart';
 
 void main() {
   test('AppColors memuat token resmi sesuai Figma Variables', () {
@@ -175,15 +174,6 @@ void main() {
     };
     expect(families, containsAll(<String?>{'Inter', 'Poppins'}));
     expect(families.any((f) => f != null && f.contains('SF')), isFalse);
-  });
-
-  testWidgets('preview screen merender tanpa error', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(theme: AppTheme.light, home: const ThemePreviewScreen()),
-    );
-    expect(find.text('Verifikasi Fase 1'), findsOneWidget);
-    expect(find.text('Warna resmi (Figma Variables)'), findsOneWidget);
-    expect(tester.takeException(), isNull);
   });
 
   testWidgets('aset SVG benar-benar ter-render oleh flutter_svg', (

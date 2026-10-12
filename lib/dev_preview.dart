@@ -140,13 +140,20 @@ class _AddPlantPreview extends StatelessWidget {
     // Semai hanya sekali per build; controller reset() sendiri di post-frame
     // pertama milik AddPlantFlow.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final add = context.read<AddPlantController>();
-      switch (step) {
-        case 1:
-          add.setMedia(PlantingMedia.pot.name);
-        case 2:
-          add.markSoilDetected();
-      }
+      // Post-frame kedua: callback yang didaftarkan saat build berjalan
+      // SEBELUM initState() AddPlantFlow mendaftarkan reset() miliknya, jadi
+      // menyemai di frame pertama justru langsung dihapus reset(). Menyemai di
+      // frame kedua menjamin urutannya benar.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        final add = context.read<AddPlantController>();
+        switch (step) {
+          case 1:
+            add.setMedia(PlantingMedia.pot.name);
+          case 2:
+            add.markSoilDetected();
+        }
+      });
     });
     return AddPlantFlow(initialStep: step);
   }
