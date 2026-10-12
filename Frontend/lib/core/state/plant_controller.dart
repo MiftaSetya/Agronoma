@@ -99,6 +99,30 @@ class PlantController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Menyimpan hasil drawer "Setelan Tanaman".
+  Future<void> updatePlant(
+    String plantId, {
+    String? name,
+    String? location,
+    String? place,
+    GrowthPhase? phase,
+    String? soilName,
+  }) async {
+    final updated = await _repository.updatePlant(
+      plantId,
+      name: name,
+      location: location,
+      place: place,
+      phase: phase,
+      soilName: soilName,
+    );
+    _plants = [
+      for (final p in _plants)
+        if (p.id == plantId) updated else p,
+    ];
+    notifyListeners();
+  }
+
   /// Menambahkan tanaman baru hasil wizard, lalu mengembalikannya.
   Future<Plant> addPlant({
     required String name,

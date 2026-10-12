@@ -111,6 +111,15 @@ class AppAssets {
   static const String closeLine =
       '$_icons/515651936e1841aad38808d964faa4c98b8bba0a.svg';
 
+  /// Kamera (mingcute:camera-2-fill) putih — tombol ganti foto di drawer
+  /// "Setelan Tanaman". Asli 20x21,8.
+  static const String cameraFill =
+      '$_icons/8936dfb0c38474f79a77cfbfcb81277f53fb701e.svg';
+
+  /// Lokasi terisi abu (#898B87) — awalan field "Lokasi Tanaman". Asli 14,7x20.
+  static const String locationTag =
+      '$_icons/e49f39185afb4a5f6ab2b994b1a046aefb686511.svg';
+
   // ─────────────────────────────────────────────────────────────────────────
   // Ikon aksi & status
   // ─────────────────────────────────────────────────────────────────────────

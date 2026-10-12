@@ -10,6 +10,7 @@ import 'package:frontend/core/state/plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_common.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
+import 'package:frontend/features/plant_detail/plant_settings_sheet.dart';
 
 /// Layar Plant Detail — frame `Plant detail v3` (node `461:6012`).
 ///
@@ -172,7 +173,7 @@ class _PhotoHeader extends StatelessWidget {
               right: AppSpacing.lg,
               bottom: AppSpacing.sm,
             ),
-            child: const SizedBox(
+            child: SizedBox(
               height: 46,
               child: Row(
                 children: [
@@ -184,12 +185,15 @@ class _PhotoHeader extends StatelessWidget {
                       style: AppTextStyles.headlineMediumOnDark,
                     ),
                   ),
-                  // Design memakai gir pengaturan; panel Edit Tanaman belum
-                  // dibangun, jadi tombolnya sengaja belum bereaksi.
-                  SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: AgroIcon(AppAssets.settingsLineWhite, size: 24),
+                  // Design memakai gir pengaturan yang membuka panel "Setelan
+                  // Tanaman" (frame `EditPlant drawer`, node `291:2872`).
+                  GestureDetector(
+                    onTap: () => PlantSettingsSheet.show(context, plant),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: AgroIcon(AppAssets.settingsLineWhite, size: 24),
+                    ),
                   ),
                 ],
               ),

@@ -28,6 +28,18 @@ abstract class PlantRepository {
   /// Menandai sebuah tugas perawatan sebagai selesai/belum.
   Future<Plant> setTaskDone(String plantId, String taskTitle, bool done);
 
+  /// Menyimpan hasil pengubahan tanaman dari drawer "Setelan Tanaman".
+  ///
+  /// Semua field opsional: hanya yang dikirim yang berubah.
+  Future<Plant> updatePlant(
+    String plantId, {
+    String? name,
+    String? location,
+    String? place,
+    GrowthPhase? phase,
+    String? soilName,
+  });
+
   /// Rekomendasi tanaman untuk langkah 4 wizard.
   Future<List<PlantRecommendation>> getRecommendations({
     required String location,
@@ -118,6 +130,29 @@ class MockPlantRepository implements PlantRepository {
         for (final t in plant.tasks)
           if (t.title == taskTitle) t.copyWith(done: done) else t,
       ],
+    );
+    _plants[index] = updated;
+    return updated;
+  }
+
+  @override
+  Future<Plant> updatePlant(
+    String plantId, {
+    String? name,
+    String? location,
+    String? place,
+    GrowthPhase? phase,
+    String? soilName,
+  }) async {
+    await Future<void>.delayed(_latency);
+    final index = _plants.indexWhere((p) => p.id == plantId);
+    if (index < 0) return _plants.first;
+    final updated = _plants[index].copyWith(
+      name: name,
+      location: location,
+      place: place,
+      phase: phase,
+      soilName: soilName,
     );
     _plants[index] = updated;
     return updated;
