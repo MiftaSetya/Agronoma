@@ -9,18 +9,12 @@ $Manifest = Join-Path $Root 'tool\manifest.json'
 $Temp     = Join-Path $env:TEMP 'agronoma_raw'
 New-Item -ItemType Directory -Force -Path $Temp, $ImageDir | Out-Null
 
-$hashes = @(
-  'a1d9f55fba0c922f702df6312dfc730d481d9c46','83fcae546fbfaec4e5b6e7980bb5365d0cf4c9e4',
-  '1f81b734e8934189c58e15c350cf1556b1cf3ad0','d41d5e0848924bc81706be83a6c9fe6a1e60c0e8',
-  'e1c380d0fe338c6467944659e846a0f9c64879df','e1af5d24963f1de953445cc053705d89d49130fd',
-  '680c6f3c54087f01bbcdf6f9bafbe5ef3ef0d457','5a06f9d9aeec8929dfbecc58242370ade180d192',
-  '8bffd86102f472123f3e7fe0cfccb0b1e275a15e','615dabecf180b9cddab902d35ca29700fd9d4c40',
-  'be6aadfe318be2836140ef486475976009e32a34','4ea7e0d87f3073adabcb4d15aeeedd740cd07643',
-  '23f81969f628ad06296438584f978298573d10b8','916ce803e52a4c51b4d9c8f4994668da852dcff1',
-  'ad9f407e510c9863d23e9f4536be7df515b3bed2','5aee898294f2a3a69c294ff46e01c96c14261f84',
-  '0b2e0f5be47ba56050c9b3b67807a7ad737bcc8e','5fd926b61cce8291149523be00289d78b3b7b5d2',
-  'ece298d0ec2c16f10310d45724b276a6035cb503'
-)
+# id aset Figma -> nama berkas lokal (lihat tool/asset-names.json).
+$names = Get-Content (Join-Path $Root 'tool\asset-names.json') -Raw | ConvertFrom-Json
+$hashes = @()
+foreach ($p in $names.PSObject.Properties) {
+  if ($p.Value -notlike '*.svg') { $hashes += $p.Name }
+}
 
 function Get-MinAlpha([System.Drawing.Bitmap]$b) {
   $rect = New-Object System.Drawing.Rectangle 0, 0, $b.Width, $b.Height
@@ -121,7 +115,9 @@ foreach ($h in $hashes) {
 
   # buang varian lama, tulis pemenang
   Get-ChildItem $ImageDir -Filter "$h.*" -ErrorAction SilentlyContinue | Remove-Item -Force
-  $finalName = "$h.$($best.ext)"
+  # Nama lokal sudah menyertakan ekstensi pemenang saat aset ini pertama
+  # dioptimalkan (lihat tool/asset-names.json).
+  $finalName = $names.$h
   $finalPath = Join-Path $ImageDir $finalName
   Copy-Item $best.path $finalPath -Force
   $newBytes = (Get-Item $finalPath).Length
@@ -131,7 +127,7 @@ foreach ($h in $hashes) {
     $finalName, $ow, $oh, $minAlpha, ($origBytes/1KB), ($newBytes/1KB), $best.ext.ToUpper())
 
   $meta += [pscustomobject]@{
-    sha = $h; kind = 'image'; ext = $best.ext
+    sha = $h; name = $finalName; kind = 'image'; ext = $finalName.Split('.')[-1]
     path = "assets/images/$finalName"
     w = $best.w; h = $best.h; bytes = $newBytes
   }
@@ -140,10 +136,12 @@ foreach ($h in $hashes) {
 }
 
 # ---------- ikon SVG ----------
+$rev = @{}
+foreach ($p in $names.PSObject.Properties) { $rev[$p.Value] = $p.Name }
 $icons = @()
 Get-ChildItem $IconDir -Filter *.svg | ForEach-Object {
   $icons += [pscustomobject]@{
-    sha = $_.BaseName; kind = 'icon'; ext = 'svg'
+    sha = $rev[$_.Name]; name = $_.BaseName; kind = 'icon'; ext = 'svg'
     path = "assets/icons/$($_.Name)"; w = $null; h = $null; bytes = $_.Length
   }
 }
@@ -156,7 +154,7 @@ $out = [pscustomobject]@{
     icons  = $icons.Count
     images = $meta.Count
   }
-  assets = $all | Sort-Object kind, sha
+  assets = $all | Sort-Object kind, name
 }
 $out | ConvertTo-Json -Depth 5 | Set-Content -Path $Manifest -Encoding UTF8
 

@@ -216,7 +216,7 @@ class Plant {
   final String id;
   final String name;
 
-  /// Path aset lokal (mis. `assets/images/<sha>.jpg`).
+  /// Path aset lokal (mis. `assets/images/photo-cabai-rawit.jpg`).
   final String photoAsset;
 
   /// Kota tempat tanaman tumbuh, mis. "Surabaya".

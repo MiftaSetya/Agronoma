@@ -38,8 +38,7 @@ void main() {
 
     final sources = [for (final f in files) f.readAsStringSync()];
     final labels = [
-      for (final f in files)
-        f.uri.pathSegments.last.replaceAll('.svg', '').substring(0, 8),
+      for (final f in files) f.uri.pathSegments.last.replaceAll('.svg', ''),
     ];
 
     final key = GlobalKey();
