@@ -61,9 +61,9 @@ baru ditambahkan, jalankan ulang skripnya supaya tabel tetap sinkron.
 | `mediaGround` | icons/f03253cc.svg | 958 B | Ikon media tanam: tanah lapang (`Lahan terbuka`) |
 | `mediaHouse` | icons/3fc8a3be.svg | 1,953 B | Rumah — pilihan "Pekarangan rumah" |
 | `mediaPot` | icons/61e41058.svg | 1,597 B | Ikon media tanam: pot (`Pot tanaman`) |
-| `navHomeActive` | icons/2c51ffd1.svg | 990 B | Ikon tab "Beranda" saat aktif (putih, di dalam pil hijau) |
+| `navHomeActive` | icons/284d83d1.svg | 1,046 B | Ikon tab "Beranda" saat aktif (putih, di dalam pil hijau) |
 | `navHomeOutline` | icons/6f62cf30.svg | 1,382 B | Ikon tab "Beranda" saat TIDAK aktif (#898B87) |
-| `navProfileActive` | icons/284d83d1.svg | 1,046 B | Ikon tab "Profil" saat aktif (putih) |
+| `navProfileActive` | icons/2c51ffd1.svg | 990 B | Ikon tab "Profil" saat aktif (putih) |
 | `navProfileOutline` | icons/dcf9c6b6.svg | 1,936 B | Ikon tab "Profil" saat TIDAK aktif (#898B87) |
 | `phaseDotActive` | icons/69aded84.svg | 2,755 B | Titik fase aktif (lingkaran hijau + cincin putih) |
 | `phaseGenerative` | icons/3ab2a16f.svg | 1,294 B | Ikon fase: generatif |

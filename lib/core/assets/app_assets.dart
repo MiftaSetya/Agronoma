@@ -31,13 +31,13 @@ class AppAssets {
 
   /// Aktif: putih, dipakai di dalam pil hijau.
   static const String navHomeActive =
-      '$_icons/2c51ffd1bf8dcd5ac3b37960817784fcdbffac42.svg';
+      '$_icons/284d83d1607bcf4841f417f1e61535a592d60489.svg';
 
   static const String navProfileOutline =
       '$_icons/dcf9c6b62c5cb236e611a7732c2bbd8fa12cde37.svg';
 
   static const String navProfileActive =
-      '$_icons/284d83d1607bcf4841f417f1e61535a592d60489.svg';
+      '$_icons/2c51ffd1bf8dcd5ac3b37960817784fcdbffac42.svg';
 
   /// Logo Agronoma putih di tengah FAB.
   static const String fabLogo =
