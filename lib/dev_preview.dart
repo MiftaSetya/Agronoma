@@ -8,14 +8,13 @@ import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/routing/app_router.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
+import 'package:frontend/core/widgets/main_shell.dart';
 import 'package:frontend/features/add_plant/add_plant_flow.dart';
 import 'package:frontend/features/auth/login_screen.dart';
 import 'package:frontend/features/auth/register_screen.dart';
 import 'package:frontend/features/disease/disease_detection_screen.dart';
-import 'package:frontend/features/home/home_screen.dart';
 import 'package:frontend/features/plant_detail/ai_chatbot_screen.dart';
 import 'package:frontend/features/plant_detail/plant_detail_screen.dart';
-import 'package:frontend/features/profile/profile_screen.dart';
 
 /// Titik masuk khusus pengembangan — **bukan** bagian aplikasi (tidak pernah
 /// dipanggil `main.dart`, jadi tidak ikut ke build rilis). Gunanya memotret
@@ -81,9 +80,9 @@ Widget _previewFor(String route, int step) {
     case Routes.register:
       return const RegisterScreen();
     case Routes.home:
-      return const HomeScreen();
+      return const MainShell();
     case Routes.profile:
-      return const ProfileScreen();
+      return const MainShell(initialIndex: 1);
     case Routes.plantDetail:
       return PlantDetailScreen(plantId: '', initialTab: step);
     case Routes.plantChat:

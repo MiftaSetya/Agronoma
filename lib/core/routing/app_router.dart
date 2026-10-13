@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'package:frontend/core/widgets/main_shell.dart';
 import 'package:frontend/features/add_plant/add_plant_flow.dart';
 import 'package:frontend/features/auth/login_screen.dart';
 import 'package:frontend/features/auth/register_screen.dart';
 import 'package:frontend/features/disease/disease_detection_screen.dart';
-import 'package:frontend/features/home/home_screen.dart';
 import 'package:frontend/features/plant_detail/ai_chatbot_screen.dart';
 import 'package:frontend/features/plant_detail/plant_detail_screen.dart';
-import 'package:frontend/features/profile/profile_screen.dart';
 import 'package:frontend/features/splash/splash_screen.dart';
 
 /// Nama rute dikumpulkan di satu tempat supaya tidak ada string rute yang
@@ -18,8 +17,13 @@ class Routes {
   static const splash = '/';
   static const login = '/login';
   static const register = '/register';
+
+  /// Beranda; dipakai juga oleh layar yang ingin masuk dalam keadaan awal.
   static const home = '/home';
+
+  /// Profil. Isinya tetap `MainShell` yang sama — hanya tab awalnya berbeda.
   static const profile = '/profile';
+
   static const plantDetail = '/plant-detail';
   static const plantChat = '/plant-chat';
   static const addPlant = '/add-plant';
@@ -50,10 +54,10 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
       return _page(const RegisterScreen(), settings);
 
     case Routes.home:
-      return _page(const HomeScreen(), settings);
+      return _page(const MainShell(), settings);
 
     case Routes.profile:
-      return _page(const ProfileScreen(), settings);
+      return _page(const MainShell(initialIndex: 1), settings);
 
     case Routes.plantDetail:
       final args = settings.arguments as PlantDetailArgs?;
