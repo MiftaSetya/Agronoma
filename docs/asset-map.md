@@ -47,7 +47,7 @@ kalau aset baru ditambahkan, jalankan ulang supaya tabel tetap sinkron.
 | `chevronRightSmall` | icons/chevron-right-small.svg | 283 B | Panah ">" kecil (7.4x12) untuk baris daftar |
 | `chevronRightThin` | icons/chevron-right-thin.svg | 335 B | Panah ">" bergaris (chevron tipis) â€” sisi kanan top bar varian 4 |
 | `closeLine` | icons/close-line.svg | 1,479 B | Silang tipis (close-line) â€” menutup layar kamera / menu |
-| `closeMenu` | icons/close-menu.svg | 1,709 B | Ikon "Tutup" (kotak dengan silang) di menu FAB |
+| `closeMenu` | icons/close-menu.svg | 1,709 B | Ikon baris "Tutup" di menu FAB. Baris itu dibuang dari aplikasi (sheet bisa ditutup lewat gagang geser), ikon tinggal cadangan 1:1 dengan design |
 | `diseaseDiagnosis` | icons/disease-diagnosis.svg | 6,052 B | Ikon "Diagnosis penyakit tanaman" di menu FAB (#6D9C25) |
 | `diseaseScan` | icons/disease-scan.svg | 6,472 B | Ikon pindai kesehatan (putih) untuk kartu "Pindai Kesehatan" |
 | `fabLogo` | icons/fab-logo.svg | 3,244 B | Logo Agronoma putih di tengah FAB (tombol hijau melayang) |

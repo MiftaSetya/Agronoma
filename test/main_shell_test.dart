@@ -10,6 +10,7 @@ import 'package:frontend/core/models/weather.dart';
 import 'package:frontend/core/state/auth_controller.dart';
 import 'package:frontend/core/state/plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/widgets/app_shell.dart';
 import 'package:frontend/core/widgets/main_shell.dart';
 
 /// Repository tiruan: Beranda memuat daftar tanaman lewat antarmuka ini.
@@ -96,5 +97,36 @@ void main() {
 
     expect(find.text('PREFERENSI'), findsOneWidget);
     expect(find.text('Tanaman Saya'), findsNothing);
+  });
+
+  testWidgets('menu FAB hanya berisi dua aksi, tanpa baris "Tutup"', (
+    tester,
+  ) async {
+    // Kanvas bawaan (800x600) dipakai apa adanya: font uji Ahem membuat teks
+    // jauh lebih lebar dari aslinya, sehingga kanvas 440 akan melaporkan
+    // overflow palsu pada label "Diagnosis penyakit tanaman".
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () => showAgroFabMenu(context),
+                child: const Text('buka'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('buka'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tambah tanaman'), findsOneWidget);
+    expect(find.text('Diagnosis penyakit tanaman'), findsOneWidget);
+    // Sheet sudah bisa ditutup lewat gagang geser / ketukan di luar; baris
+    // "Tutup" dari design sengaja dibuang supaya tidak ada aksi mubazir.
+    expect(find.text('Tutup'), findsNothing);
   });
 }
