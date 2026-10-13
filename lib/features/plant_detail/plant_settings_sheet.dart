@@ -270,6 +270,7 @@ class _PhotoPicker extends StatelessWidget {
           height: 80,
           padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
+            color: AppColors.surface,
             borderRadius: AppRadius.smAll,
             border: Border.all(color: AppColors.border),
             boxShadow: AppColors.shadow1,

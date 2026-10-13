@@ -772,6 +772,9 @@ class _ScanCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
+            // Warna wajib ada; kalau tidak, bayangan hijau di bawah ini ikut
+            // melukis seluruh badan kartu.
+            color: AppColors.primary,
             borderRadius: AppRadius.lgAll,
             // Bayangan hijau (bukan hitam) sesuai design.
             boxShadow: const [

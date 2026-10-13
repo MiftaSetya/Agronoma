@@ -365,6 +365,9 @@ class _LogoutCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
+            // Wajib: tanpa `color`, bayangan di bawah ini menutupi seluruh
+            // badan kartu sehingga tampak abu, bukan putih.
+            color: AppColors.surface,
             borderRadius: AppRadius.lgAll,
             border: Border.all(color: AppColors.border),
             boxShadow: AppColors.shadow1,
