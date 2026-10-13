@@ -310,6 +310,10 @@ class _AddButton extends StatelessWidget {
 }
 
 /// Menu yang muncul dari tombol tambah (FAB Menu Button, node `253:2576`).
+///
+/// Design punya baris ketiga "Tutup" di bawah dua aksi ini; baris itu dibuang
+/// karena sheet sudah bisa ditutup dengan menggeser gagang atau menekan area
+/// gelap di luarnya — tombol tutup hanya menambah satu ketukan.
 Future<void> showAgroFabMenu(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
@@ -342,11 +346,6 @@ Future<void> showAgroFabMenu(BuildContext context) {
                 Navigator.of(sheetContext).pop();
                 Navigator.of(context).pushNamed(Routes.diseaseDetection);
               },
-            ),
-            _FabMenuItem(
-              icon: AppAssets.closeMenu,
-              label: 'Tutup',
-              onTap: () => Navigator.of(sheetContext).pop(),
             ),
           ],
         ),

@@ -53,6 +53,9 @@ class AppAssets {
   static const String sheetHandle =
       '$_icons/sheet-handle.svg';
 
+  /// Ikon baris "Tutup" di menu FAB pada design. Baris itu dibuang dari aplikasi
+  /// (sheet sudah bisa ditutup lewat gagang geser / ketukan di luar), jadi
+  /// ikonnya tinggal cadangan untuk menjaga struktur 1:1 dengan ekspor design.
   static const String closeMenu =
       '$_icons/close-menu.svg';
 
