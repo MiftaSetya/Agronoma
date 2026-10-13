@@ -86,6 +86,10 @@ class PlantCard extends StatelessWidget {
             // tiap kartu 2px lebih tinggi dan selisihnya menumpuk ke bawah.
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
+              // Warna ini wajib: tanpa `color`, bayangan di bawah ini ikut
+              // terlukis di seluruh badan kartu (kartunya jadi abu #F2F2F2,
+              // bukan putih seperti design).
+              color: AppColors.surface,
               borderRadius: AppRadius.lgAll,
               border: Border.all(color: AppColors.border),
               boxShadow: AppColors.shadow1,
