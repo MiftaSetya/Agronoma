@@ -7,10 +7,10 @@ import 'package:frontend/core/state/auth_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_common.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
-import 'package:frontend/core/widgets/app_shell.dart';
 
-/// Layar Profile — frame `Profile` (node `28:1409`) pada Figma.
+/// Layar Profil — frame `Profile` (node `28:1409`) pada Figma.
 ///
+/// Ini isi tab saja; topbar & navbar disediakan `MainShell`/`AppShell`.
 /// Jarak antar-seksi 32px (16px di dalam blok statistik), padding atas 24px —
 /// semua dari komponen `profile content`. Nama pemilik diambil dari
 /// [AuthController] (bukan ditulis mati seperti `Username` di design) supaya
@@ -22,61 +22,58 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = context.watch<AuthController>().user;
 
-    return AppShell(
-      currentIndex: 1,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.page,
-          AppSpacing.xxl,
-          AppSpacing.page,
-          AppSpacing.xxl,
-        ),
-        children: [
-          _ProfileHeader(name: user?.name ?? 'Username', photo: user?.photoAsset),
-          const SizedBox(height: AppSpacing.xxxl),
-          Row(
-            children: [
-              Expanded(
-                child: StatCard(
-                  icon: AppAssets.pottedPlant,
-                  title: 'Tanaman',
-                  value: '${user?.totalPlants ?? 0}',
-                  caption: 'Sedang tumbuh',
-                  valueColor: AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              Expanded(
-                child: StatCard(
-                  icon: AppAssets.harvest,
-                  title: 'Dipanen',
-                  value: '${user?.harvestedThisSeason ?? 0}',
-                  caption: 'Musim ini',
-                  valueColor: AppColors.harvest,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          _CareScoreCard(
-            score: user?.careScoreLabel ?? '0%',
-            caption: user?.careScoreCaption ?? '-',
-          ),
-          const SizedBox(height: AppSpacing.xxxl),
-          _SettingsGroup(
-            onArchiveTap: () {},
-            logout: _LogoutCard(
-              onTap: () {
-                context.read<AuthController>().signOut();
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  Routes.login,
-                  (route) => false,
-                );
-              },
-            ),
-          ),
-        ],
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.page,
+        AppSpacing.xxl,
+        AppSpacing.page,
+        AppSpacing.xxl,
       ),
+      children: [
+        _ProfileHeader(name: user?.name ?? 'Username', photo: user?.photoAsset),
+        const SizedBox(height: AppSpacing.xxxl),
+        Row(
+          children: [
+            Expanded(
+              child: StatCard(
+                icon: AppAssets.pottedPlant,
+                title: 'Tanaman',
+                value: '${user?.totalPlants ?? 0}',
+                caption: 'Sedang tumbuh',
+                valueColor: AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.lg),
+            Expanded(
+              child: StatCard(
+                icon: AppAssets.harvest,
+                title: 'Dipanen',
+                value: '${user?.harvestedThisSeason ?? 0}',
+                caption: 'Musim ini',
+                valueColor: AppColors.harvest,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        _CareScoreCard(
+          score: user?.careScoreLabel ?? '0%',
+          caption: user?.careScoreCaption ?? '-',
+        ),
+        const SizedBox(height: AppSpacing.xxxl),
+        _SettingsGroup(
+          onArchiveTap: () {},
+          logout: _LogoutCard(
+            onTap: () {
+              context.read<AuthController>().signOut();
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                Routes.login,
+                (route) => false,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

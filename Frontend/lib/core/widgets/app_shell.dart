@@ -17,21 +17,18 @@ class AppShell extends StatelessWidget {
   const AppShell({
     super.key,
     required this.currentIndex,
+    required this.onTabSelected,
     required this.child,
-    this.showTopBar = true,
-    this.topBarTitle,
   });
 
-/// 0 = Beranda, 1 = Profil (sesuai urutan tab di design).
+  /// 0 = Beranda, 1 = Profil (sesuai urutan tab di design).
   final int currentIndex;
 
+  /// Dipanggil saat tab ditekan. Pemanggil yang menggeser isinya, supaya
+  /// topbar & navbar di sini tidak ikut dibangun ulang.
+  final ValueChanged<int> onTabSelected;
+
   final Widget child;
-
-  /// Sembunyikan top bar untuk halaman yang punya header sendiri.
-  final bool showTopBar;
-
-  /// Bila diisi, top bar berubah jadi panah kembali + judul (bukan wordmark).
-  final String? topBarTitle;
 
   /// Tinggi navbar (tanpa area aman bawah).
   static const double navBarHeight = 80;
@@ -45,11 +42,14 @@ class AppShell extends StatelessWidget {
       backgroundColor: AppColors.surface,
       body: Column(
         children: [
-          if (showTopBar) AgroTopBar(title: topBarTitle),
+          const AgroTopBar(),
           Expanded(child: child),
         ],
       ),
-      bottomNavigationBar: _AgroBottomNav(currentIndex: currentIndex),
+      bottomNavigationBar: _AgroBottomNav(
+        currentIndex: currentIndex,
+        onTabSelected: onTabSelected,
+      ),
     );
   }
 }
@@ -89,10 +89,7 @@ class AgroTopBar extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // Wordmark asli dari design: 146.221 x 28.
-                    const SizedBox(
-                      height: 28,
-                      child: _Wordmark(),
-                    ),
+                    const SizedBox(height: 28, child: _Wordmark()),
                     _TopBarChatButton(),
                   ],
                 )
@@ -167,9 +164,13 @@ class _BackArrow extends StatelessWidget {
 
 /// Navbar bawah: dua tab + tombol tambah melayang di tengah.
 class _AgroBottomNav extends StatelessWidget {
-  const _AgroBottomNav({required this.currentIndex});
+  const _AgroBottomNav({
+    required this.currentIndex,
+    required this.onTabSelected,
+  });
 
   final int currentIndex;
+  final ValueChanged<int> onTabSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +204,7 @@ class _AgroBottomNav extends StatelessWidget {
                       activeIcon: AppAssets.navHomeActive,
                       inactiveIcon: AppAssets.navHomeOutline,
                       selected: currentIndex == 0,
-                      onTap: () => _goTo(context, 0),
+                      onTap: () => onTabSelected(0),
                     ),
                   ),
                   Expanded(
@@ -212,7 +213,7 @@ class _AgroBottomNav extends StatelessWidget {
                       activeIcon: AppAssets.navProfileActive,
                       inactiveIcon: AppAssets.navProfileOutline,
                       selected: currentIndex == 1,
-                      onTap: () => _goTo(context, 1),
+                      onTap: () => onTabSelected(1),
                     ),
                   ),
                 ],
@@ -225,13 +226,6 @@ class _AgroBottomNav extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  void _goTo(BuildContext context, int index) {
-    if (index == currentIndex) return;
-    Navigator.of(context).pushReplacementNamed(
-      index == 0 ? Routes.home : Routes.profile,
     );
   }
 }

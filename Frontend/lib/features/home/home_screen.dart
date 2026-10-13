@@ -9,7 +9,10 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_common.dart';
 import 'package:frontend/core/widgets/app_shell.dart';
 
-/// Layar Home — frame `Home` (node `10:29`) pada Figma.
+/// Layar Beranda — frame `Home` (node `10:29`) pada Figma.
+///
+/// Ini isi tab saja; topbar & navbar disediakan `MainShell`/`AppShell`, supaya
+/// saat berpindah tab keduanya tidak ikut dibangun ulang.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -34,59 +37,56 @@ class _HomeScreenState extends State<HomeScreen> {
       (a) => a.user?.firstName ?? 'User',
     );
 
-    return AppShell(
-      currentIndex: 0,
-      child: RefreshIndicator(
-        onRefresh: () => controller.load(force: true),
-        // Jarak mengikuti design: antar-seksi 24px, 24px sebelum judul
-        // seksi, dan 16px ke kartu pertama.
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.page,
-            AppSpacing.xxl,
-            AppSpacing.page,
-            AppShell.bottomInset,
-          ),
-          children: [
-            _Greeting(name: name),
-            const SizedBox(height: AppSpacing.xxl),
-            if (controller.weather != null)
-              WeatherCard(
-                city: controller.weather!.city,
-                condition: controller.weather!.condition,
-                temperature: controller.weather!.temperatureLabel,
-                iconAsset: controller.weather!.iconAsset,
-              ),
-            const SizedBox(height: AppSpacing.xxl),
-            // Tanpa `actionLabel`: di frame Home, container "Lihat Semua"
-            // berstatus hidden, jadi design memang hanya menampilkan judulnya.
-            const SectionHeader(title: 'Tanaman Saya'),
-            const SizedBox(height: AppSpacing.lg),
-            if (controller.isLoading && controller.plants.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 48),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (controller.isEmpty)
-              EmptyState(
-                icon: AppAssets.pottedPlant,
-                title: 'Belum ada tanaman',
-                message:
-                    'Tekan tombol di tengah bawah untuk mulai menanam '
-                    'tanaman pertamamu.',
-              )
-            else
-              for (final plant in controller.plants)
-                PlantCard(
-                  plant: plant,
-                  margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-                  onTap: () => Navigator.of(context).pushNamed(
-                    Routes.plantDetail,
-                    arguments: PlantDetailArgs(plantId: plant.id),
-                  ),
-                ),
-          ],
+    return RefreshIndicator(
+      onRefresh: () => controller.load(force: true),
+      // Jarak mengikuti design: antar-seksi 24px, 24px sebelum judul
+      // seksi, dan 16px ke kartu pertama.
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.page,
+          AppSpacing.xxl,
+          AppSpacing.page,
+          AppShell.bottomInset,
         ),
+        children: [
+          _Greeting(name: name),
+          const SizedBox(height: AppSpacing.xxl),
+          if (controller.weather != null)
+            WeatherCard(
+              city: controller.weather!.city,
+              condition: controller.weather!.condition,
+              temperature: controller.weather!.temperatureLabel,
+              iconAsset: controller.weather!.iconAsset,
+            ),
+          const SizedBox(height: AppSpacing.xxl),
+          // Tanpa `actionLabel`: di frame Home, container "Lihat Semua"
+          // berstatus hidden, jadi design memang hanya menampilkan judulnya.
+          const SectionHeader(title: 'Tanaman Saya'),
+          const SizedBox(height: AppSpacing.lg),
+          if (controller.isLoading && controller.plants.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 48),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (controller.isEmpty)
+            EmptyState(
+              icon: AppAssets.pottedPlant,
+              title: 'Belum ada tanaman',
+              message:
+                  'Tekan tombol di tengah bawah untuk mulai menanam '
+                  'tanaman pertamamu.',
+            )
+          else
+            for (final plant in controller.plants)
+              PlantCard(
+                plant: plant,
+                margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                onTap: () => Navigator.of(context).pushNamed(
+                  Routes.plantDetail,
+                  arguments: PlantDetailArgs(plantId: plant.id),
+                ),
+              ),
+        ],
       ),
     );
   }
