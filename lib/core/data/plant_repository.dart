@@ -43,6 +43,11 @@ class MockPlantRepository implements PlantRepository {
   /// Jeda buatan supaya indikator loading benar-benar terlihat.
   static const Duration _latency = Duration(milliseconds: 900);
 
+  /// Jenis tanah paling kaya bahan organik pada daftar design, jadi satu-satunya
+  /// yang diberi pupuk organik. Dicocokkan lewat [SoilType.id] — nama tanah
+  /// adalah teks design yang bisa berubah kapan saja.
+  static const String _organicSoilId = 's2';
+
   @override
   Future<List<Plant>> getPlants() async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
@@ -85,7 +90,7 @@ class MockPlantRepository implements PlantRepository {
       careScore: 100,
       description: source.description,
       tags: const ['Indoor'],
-      fertilizer: soil.name == 'Tanah Humus' ? 'NPK Organik' : 'NPK Daun',
+      fertilizer: soil.id == _organicSoilId ? 'NPK Organik' : 'NPK Daun',
       soilName: soil.name,
       // Tanaman baru selalu mulai dari nol: belum ada jadwal perawatan dan
       // belum ada tonggak pertumbuhan yang terlewati.

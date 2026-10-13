@@ -32,6 +32,7 @@ $screens = @(
   @{ name = "add-1-location"; route = "/add-plant";       step = 0; wait = 16 }
   @{ name = "add-2-media";    route = "/add-plant";       step = 1; wait = 16 }
   @{ name = "add-3-soil";     route = "/add-plant";       step = 2; wait = 16 }
+  @{ name = "add-3-soil-list"; route = "/add-plant";      step = 5; wait = 16 }
   @{ name = "add-4-reco";     route = "/add-plant";       step = 3; wait = 16 }
   @{ name = "add-5-phase";    route = "/add-plant";       step = 4; wait = 16 }
 )

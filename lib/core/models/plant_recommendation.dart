@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 
 import 'soil_type.dart';
 
@@ -55,6 +56,7 @@ class AddPlantDraft {
   const AddPlantDraft({
     this.locationName,
     this.locationAddress,
+    this.locationPosition,
     this.locationConfirmed = false,
     this.media,
     this.soil,
@@ -67,6 +69,11 @@ class AddPlantDraft {
 
   final String? locationName;
   final String? locationAddress;
+
+  /// Titik yang dipilih di peta. Bisa berasal dari lokasi contoh mana pun atau
+  /// titik bebas hasil menggeser peta; disimpan supaya pilihan itu tidak hilang
+  /// saat berpindah langkah.
+  final LatLng? locationPosition;
 
   /// Pengguna sudah menekan "Konfirmasi Lokasi".
   final bool locationConfirmed;
@@ -96,6 +103,7 @@ class AddPlantDraft {
   AddPlantDraft copyWith({
     String? locationName,
     String? locationAddress,
+    LatLng? locationPosition,
     bool? locationConfirmed,
     String? media,
     SoilType? soil,
@@ -107,6 +115,7 @@ class AddPlantDraft {
   }) => AddPlantDraft(
     locationName: locationName ?? this.locationName,
     locationAddress: locationAddress ?? this.locationAddress,
+    locationPosition: locationPosition ?? this.locationPosition,
     locationConfirmed: locationConfirmed ?? this.locationConfirmed,
     media: media ?? this.media,
     soil: soil ?? this.soil,

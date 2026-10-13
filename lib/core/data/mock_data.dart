@@ -1,7 +1,10 @@
+import 'package:latlong2/latlong.dart';
+
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/models/app_user.dart';
 import 'package:frontend/core/models/chat_message.dart';
 import 'package:frontend/core/models/disease.dart';
+import 'package:frontend/core/models/map_location.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/models/soil_type.dart';
@@ -96,7 +99,7 @@ class MockData {
           'bisa dipanen untuk kebutuhan dapur sehari-hari.',
       tags: const ['Indoor', 'Outdoor'],
       fertilizer: 'NPK Daun',
-      soilName: 'Tanah Gembur',
+      soilName: 'Tanah gembur',
       tasks: _tasksWater,
       timeline: _timeline,
     ),
@@ -117,7 +120,7 @@ class MockData {
           'dan cocok untuk salad atau camilan segar.',
       tags: const ['Indoor', 'Outdoor'],
       fertilizer: 'NPK Buah',
-      soilName: 'Tanah Humus',
+      soilName: 'Tanah vulkanik',
       tasks: _tasksFertilize,
       timeline: _timeline,
     ),
@@ -138,7 +141,7 @@ class MockData {
           'tanaman terus memproduksi bunga baru.',
       tags: const ['Outdoor'],
       fertilizer: 'NPK Kandang',
-      soilName: 'Tanah Liat',
+      soilName: 'Tanah liat',
       tasks: const [],
       timeline: _timeline,
     ),
@@ -198,51 +201,83 @@ class MockData {
     ),
   ];
 
-  static const List<Map<String, String>> locations = [
-    {
-      'name': 'Politeknik Elektronika Negeri Surabaya',
-      'address':
+  /// Tiga lokasi contoh di sekitar Surabaya. Nama dan alamatnya disalin dari
+  /// design; koordinat diambil dari alamat aslinya supaya peta sungguhan
+  /// ([AgroMap]) menunjuk tempat yang benar-benar ada.
+  static const List<MapLocation> locations = [
+    MapLocation(
+      name: 'Politeknik Elektronika Negeri Surabaya',
+      address:
           'Politeknik Elektronika Surabaya, Jl. Raya ITS, Keputih, Sukolilo, '
           'Surabaya, East Java 60111',
-    },
-    {
-      'name': 'Kebun Bibit Wonorejo',
-      'address':
-          'Jl. Wonorejo Rungkut, Surabaya, East Java 60296',
-    },
-    {
-      'name': 'Rumah Kaca Sukolilo',
-      'address': 'Jl. Teknik Kimia, Sukolilo, Surabaya, East Java 60111',
-    },
+      position: LatLng(-7.28161, 112.79500),
+    ),
+    MapLocation(
+      name: 'Kebun Bibit Wonorejo',
+      address: 'Jl. Wonorejo Rungkut, Surabaya, East Java 60296',
+      position: LatLng(-7.30814, 112.83417),
+    ),
+    MapLocation(
+      name: 'Rumah Kaca Sukolilo',
+      address: 'Jl. Teknik Kimia, Sukolilo, Surabaya, East Java 60111',
+      position: LatLng(-7.28633, 112.79457),
+    ),
   ];
 
+  /// Tujuh jenis tanah pada daftar "Saya Tahu Jenis Tanah" (frame `113:765`).
+  /// Nama dan keterangannya disalin dari render design; fotonya adalah aset
+  /// yang sudah ada dan pasangannya dipastikan dengan membandingkan piksel
+  /// kartu design terhadap tiap berkas — dulu daftar ini meminjam foto tanaman
+  /// cabai/tomat sehingga gambarnya sama sekali tidak berhubungan.
   static const List<SoilType> soilTypes = [
     SoilType(
       id: 's1',
-      name: 'Tanah Humus',
-      description: 'Paling subur, kaya bahan organik, cocok untuk kebanyakan '
-          'tanaman pangan dan sayur.',
-      iconAsset: AppAssets.photoCabaiRawit,
-      phRange: '6.0 - 7.0',
-      bestFor: ['Cabai', 'Tomat', 'Terung'],
+      name: 'Media Tanam Campuran',
+      description: 'Racikan buatan khusus yang biasanya terdiri dari pupuk '
+          'kompos, sekam, atau sabut kelapa.',
+      photoAsset: AppAssets.photoMulchWood,
     ),
     SoilType(
       id: 's2',
-      name: 'Tanah Liat',
-      description: 'Menahan air dengan baik tetapi berat dan mudah padat saat '
-          'kering.',
-      iconAsset: AppAssets.photoTomatCeri,
-      phRange: '5.5 - 6.5',
-      bestFor: ['Padi', 'Kangkung'],
+      name: 'Tanah gembur',
+      description: 'Kaya nutrisi, bertekstur remah, dan subur. Pilihan '
+          'terbaik untuk mayoritas tanaman.',
+      photoAsset: AppAssets.photoSoilCompost,
     ),
     SoilType(
       id: 's3',
-      name: 'Tanah Pasir',
-      description: 'Cepat mengalirkan air, kurang menyimpan nutrisi sehingga '
-          'perlu pemupukan lebih sering.',
-      iconAsset: AppAssets.photoCabaiKeriting,
-      phRange: '6.5 - 7.5',
-      bestFor: ['Semangka', 'Kacang hijau'],
+      name: 'Tanah liat',
+      description: 'Bertekstur padat, menggumpal, dan lengket saat basah. '
+          'Mengikat air lebih lama.',
+      photoAsset: AppAssets.photoSoilCracked,
+    ),
+    SoilType(
+      id: 's4',
+      name: 'Tanah berpasir',
+      description: 'Berbutir kasar dan sangat cepat kering. Air mengalir ke '
+          'bawah dengan sangat bebas.',
+      photoAsset: AppAssets.photoSoilBrown,
+    ),
+    SoilType(
+      id: 's5',
+      name: 'Tanah kapur',
+      description: 'Berwarna pucat dan sering bercampur kerikil atau serpihan '
+          'batu. Cenderung cepat kering.',
+      photoAsset: AppAssets.photoSoilGravel,
+    ),
+    SoilType(
+      id: 's6',
+      name: 'Tanah vulkanik',
+      description: 'Berwarna hitam pekat yang sangat subur. Kaya mineral '
+          'alami dari abu pegunungan.',
+      photoAsset: AppAssets.photoSoilDark,
+    ),
+    SoilType(
+      id: 's7',
+      name: 'Tanah gambut',
+      description: 'Terasa berserat dari sisa pelapukan tanaman. Sangat empuk '
+          'dan menyimpan banyak air.',
+      photoAsset: AppAssets.photoMulchStraw,
     ),
   ];
 

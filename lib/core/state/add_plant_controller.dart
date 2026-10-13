@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:latlong2/latlong.dart';
 
 import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/data/plant_repository.dart';
@@ -28,8 +29,12 @@ class AddPlantController extends ChangeNotifier {
   bool get isLoading => _loading;
   Object? get error => _error;
 
-  void setLocation(String name, String address) {
-    _draft = _draft.copyWith(locationName: name, locationAddress: address);
+  void setLocation(String name, String address, {LatLng? position}) {
+    _draft = _draft.copyWith(
+      locationName: name,
+      locationAddress: address,
+      locationPosition: position,
+    );
     notifyListeners();
   }
 

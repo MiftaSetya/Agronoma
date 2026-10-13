@@ -73,22 +73,67 @@ jarak kartu per langkah, tombol manual melayang, ikon daftar kartu tanah).
 
 | Layar | Selisih |
 |---|---:|
-| Add plant — fase | 5.5 |
-| Add plant — tanah | 4.2 |
-| Add plant — media | 5.8 |
+| Add plant — fase | 2.1 |
+| Add plant — tanah | 1.9 |
+| Add plant — media | 3.0 |
 | Login | 6.5 |
 | Profile | 6.8 |
 | Register | 9.8 |
 | Add plant — lokasi | 8.0 |
 | Home | 11.1 |
 | Plant detail | 12.2 |
-| Add plant — rekomendasi | 9.4 |
+| Add plant — rekomendasi | 3.3 |
 | Plant chat | 18.7 |
 | Deteksi Penyakit | 78.9 |
 
-> Angka wizard terakhir diukur setelah ikon daftar kartu "Saya Tahu Jenis
-> Tanah" digambar ulang. Selisih rekomendasi (9.4) didominasi perbedaan
-> kompresi JPEG foto tanaman, bukan layout.
+> Angka wizard diukur ulang setelah langkah 1-5 ditata sesuai frame Figma
+> (kartu kepala langkah 1, kompensasi border `border-box`, perataan ikon fase
+> dan media, serta daftar tujuh jenis tanah). Selisih rekomendasi (3.3) masih
+> didominasi perbedaan kompresi JPEG foto tanaman, bukan layout.
+
+## Penyimpangan yang disengaja: peta langkah 1
+
+Langkah 1 memakai peta sungguhan (`lib/core/widgets/agro_map.dart`, ubin
+OpenStreetMap lewat `flutter_map`), bukan `photo-map.jpg` yang lama. Frame Figma
+`58:222`/`127:721` menampilkan **tangkapan Google Maps**, jadi gaya petanya
+pasti berbeda dan selisih rata-rata layar itu tidak turun sampai regangan
+peta lain. Alasannya:
+
+- Ubin OSM tidak menuntut kunci API maupun akun penagihan; Google Maps
+  mengharuskan keduanya (`google_maps_flutter` tanpa kunci hanya menampilkan
+  kotak kosong). Fitur OSM juga dipakai di web tanpa biaya.
+- Peta statis tidak bisa mengikuti lokasi yang dipilih pengguna, sedangkan
+  langkah ini memang diminta "integrasikan dengan maps".
+- Konsekuensinya aplikasi butuh internet saat langkah 1 dibuka
+  (izin `android.permission.INTERNET` sudah ditambahkan). Kalau ubin gagal
+  dimuat, `silenceExceptions: true` membuatnya jatuh jadi kotak kosong, bukan
+  layar galat merah.
+
+Pin `map-pointer.svg` tetap digambar **di tengah** seperti design: pada Figma
+kotak pin memang terpusat di pita peta 380px (pusat peta-relatif 189,86 ≈ 190).
+Titik yang dipilih = pusat peta, jadi menggeser peta memindahkan titik — pola
+yang sama dipakai pemilih lokasi (`127:721`).
+
+Pemilih lokasi (`_LocationPickerSheet`) menambahkan daftar tiga lokasi contoh
+di bawah peta sebagai jalan pintas; frame Figma tidak memuat daftar itu
+(barangkali karena hanya kotak peta + tombol yang digambar). Titik bebas hasil
+menggeser peta tetap diizinkan dan disimpan di draft.
+
+## Penyimpangan yang disengaja: daftar jenis tanah
+
+Frame `113:765` mengganti kedua kartu besar langkah 3 dengan daftar tujuh jenis
+tanah (bukan menumpuknya di bawah kartu: daftar mulai di baris 308, tepat di
+bawah kartu kepala). Implementasinya mengikuti itu, tetapi tombol **"Kembali"**
+di daftar lebih dulu menutup daftar (kembali ke dua kartu besar) baru mundur
+satu langkah — design tidak menggambar jalan kembali, dan tanpa itu pilihan
+"Bantu Saya Scan Tanah" tidak bisa dijangkau lagi setelah daftar dibuka.
+
+Tiap baris memakai foto 80×80 dari berkas yang sudah ada
+(`photo-mulch-wood`, `photo-soil-compost`, `-cracked`, `-brown`, `-gravel`,
+`-dark`, `photo-mulch-straw`); pasangan nama ↔ gambar ditentukan dengan
+membandingkan render kartu Figma terhadap tiap berkas piksel per piksel, bukan
+ditebak dari namanya.
+
 
 ## Alat ukur
 

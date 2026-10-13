@@ -303,6 +303,18 @@ class AppAssets {
   static const String photoPlantDetection =
       '$_images/photo-plant-detection.jpg';
 
+  /// Foto tanah untuk daftar "Saya Tahu Jenis Tanah" (frame `113:765`).
+  /// Nama berkasnya sudah menunjukkan jenisnya, jadi tidak ada tebakan lagi
+  /// soal pasangan nama ↔ gambar seperti sebelumnya (dulu daftar ini meminjam
+  /// foto tanaman cabai/tomat sehingga kartunya tampak keliru).
+  static const String photoSoilBrown = '$_images/photo-soil-brown.jpg';
+  static const String photoSoilCompost = '$_images/photo-soil-compost.jpg';
+  static const String photoSoilCracked = '$_images/photo-soil-cracked.jpg';
+  static const String photoSoilDark = '$_images/photo-soil-dark.jpg';
+  static const String photoSoilGravel = '$_images/photo-soil-gravel.jpg';
+  static const String photoMulchStraw = '$_images/photo-mulch-straw.jpg';
+  static const String photoMulchWood = '$_images/photo-mulch-wood.jpg';
+
   static const String photoMap =
       '$_images/photo-map.jpg';
 
