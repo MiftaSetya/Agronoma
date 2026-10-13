@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/theme/theme.dart';
 
 void main() {
@@ -175,9 +176,7 @@ void main() {
         theme: AppTheme.light,
         home: Scaffold(
           body: Center(
-            child: SvgPicture.asset(
-              'assets/icons/ef737f2fd5f77ee8b2373bcd192ef31ba14d492b.svg',
-            ),
+            child: SvgPicture.asset(AppAssets.arrowLeftWhite),
           ),
         ),
       ),

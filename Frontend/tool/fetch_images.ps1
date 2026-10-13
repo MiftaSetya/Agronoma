@@ -5,21 +5,21 @@ $Base = 'http://127.0.0.1:3845/assets/'
 $Dir  = 'C:\Project\Agronoma\Frontend\assets\images'
 New-Item -ItemType Directory -Force -Path $Dir | Out-Null
 
-# Aset ini URL-nya .png tapi isinya JPEG -> simpan sebagai .jpg
-$asJpg = @(
-  'a1d9f55fba0c922f702df6312dfc730d481d9c46',
-  '83fcae546fbfaec4e5b6e7980bb5365d0cf4c9e4',
-  '1f81b734e8934189c58e15c350cf1556b1cf3ad0',
-  'd41d5e0848924bc81706be83a6c9fe6a1e60c0e8'
-)
+# id aset Figma -> nama berkas lokal (lihat tool/asset-names.json). Aset ini
+# URL-nya .png tapi isinya JPEG, jadi disimpan dengan nama .jpg-nya.
+$names = Get-Content (Join-Path (Split-Path $Dir) '..\tool\asset-names.json') -Raw | ConvertFrom-Json
+$asJpg = @()
+foreach ($p in $names.PSObject.Properties) {
+  if ($p.Value -like '*.jpg') { $asJpg += $p.Name }
+}
 
 foreach ($h in $asJpg) {
-  $dest = Join-Path $Dir "$h.jpg"
+  $dest = Join-Path $Dir $names.$h
   try {
     Invoke-WebRequest -Uri ($Base + $h + '.png') -OutFile $dest -UseBasicParsing
     $b = [System.IO.File]::ReadAllBytes($dest)
     if (-not ($b[0] -eq 0xFF -and $b[1] -eq 0xD8)) { throw 'bukan JPEG valid' }
-    Write-Host "OK  $h.jpg  ($([math]::Round($b.Length/1KB,1)) KB)"
+    Write-Host "OK  $($names.$h)  ($([math]::Round($b.Length/1KB,1)) KB)"
   } catch {
     Write-Host "GAGAL $h -> $($_.Exception.Message)"
     Remove-Item $dest -ErrorAction SilentlyContinue

@@ -102,11 +102,13 @@ Nilai kelipatan 4 yang lazim di Figma; diukur dari `get_design_context`.
 
 | Jenis | Jumlah | Lokasi |
 |---|---|---|
-| Ikon SVG | 117 | `assets/icons/` |
-| Gambar | 19 | `assets/images/` |
+| Ikon SVG | 118 | `assets/icons/` |
+| Gambar | 18 | `assets/images/` |
 
-Aset disajikan Figma dari `http://localhost:3845/assets/<sha>.<ext>` dan hanya
-hidup selama Figma berjalan — karena itu semuanya diunduh ke repo (Fase 0).
+Aset disajikan Figma dari `http://localhost:3845/assets/<id>.<ext>` (id = SHA-1
+aset, hanya hidup selama Figma berjalan) — karena itu semuanya diunduh ke repo
+(Fase 0) dan disimpan dengan nama deskriptif; pemetaan id → nama berkas ada di
+`tool/asset-names.json`.
 
 Raster dioptimasi 39,6 MB → 4,8 MB (87,8%). Deteksi alpha dilakukan per piksel,
 bukan dari nama kanal: dari 19 gambar ternyata hanya **1** yang benar-benar

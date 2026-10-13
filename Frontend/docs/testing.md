@@ -162,4 +162,3 @@ cukup:
   itu), gambar ulang ikonnya dari trace piksel screenshot — lihat
   `assets/icons/soil-list-manual.svg` dan catatannya di
   `docs/asset-map.md`.
-

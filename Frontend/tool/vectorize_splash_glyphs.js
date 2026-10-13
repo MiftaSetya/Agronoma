@@ -29,9 +29,9 @@ const ICONS = path.join(__dirname, '..', 'assets', 'icons');
 // Dipetakan dari pasangan ukuran+warna asset raster: 26x32->a, 32x32->o,
 // 32x44->g (coklat #513620 kecuali "g" yang hijau #6D9C25).
 const GLYPHS = {
-  8: '6a70a53d996b3f923a1d490f9aab3b2896b9e220.svg', // "a"
-  10: '8637549cd036f77b062483c5cb4d60910a8c92ab.svg', // "o"
-  11: 'a0a7f93bd94de47b5b65ca2e78b7106ffce27179.svg', // "g"
+  8: 'splash-glyph-a.svg', // "a"
+  10: 'splash-glyph-o.svg', // "o"
+  11: 'splash-glyph-g.svg', // "g"
 };
 
 const PRECOMP = 'asset_5'; // precomp "agronoma full"

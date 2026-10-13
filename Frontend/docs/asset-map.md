@@ -1,136 +1,193 @@
 # Peta Aset
 
-Setiap aset di `assets/` dinamai **SHA-1 kontennya** (hasil ekspor Figma via
-`tool/fetch_assets.ps1`, dioptimalkan `tool/optimize_assets.ps1`, dan
-dicatat `tool/manifest.json`). Nama berkas yang berisi hash membuat dua hal
-jadi murah:
+Berkas di `assets/` **bernama deskriptif** (kebab-case, mis.
+`nav-home-active.svg`), bukan hash. Nama itu dipetakan dari **id aset Figma**
+(SHA-1) lewat `tool/asset-names.json`; `tool/fetch_assets.ps1`,
+`tool/optimize_assets.ps1`, dan `tool/fetch_images.ps1` memakai file itu untuk
+mengunduh ulang tanpa kehilangan asal-usul.
 
-- **anti-duplikat** — berkas yang sama tidak pernah tersimpan dua kali, dan
-- **anti-usang** — bila design mengganti ikon, SHA-nya berubah, sehingga kode
-  yang masih menunjuk hash lama langsung gagal memuat alih-alih diam-diam
-  menampilkan ikon yang salah.
+Awalnya berkas dinamai id aset Figma apa adanya. Nama hash membuat dua hal
+murah — **anti-duplikat** dan **anti-usang** — tetapi sulit dibaca; karena id
+aset Figma ternyata *bukan* hash isi berkas (118/118 ikon beda, dan ada 4 grup
+berkas byte-identik), jaminan itu memang tidak pernah berlaku penuh. Sekarang
+keutuhan/keberadaan dijaga test: `test/asset_bundle_test.dart` mengunci
+manifest, dan `test/asset_naming_test.dart` memastikan tiap berkas bernama
+deskriptif, kebab-case, dan tanpa id SHA.
 
-Widget tidak menyebut hash itu langsung. Semua path dikumpulkan di
+Widget tidak menyebut path literal. Semua path dikumpulkan di
 `lib/core/assets/app_assets.dart` (`AppAssets`), lengkap dengan komentar
-asal-usulnya. Pemetaan ikon → nama semantik dibuat oleh
-`tool/figma_semantic_map.mjs`; hasilnya tabel di bawah.
+asal-usulnya. Pemetaan ikon → nama semantik aslinya (ikon Figma punya
+`data-name`) dibuat `tool/figma_semantic_map.mjs` dan dicek visual lewat
+`tool/icon_sheet_test.dart` (`build/icon_sheet.png`).
 
-Tabel di-generate dari registry + manifest dengan skrip kecil — kalau aset
-baru ditambahkan, jalankan ulang skripnya supaya tabel tetap sinkron.
+Tabel di bawah di-generate ulang dari registry + manifest lewat skrip kecil —
+kalau aset baru ditambahkan, jalankan ulang supaya tabel tetap sinkron.
 
 ## Ikon & gambar yang dipakai kode
 
 | Nama (`AppAssets`) | Berkas | Ukuran | Keterangan |
 |---|---|---:|---|
-| `addPlant` | icons/6fe50b8e.svg | 1,262 B | Tombol tambah tanaman di menu FAB (#6D9C25) |
-| `archive` | icons/39e90148.svg | 1,449 B | Kotak arsip — baris "Arsip tanaman" |
-| `arrowDown` | icons/c6991985.svg | 1,029 B | Panah bawah (dropdown), mis. pada field pilih |
-| `arrowLeftWhite` | icons/ef737f2f.svg | 333 B | Panah kiri putih di atas foto header |
-| `bestMatchStar` | icons/86fcf618.svg | 1,415 B | Bintang kuning kecil (12x12,6) di chip "Pilihan Terbaik" (langkah 4) |
-| `calendarFertilizer` | icons/fce7e399.svg | 2,321 B | Ikon kecil (12px) pemupukan di kalender perawatan |
-| `calendarWatering` | icons/1bc17606.svg | 1,067 B | Ikon kecil (12px) penyiraman di kalender perawatan |
-| `cameraFill` | icons/8936dfb0.svg | 1,674 B | Kamera putih — tombol ganti foto di drawer "Setelan Tanaman" |
-| `careWaterDrops` | icons/13655dc5.svg | 1,764 B | Ikon tugas penyiraman (biru) pada "Perawatan Hari Ini" |
-| `careWateringCan` | icons/cc68dec2.svg | 2,096 B | Ikon tugas pemupukan (cokelat) pada "Perawatan Hari Ini" |
-| `chatAi` | icons/58a5d2ea.svg | 3,003 B | Ikon obrolan AI di top bar (putih) untuk layar chat |
-| `checkCircle` | icons/4398fe69.svg | 1,123 B | Centang bulat hijau — status perawatan "Kondisi Aman" |
-| `checkCircleSolid` | icons/63bd523e.svg | 1,007 B | Centang bulat solid hijau tua (#56810B) agar terbaca di atas pil hijau |
-| `checkMarkGreen` | icons/e49bbb9c.svg | 347 B | Centang hijau slot langkah 4, disembunyikan dengan `Opacity` |
-| `chevronLeft` | icons/1422e538.svg | 335 B | Panah kembali (opacity 0 — judul tetap tengah) |
-| `chevronLeftThin` | icons/b0edba78.svg | 345 B | Panah "<" bergaris (chevron tipis) — sisi kiri top bar varian 3 |
-| `chevronRight` | icons/7c1bfeea.svg | 1,122 B | Panah ">" (chevron kanan) untuk baris yang bisa ditekan |
-| `chevronRightSmall` | icons/2e6408ac.svg | 283 B | Panah ">" kecil (7.4x12) untuk baris daftar |
-| `chevronRightThin` | icons/a7ce4d8f.svg | 335 B | Panah ">" bergaris (chevron tipis) — sisi kanan top bar varian 4 |
-| `closeLine` | icons/51565193.svg | 1,479 B | Silang tipis (close-line) — menutup layar kamera / menu |
-| `closeMenu` | icons/bd49f2e9.svg | 1,709 B | Ikon "Tutup" (kotak dengan silang) di menu FAB |
-| `diseaseDiagnosis` | icons/bd5068fb.svg | 6,052 B | Ikon "Diagnosis penyakit tanaman" di menu FAB (#6D9C25) |
-| `diseaseScan` | icons/3c4a1631.svg | 6,472 B | Ikon pindai kesehatan (putih) untuk kartu "Pindai Kesehatan" |
-| `fabLogo` | icons/200d5ec8.svg | 3,244 B | Logo Agronoma putih di tengah FAB (tombol hijau melayang) |
-| `flashFill` | icons/756880f6.svg | 911 B | Ikon kilat (flash) — tombol kanan di bawah layar kamera |
-| `galleryFill` | icons/17ff6b81.svg | 745 B | Ikon galeri — tombol kiri di bawah layar kamera |
-| `harvest` | icons/9d0d832e.svg | 1,424 B | Salad/hasil panen — statistik "Dipanen" |
-| `infoFill` | icons/83fa194c.svg | 1,152 B | Ikon informasi bulat (biru) — pil petunjuk di layar kamera |
-| `leafFill` | icons/d73e86bc.svg | 1,800 B | Daun — kartu "Skor perawatan" |
-| `locationFill` | icons/e3efd504.svg | 1,277 B | Penanda lokasi (type pin) — baris kota pada kartu tanaman |
-| `locationFilled` | icons/091d3ab2.svg | 1,174 B | Penanda lokasi dengan lubang di tengah, di samping nama lokasi |
-| `locationTag` | icons/e49f3918.svg | 1,313 B | Lokasi terisi abu (#898B87) — awalan field "Lokasi Tanaman" |
-| `logoMark` | icons/0984935e.svg | 2,453 B | Logo "A" berdaun — dipakai di Login/Register dan sebagai ikon aplikasi |
-| `logout` | icons/f1f02166.svg | 1,342 B | Pintu keluar — tombol "Keluar" |
-| `manualAddCircle` | icons/6e06a745.svg | 1,134 B | Tombol "tambah manual" (langkah 4 wizard) |
-| `mapPointer` | icons/2fa8343d.svg | 4,263 B | Penanda lokasi pada peta (langkah 1) |
-| `mediaGround` | icons/f03253cc.svg | 958 B | Ikon media tanam: tanah lapang (`Lahan terbuka`) |
-| `mediaHouse` | icons/3fc8a3be.svg | 1,953 B | Rumah — pilihan "Pekarangan rumah" |
-| `mediaPot` | icons/61e41058.svg | 1,597 B | Ikon media tanam: pot (`Pot tanaman`) |
-| `navHomeActive` | icons/284d83d1.svg | 1,046 B | Ikon tab "Beranda" saat aktif (putih, di dalam pil hijau) |
-| `navHomeOutline` | icons/6f62cf30.svg | 1,382 B | Ikon tab "Beranda" saat TIDAK aktif (#898B87) |
-| `navProfileActive` | icons/2c51ffd1.svg | 990 B | Ikon tab "Profil" saat aktif (putih) |
-| `navProfileOutline` | icons/dcf9c6b6.svg | 1,936 B | Ikon tab "Profil" saat TIDAK aktif (#898B87) |
-| `phaseDotActive` | icons/69aded84.svg | 2,755 B | Titik fase aktif (lingkaran hijau + cincin putih) |
-| `phaseGenerative` | icons/3ab2a16f.svg | 1,294 B | Ikon fase: generatif |
-| `phaseSeedling` | icons/dd67902a.svg | 540 B | Ikon fase: semai biji |
-| `phaseVegetativeEarly` | icons/b29cf626.svg | 1,282 B | Ikon fase: vegetatif awal |
-| `phaseVegetativeLate` | icons/3484631a.svg | 2,411 B | Ikon fase: vegetatif akhir (tinggi 25, dipakai apa adanya) |
-| `photoCabaiKeriting` | images/e1c380d0.jpg | 204,646 B | Foto "Cabai Rawit Keriting" |
-| `photoCabaiRawit` | images/83fcae54.jpg | 364,017 B | Foto "Cabai Rawit" |
-| `photoLidahMertua` | images/ad9f407e.jpg | 169,541 B | Foto "Lidah Mertua (Sansevieria)" — rekomendasi ke-2 di langkah 4 |
-| `photoMap` | images/0b2e0f5b.jpg | 68,854 B | Foto peta (ubin jalan) untuk langkah "Lokasi penanaman" |
-| `photoPlantDetection` | images/d41d5e08.jpg | 140,505 B | Foto hasil deteksi penyakit |
-| `photoProfile` | images/e1af5d24.jpg | 225,521 B | Foto profil pengguna |
-| `photoSirihGading` | images/5aee8982.jpg | 56,079 B | Foto "Sirih Gading" — rekomendasi ke-3 di langkah 4 |
-| `photoTomatCeri` | images/a1d9f55f.jpg | 126,265 B | Foto "Tomat Ceri" |
-| `pottedPlant` | icons/93dee2db.svg | 1,407 B | Pot tanaman — statistik "Tanaman" |
-| `rainAlert` | icons/277e53b5.svg | 6,541 B | Peringatan hujan (FAB di atas tombol obrolan) |
-| `settingsLineWhite` | icons/5aaaa51f.svg | 3,670 B | Gir pengaturan (putih) di kanan atas header Detail Tanaman |
-| `sheetHandle` | icons/d4923294.svg | 288 B | Gagang tarik drawer bawah |
-| `soilListManual` | icons/soil-list-manual.svg | 516 B | Ikon daftar kartu "Saya Tahu Jenis Tanah" — digambar ulang dari trace piksel |
-| `soilScan` | icons/eff00ba5.svg | 3,538 B | Ikon kamera abu kartu "Bantu saya scan tanah" |
-| `soilScanSelected` | icons/3cc16617.svg | 3,536 B | Ikon kamera putih (terpilih), di dalam bulatan 60px digambar 32px |
-| `tabUnderline` | icons/8832c9f7.svg | 260 B | Garis bawah tab yang sedang aktif pada Detail Tanaman |
-| `tag` | icons/16e0c83d.svg | 1,574 B | Ikon tag/label — prefix field nama tanaman |
-| `taskCheckDone` | icons/31a2dc7c.svg | 479 B | Kotak centang tugas perawatan — sudah dikerjakan |
-| `taskCheckEmpty` | icons/7360fdf6.svg | 272 B | Kotak centang tugas perawatan — belum dikerjakan |
-| `warningFill` | icons/042357eb.svg | 1,246 B | Ikon peringatan bulat (merah) — label "Penyakit terdeteksi" |
-| `waterDrop` | icons/d886046b.svg | 1,048 B | Tetes air (biru) — chip "Pengingat Penyiraman" |
-| `waterDrops` | icons/dee016e4.svg | 1,981 B | Beberapa tetes air (biru) — status perawatan "Perlu Disiram" |
-| `wateringCan` | icons/582a8ddb.svg | 2,323 B | Gembor / alat siram (kuning) — status perawatan "Perlu Pupuk" |
-| `weatherClear` | icons/fe532cf4.svg | 4,063 B | Matahari penuh — "Cerah" |
-| `weatherPartlyCloudy` | icons/1633b862.svg | 1,496 B | Awan dengan matahari — "Sebagian Berawan" |
-| `weatherRain` | icons/746c5a17.svg | 5,351 B | Hujan (varian abu-biru) — "Hujan" |
-| `weatherRainAlt` | icons/98832cea.svg | 3,816 B | Hujan (varian kedua, tanpa tetes ringan) |
-| `weatherRainHeavy` | icons/a6f91e88.svg | 3,893 B | Hujan lebat |
-| `weatherSunShower` | icons/9b2be4d4.svg | 5,209 B | Cerah berawan (matahari + awan + tetes) |
-| `wordmark` | icons/b5724314.svg | 8,846 B | Wordmark "Agronoma" (dipakai di top bar Home/Profile) |
+| `addPlant` | icons/add-plant.svg | 1,262 B | Tombol tambah tanaman di menu FAB (#6D9C25) |
+| `archive` | icons/archive.svg | 1,449 B | Kotak arsip â€” baris "Arsip tanaman" |
+| `arrowDown` | icons/arrow-down.svg | 1,029 B | Panah bawah (dropdown), mis. pada field pilih |
+| `arrowLeftWhite` | icons/arrow-left-white.svg | 333 B | Panah kiri putih di atas foto header |
+| `bestMatchStar` | icons/best-match-star.svg | 1,415 B | Bintang kuning kecil (12x12,6) di chip "Pilihan Terbaik" (langkah 4) |
+| `calendarFertilizer` | icons/calendar-fertilizer.svg | 2,321 B | Ikon kecil (12px) pemupukan di kalender perawatan |
+| `calendarWatering` | icons/calendar-watering.svg | 1,067 B | Ikon kecil (12px) penyiraman di kalender perawatan |
+| `cameraFill` | icons/camera-fill.svg | 1,674 B | Kamera putih â€” tombol ganti foto di drawer "Setelan Tanaman" |
+| `careWaterDrops` | icons/care-water-drops.svg | 1,764 B | Ikon tugas penyiraman (biru) pada "Perawatan Hari Ini" |
+| `careWateringCan` | icons/care-watering-can.svg | 2,096 B | Ikon tugas pemupukan (cokelat) pada "Perawatan Hari Ini" |
+| `chatAi` | icons/chat-ai.svg | 3,003 B | Ikon obrolan AI di top bar (putih) untuk layar chat |
+| `checkCircle` | icons/check-circle.svg | 1,123 B | Centang bulat hijau â€” status perawatan "Kondisi Aman" |
+| `checkCircleSolid` | icons/check-circle-solid.svg | 1,007 B | Centang bulat solid hijau tua (#56810B) agar terbaca di atas pil hijau |
+| `checkMarkGreen` | icons/check-mark-green.svg | 347 B | Centang hijau slot langkah 4, disembunyikan dengan `Opacity` |
+| `chevronLeft` | icons/chevron-left.svg | 335 B | Panah kembali (opacity 0 â€” judul tetap tengah) |
+| `chevronLeftThin` | icons/chevron-left-thin.svg | 345 B | Panah "<" bergaris (chevron tipis) â€” sisi kiri top bar varian 3 |
+| `chevronRight` | icons/chevron-right.svg | 1,122 B | Panah ">" (chevron kanan) untuk baris yang bisa ditekan |
+| `chevronRightSmall` | icons/chevron-right-small.svg | 283 B | Panah ">" kecil (7.4x12) untuk baris daftar |
+| `chevronRightThin` | icons/chevron-right-thin.svg | 335 B | Panah ">" bergaris (chevron tipis) â€” sisi kanan top bar varian 4 |
+| `closeLine` | icons/close-line.svg | 1,479 B | Silang tipis (close-line) â€” menutup layar kamera / menu |
+| `closeMenu` | icons/close-menu.svg | 1,709 B | Ikon "Tutup" (kotak dengan silang) di menu FAB |
+| `diseaseDiagnosis` | icons/disease-diagnosis.svg | 6,052 B | Ikon "Diagnosis penyakit tanaman" di menu FAB (#6D9C25) |
+| `diseaseScan` | icons/disease-scan.svg | 6,472 B | Ikon pindai kesehatan (putih) untuk kartu "Pindai Kesehatan" |
+| `fabLogo` | icons/fab-logo.svg | 3,244 B | Logo Agronoma putih di tengah FAB (tombol hijau melayang) |
+| `flashFill` | icons/flash-fill.svg | 911 B | Ikon kilat (flash) â€” tombol kanan di bawah layar kamera |
+| `galleryFill` | icons/gallery-fill.svg | 745 B | Ikon galeri â€” tombol kiri di bawah layar kamera |
+| `harvest` | icons/harvest.svg | 1,424 B | Salad/hasil panen â€” statistik "Dipanen" |
+| `infoFill` | icons/info-fill.svg | 1,152 B | Ikon informasi bulat (biru) â€” pil petunjuk di layar kamera |
+| `leafFill` | icons/leaf-fill.svg | 1,800 B | Daun â€” kartu "Skor perawatan" |
+| `locationFill` | icons/location-fill.svg | 1,277 B | Penanda lokasi (type pin) â€” baris kota pada kartu tanaman |
+| `locationFilled` | icons/location-filled.svg | 1,174 B | Penanda lokasi dengan lubang di tengah, di samping nama lokasi |
+| `locationTag` | icons/location-tag.svg | 1,313 B | Lokasi terisi abu (#898B87) â€” awalan field "Lokasi Tanaman" |
+| `logoMark` | icons/logo-mark.svg | 2,453 B | Logo "A" berdaun â€” dipakai di Login/Register dan sebagai ikon aplikasi |
+| `logout` | icons/logout.svg | 1,342 B | Pintu keluar â€” tombol "Keluar" |
+| `manualAddCircle` | icons/manual-add-circle.svg | 1,134 B | Tombol "tambah manual" (langkah 4 wizard) |
+| `mapPointer` | icons/map-pointer.svg | 4,263 B | Penanda lokasi pada peta (langkah 1) |
+| `mediaGround` | icons/media-ground.svg | 958 B | Ikon media tanam: tanah lapang (`Lahan terbuka`) |
+| `mediaHouse` | icons/media-house.svg | 1,953 B | Rumah â€” pilihan "Pekarangan rumah" |
+| `mediaPot` | icons/media-pot.svg | 1,597 B | Ikon media tanam: pot (`Pot tanaman`) |
+| `navHomeActive` | icons/nav-home-active.svg | 1,046 B | Ikon tab "Beranda" saat aktif (putih, di dalam pil hijau) |
+| `navHomeOutline` | icons/nav-home-outline.svg | 1,382 B | Ikon tab "Beranda" saat TIDAK aktif (#898B87) |
+| `navProfileActive` | icons/nav-profile-active.svg | 990 B | Ikon tab "Profil" saat aktif (putih) |
+| `navProfileOutline` | icons/nav-profile-outline.svg | 1,936 B | Ikon tab "Profil" saat TIDAK aktif (#898B87) |
+| `phaseDotActive` | icons/phase-dot-active.svg | 2,755 B | Titik fase aktif (lingkaran hijau + cincin putih) |
+| `phaseGenerative` | icons/phase-generative.svg | 1,294 B | Ikon fase: generatif |
+| `phaseSeedling` | icons/phase-seedling.svg | 540 B | Ikon fase: semai biji |
+| `phaseVegetativeEarly` | icons/phase-vegetative-early.svg | 1,282 B | Ikon fase: vegetatif awal |
+| `phaseVegetativeLate` | icons/phase-vegetative-late.svg | 2,411 B | Ikon fase: vegetatif akhir (tinggi 25, dipakai apa adanya) |
+| `photoCabaiKeriting` | images/photo-cabai-keriting.jpg | 204,646 B | Foto "Cabai Rawit Keriting" |
+| `photoCabaiRawit` | images/photo-cabai-rawit.jpg | 364,017 B | Foto "Cabai Rawit" |
+| `photoLidahMertua` | images/photo-lidah-mertua.jpg | 169,541 B | Foto "Lidah Mertua (Sansevieria)" â€” rekomendasi ke-2 di langkah 4 |
+| `photoMap` | images/photo-map.jpg | 68,854 B | Foto peta (ubin jalan) untuk langkah "Lokasi penanaman" |
+| `photoPlantDetection` | images/photo-plant-detection.jpg | 140,505 B | Foto hasil deteksi penyakit |
+| `photoProfile` | images/photo-profile.jpg | 225,521 B | Foto profil pengguna |
+| `photoSirihGading` | images/photo-sirih-gading.jpg | 56,079 B | Foto "Sirih Gading" â€” rekomendasi ke-3 di langkah 4 |
+| `photoTomatCeri` | images/photo-tomat-ceri.jpg | 126,265 B | Foto "Tomat Ceri" |
+| `pottedPlant` | icons/potted-plant.svg | 1,407 B | Pot tanaman â€” statistik "Tanaman" |
+| `rainAlert` | icons/rain-alert.svg | 6,541 B | Peringatan hujan (FAB di atas tombol obrolan) |
+| `settingsLineWhite` | icons/settings-line-white.svg | 3,670 B | Gir pengaturan (putih) di kanan atas header Detail Tanaman |
+| `sheetHandle` | icons/sheet-handle.svg | 288 B | Gagang tarik drawer bawah |
+| `soilListManual` | icons/soil-list-manual.svg | 516 B | Ikon daftar kartu "Saya Tahu Jenis Tanah" â€” digambar ulang dari trace piksel |
+| `soilScan` | icons/soil-scan.svg | 3,538 B | Ikon kamera abu kartu "Bantu saya scan tanah" |
+| `soilScanSelected` | icons/soil-scan-selected.svg | 3,536 B | Ikon kamera putih (terpilih), di dalam bulatan 60px digambar 32px |
+| `tabUnderline` | icons/tab-underline.svg | 260 B | Garis bawah tab yang sedang aktif pada Detail Tanaman |
+| `tag` | icons/tag.svg | 1,574 B | Ikon tag/label â€” prefix field nama tanaman |
+| `taskCheckDone` | icons/task-check-done.svg | 479 B | Kotak centang tugas perawatan â€” sudah dikerjakan |
+| `taskCheckEmpty` | icons/task-check-empty.svg | 272 B | Kotak centang tugas perawatan â€” belum dikerjakan |
+| `warningFill` | icons/warning-fill.svg | 1,246 B | Ikon peringatan bulat (merah) â€” label "Penyakit terdeteksi" |
+| `waterDrop` | icons/water-drop.svg | 1,048 B | Tetes air (biru) â€” chip "Pengingat Penyiraman" |
+| `waterDrops` | icons/water-drops.svg | 1,981 B | Beberapa tetes air (biru) â€” status perawatan "Perlu Disiram" |
+| `wateringCan` | icons/watering-can.svg | 2,323 B | Gembor / alat siram (kuning) â€” status perawatan "Perlu Pupuk" |
+| `weatherClear` | icons/weather-clear.svg | 4,063 B | Matahari penuh â€” "Cerah" |
+| `weatherPartlyCloudy` | icons/weather-partly-cloudy.svg | 1,496 B | Awan dengan matahari â€” "Sebagian Berawan" |
+| `weatherRain` | icons/weather-rain.svg | 5,351 B | Hujan (varian abu-biru) â€” "Hujan" |
+| `weatherRainAlt` | icons/weather-rain-alt.svg | 3,816 B | Hujan (varian kedua, tanpa tetes ringan) |
+| `weatherRainHeavy` | icons/weather-rain-heavy.svg | 3,893 B | Hujan lebat |
+| `weatherSunShower` | icons/weather-sun-shower.svg | 5,209 B | Cerah berawan (matahari + awan + tetes) |
+| `wordmark` | icons/wordmark.svg | 8,846 B | Wordmark "Agronoma" (dipakai di top bar Home/Profile) |
 
-## Gambar cadangan (belum direferensikan kode)
+## Aset cadangan (belum direferensikan kode)
 
-Hasil ekspor Figma menyertakan foto dalam beberapa resolusi. Yang dipakai
-kode hanya resolusi finalnya (tabel atas); sisanya disimpan sebagai cadangan
-bila suatu layar butuh foto resolusi lebih tinggi:
+Hasil ekspor Figma menyertakan elemen pendukung yang tidak dipakai layar
+(ikon status bar, glyph splash, lingkaran/lengkung dekoratif) dan foto dalam
+beberapa resolusi. Semuanya tetap di-bundle dengan nama deskriptif agar
+struktur repo 1:1 dengan ekspor design:
 
-| Nama berkas | Dimensi | Ukuran |
+| Berkas | Id aset | Ukuran |
 |---|---|---:|
-| `1f81b734…jpg` | 720x1280 | 199,778 B |
-| `23f81969…jpg` | 1024x1024 | 367,207 B |
-| `4ea7e0d8…jpg` | 1024x1024 | 468,593 B |
-| `5a06f9d9…jpg` | 1024x1024 | 517,507 B |
-| `5fd926b6…png` | 522x522 | 9,156 B |
-| `615dabec…jpg` | 1200x1200 | 364,017 B |
-| `680c6f3c…jpg` | 1024x1024 | 582,671 B |
-| `8bffd861…jpg` | 1024x1024 | 513,055 B |
-| `916ce803…jpg` | 1024x559 | 242,524 B |
-| `be6aadfe…jpg` | 1024x1024 | 421,352 B |
+| `arc-beige.svg` | 901b8b3d | 1,317 B |
+| `arc-brown-thick.svg` | 2681f967 | 508 B |
+| `arc-brown-thin.svg` | e17f53b7 | 634 B |
+| `arc-brown.svg` | 232621d7 | 585 B |
+| `arc-green-2.svg` | 38f7dd19 | 832 B |
+| `arc-green-bright.svg` | b2af88a3 | 832 B |
+| `arc-green.svg` | 064950e4 | 832 B |
+| `arrow-hidden-stroke.svg` | 94312fbf | 347 B |
+| `arrow-hidden.svg` | 0c97f46d | 345 B |
+| `check-mark-hidden.svg` | bb146b37 | 357 B |
+| `chevron-right-grey.svg` | b8183879 | 818 B |
+| `circle-dashed-2.svg` | e865fadf | 350 B |
+| `circle-dashed-3.svg` | f8be6d49 | 350 B |
+| `circle-dashed.svg` | 57920ea7 | 350 B |
+| `dot-grey.svg` | 8463a5d6 | 229 B |
+| `dot-yellow.svg` | e25b7a48 | 229 B |
+| `eye-grey.svg` | 9e3e7ad6 | 1,358 B |
+| `flask-green-bright-hidden.svg` | b4132284 | 1,555 B |
+| `flask-green-hidden.svg` | 47969e0c | 1,555 B |
+| `flower-dark.svg` | b3045c45 | 3,672 B |
+| `leaf-sprout.svg` | 89e633c0 | 828 B |
+| `leaf-white.svg` | d9987165 | 1,098 B |
+| `line-dark.svg` | ae9c38a8 | 565 B |
+| `line-hidden.svg` | 795eded9 | 274 B |
+| `microphone-green.svg` | 88bffc6f | 1,774 B |
+| `plus-dark.svg` | 6336823c | 841 B |
+| `plus-green-small.svg` | b4c075c2 | 1,008 B |
+| `plus-grey-small.svg` | d8af34bf | 1,039 B |
+| `search-grey.svg` | b209a8b6 | 1,501 B |
+| `spinner-green.svg` | 02130f48 | 1,197 B |
+| `splash-glyph-a.svg` | 6a70a53d | 1,005 B |
+| `splash-glyph-capital-a.svg` | 94bcff3f | 658 B |
+| `splash-glyph-g.svg` | a0a7f93b | 1,054 B |
+| `splash-glyph-m.svg` | 9a842c4b | 960 B |
+| `splash-glyph-n.svg` | ba991d7e | 700 B |
+| `splash-glyph-o.svg` | 8637549c | 662 B |
+| `splash-glyph-r.svg` | 0f266937 | 574 B |
+| `sprout-green.svg` | 8bcc67bd | 636 B |
+| `statusbar-battery-alt.svg` | efadcb3d | 1,557 B |
+| `statusbar-battery-filled.svg` | 770a02f4 | 1,563 B |
+| `statusbar-battery.svg` | 82c379a7 | 1,557 B |
+| `statusbar-cellular-alt-2.svg` | fd349978 | 1,171 B |
+| `statusbar-cellular-alt.svg` | b6327159 | 1,173 B |
+| `statusbar-cellular.svg` | 69cd7a79 | 1,171 B |
+| `statusbar-wifi-alt.svg` | 3e8fa98f | 1,627 B |
+| `statusbar-wifi-hidden.svg` | 3de30bfd | 1,625 B |
+| `statusbar-wifi.svg` | 374e1449 | 1,625 B |
+| `target-reticle.svg` | 9b5154c0 | 1,947 B |
+| `avatar-placeholder.png` | 5fd926b6 | 9,156 B |
+| `photo-cabai-rawit-alt.jpg` | 615dabec | 364,017 B |
+| `photo-mulch-straw.jpg` | be6aadfe | 421,352 B |
+| `photo-mulch-wood.jpg` | 680c6f3c | 582,671 B |
+| `photo-pot-soil.jpg` | 1f81b734 | 199,778 B |
+| `photo-soil-brown.jpg` | 5a06f9d9 | 517,507 B |
+| `photo-soil-compost.jpg` | 8bffd861 | 513,055 B |
+| `photo-soil-cracked.jpg` | 916ce803 | 242,524 B |
+| `photo-soil-dark.jpg` | 23f81969 | 367,207 B |
+| `photo-soil-gravel.jpg` | 4ea7e0d8 | 468,593 B |
 
 ## Kasus khusus
 
-- **`soilListManual.svg`** — satu-satunya aset yang bukan hasil ekspor Figma.
+- **`soil-list-manual.svg`** — satu-satunya aset yang bukan hasil ekspor Figma.
   Ikon ini adalah *override* komponen pada kartu "Saya Tahu Jenis Tanah"
-  (drawer langkah 3 wizard). Berkas SVG aslinya tidak tersedia di server
-  aset MCP (hanya varian kamera `eff00ba5…`), jadi ikonnya digambar ulang
-  dari trace piksel render Figma. Geometrinya tercatat di komentar
+  (drawer langkah 3 wizard). Berkas SVG aslinya tidak tersedia di server aset
+  MCP (hanya varian kamera `soil-scan.svg`), jadi ikonnya digambar ulang dari
+  trace piksel render Figma. Geometrinya tercatat di komentar
   `AppAssets.soilListManual`.
-- **Ikon dengan `opacity="0"`** (`chevronLeft`, `chevronLeftThin`) — di Figma
+- **Ikon dengan `opacity="0"`** (`chevron-left`, `chevron-left-thin`) — di Figma
   elemen ini sengaja tak terlihat (hanya penjaga layout). Tetap di-bundle
   supaya struktur kode 1:1 dengan design.
+- **Berkas kembar identik** — `arc-green`/`arc-green-2`,
+  `chevron-left`/`chevron-right-thin`, dan tiga `circle-dashed*` byte-identik
+  tetapi muncul di node berbeda, jadi tetap diberi nama sendiri.
 - **Manifest** (`tool/manifest.json`) menghitung 136 aset (118 ikon + 18
   gambar); `test/asset_bundle_test.dart` mengunci angka itu dan memverifikasi
   setiap berkas benar-benar ada di bundle.
