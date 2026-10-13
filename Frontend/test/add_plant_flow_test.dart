@@ -113,7 +113,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(MockData.soilTypes.first.name), findsOneWidget);
-      expect(find.text('pH ${MockData.soilTypes.first.phRange}'), findsOneWidget);
+      expect(find.text(MockData.soilTypes.first.description), findsOneWidget);
     });
 
     testWidgets('alur manual lengkap sampai rekomendasi terisi', (

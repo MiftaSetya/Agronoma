@@ -31,8 +31,9 @@ import 'package:frontend/features/plant_detail/plant_detail_screen.dart';
 /// ```
 ///
 /// `debug.agronoma.langkah` mengisi keadaan awal: langkah wizard `/add-plant`
-/// (0..4), tab `/plant-detail` (0 Ringkasan / 1 Perawatan), atau keadaan
-/// `/disease-detection` (0 kamera / 1 panel hasil). Alternatif saat kompilasi:
+/// (0..4, dan 5 = langkah 3 dengan daftar tanah terbuka), tab `/plant-detail`
+/// (0 Ringkasan / 1 Perawatan), atau keadaan `/disease-detection` (0 kamera /
+/// 1 panel hasil). Alternatif saat kompilasi:
 /// `--dart-define=ROUTE=/add-plant --dart-define=STEP=2`.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +48,7 @@ Future<void> main() async {
       signedInUser: MockData.user,
       home: _previewFor(
         route.isEmpty ? Routes.login : route,
-        (step ?? 0).clamp(0, 4),
+        (step ?? 0).clamp(0, 5),
       ),
     ),
   );
@@ -109,8 +110,15 @@ class _AddPlantPreview extends StatelessWidget {
 
   final int step;
 
+  /// `step == 5` bukan langkah keenam wizard, melainkan keadaan langkah 3
+  /// dengan daftar "Saya Tahu Jenis Tanah" sudah terbuka (frame `113:765`);
+  /// design memotret kedua keadaan itu sebagai dua frame berbeda.
+  static const int _soilListStep = 5;
+
   @override
   Widget build(BuildContext context) {
+    final soilListOpen = step == _soilListStep;
+    final flowStep = soilListOpen ? 2 : step;
     // Semai hanya sekali per build; controller reset() sendiri di post-frame
     // pertama milik AddPlantFlow.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -121,14 +129,21 @@ class _AddPlantPreview extends StatelessWidget {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
         final add = context.read<AddPlantController>();
-        switch (step) {
+        switch (flowStep) {
           case 1:
             add.setMedia(PlantingMedia.pot.name);
           case 2:
-            add.markSoilDetected();
+            // Design memotret langkah 3 dalam dua keadaan: kartu besar dengan
+            // tanah sudah dianalisis (88:361), dan daftar manual dengan "Tanah
+            // gembur" terpilih (113:765).
+            if (soilListOpen) {
+              add.selectSoil(MockData.soilTypes[1]);
+            } else {
+              add.markSoilDetected();
+            }
         }
       });
     });
-    return AddPlantFlow(initialStep: step);
+    return AddPlantFlow(initialStep: flowStep, soilListOpen: soilListOpen);
   }
 }

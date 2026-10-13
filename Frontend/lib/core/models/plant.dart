@@ -207,7 +207,7 @@ class Plant {
     this.scientificName,
     this.tags = const [],
     this.fertilizer = 'NPK Daun',
-    this.soilName = 'Tanah Gembur',
+    this.soilName = 'Tanah gembur',
     this.secondaryStatus,
     this.tasks = const [],
     this.timeline = const [],
@@ -307,7 +307,7 @@ class Plant {
     scientificName: json['scientificName'] as String?,
     tags: (json['tags'] as List? ?? const []).cast<String>(),
     fertilizer: json['fertilizer'] as String? ?? 'NPK Daun',
-    soilName: json['soilName'] as String? ?? 'Tanah Gembur',
+    soilName: json['soilName'] as String? ?? 'Tanah gembur',
     secondaryStatus: json['secondaryStatus'] == null
         ? null
         : CareStatus.values.byName(json['secondaryStatus'] as String),

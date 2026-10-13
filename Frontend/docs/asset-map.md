@@ -78,10 +78,17 @@ kalau aset baru ditambahkan, jalankan ulang supaya tabel tetap sinkron.
 | `photoCabaiKeriting` | images/photo-cabai-keriting.jpg | 204,646 B | Foto "Cabai Rawit Keriting" |
 | `photoCabaiRawit` | images/photo-cabai-rawit.jpg | 364,017 B | Foto "Cabai Rawit" |
 | `photoLidahMertua` | images/photo-lidah-mertua.jpg | 169,541 B | Foto "Lidah Mertua (Sansevieria)" â€” rekomendasi ke-2 di langkah 4 |
-| `photoMap` | images/photo-map.jpg | 68,854 B | Foto peta (ubin jalan) untuk langkah "Lokasi penanaman" |
+| `photoMap` | images/photo-map.jpg | 68,854 B | Foto peta lama langkah "Lokasi penanaman" — kini digantikan peta sungguhan `AgroMap`, berkasnya disimpan sebagai cadangan |
+| `photoMulchStraw` | images/photo-mulch-straw.jpg | 421,352 B | Foto "Tanah gambut" di daftar jenis tanah (langkah 3) |
+| `photoMulchWood` | images/photo-mulch-wood.jpg | 582,671 B | Foto "Media Tanam Campuran" di daftar jenis tanah (langkah 3) |
 | `photoPlantDetection` | images/photo-plant-detection.jpg | 140,505 B | Foto hasil deteksi penyakit |
 | `photoProfile` | images/photo-profile.jpg | 225,521 B | Foto profil pengguna |
 | `photoSirihGading` | images/photo-sirih-gading.jpg | 56,079 B | Foto "Sirih Gading" â€” rekomendasi ke-3 di langkah 4 |
+| `photoSoilBrown` | images/photo-soil-brown.jpg | 517,507 B | Foto "Tanah berpasir" di daftar jenis tanah (langkah 3) |
+| `photoSoilCompost` | images/photo-soil-compost.jpg | 513,055 B | Foto "Tanah gembur" di daftar jenis tanah (langkah 3) |
+| `photoSoilCracked` | images/photo-soil-cracked.jpg | 242,524 B | Foto "Tanah liat" di daftar jenis tanah (langkah 3) |
+| `photoSoilDark` | images/photo-soil-dark.jpg | 367,207 B | Foto "Tanah vulkanik" di daftar jenis tanah (langkah 3) |
+| `photoSoilGravel` | images/photo-soil-gravel.jpg | 468,593 B | Foto "Tanah kapur" di daftar jenis tanah (langkah 3) |
 | `photoTomatCeri` | images/photo-tomat-ceri.jpg | 126,265 B | Foto "Tomat Ceri" |
 | `pottedPlant` | icons/potted-plant.svg | 1,407 B | Pot tanaman â€” statistik "Tanaman" |
 | `rainAlert` | icons/rain-alert.svg | 6,541 B | Peringatan hujan (FAB di atas tombol obrolan) |
@@ -165,14 +172,11 @@ struktur repo 1:1 dengan ekspor design:
 | `target-reticle.svg` | 9b5154c0 | 1,947 B |
 | `avatar-placeholder.png` | 5fd926b6 | 9,156 B |
 | `photo-cabai-rawit-alt.jpg` | 615dabec | 364,017 B |
-| `photo-mulch-straw.jpg` | be6aadfe | 421,352 B |
-| `photo-mulch-wood.jpg` | 680c6f3c | 582,671 B |
 | `photo-pot-soil.jpg` | 1f81b734 | 199,778 B |
-| `photo-soil-brown.jpg` | 5a06f9d9 | 517,507 B |
-| `photo-soil-compost.jpg` | 8bffd861 | 513,055 B |
-| `photo-soil-cracked.jpg` | 916ce803 | 242,524 B |
-| `photo-soil-dark.jpg` | 23f81969 | 367,207 B |
-| `photo-soil-gravel.jpg` | 4ea7e0d8 | 468,593 B |
+
+> Foto tanah untuk daftar langkah 3 (`photo-mulch-wood`, `photo-mulch-straw`,
+> `photo-soil-brown`, `-compost`, `-cracked`, `-dark`, `-gravel`) sempat ada di
+> tabel ini; sekarang dipakai kode, jadi barisnya pindah ke tabel utama di atas.
 
 ## Kasus khusus
 

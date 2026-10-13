@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/data/mock_data.dart';
+import 'package:frontend/core/models/map_location.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/routing/app_router.dart';
@@ -11,6 +13,7 @@ import 'package:frontend/core/state/plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
+import 'package:frontend/core/widgets/agro_map.dart';
 import 'package:frontend/core/widgets/agro_text_field.dart';
 import 'package:frontend/core/widgets/app_shell.dart';
 
@@ -23,10 +26,15 @@ import 'package:frontend/core/widgets/app_shell.dart';
 /// Isi digambar dengan koordinat absolut ([Stack] + [Positioned]) karena ada
 /// elemen design yang saling menimpa (peta dan kartu konfirmasi langkah 1).
 class AddPlantFlow extends StatefulWidget {
-  const AddPlantFlow({super.key, this.initialStep = 0});
+  const AddPlantFlow({super.key, this.initialStep = 0, this.soilListOpen = false});
 
   /// Langkah yang langsung dibuka (0..4) — untuk preview pengembangan.
   final int initialStep;
+
+  /// Langsung membuka daftar "Saya Tahu Jenis Tanah" di langkah 3 — untuk
+  /// preview pengembangan, karena design memotret keadaan itu (frame
+  /// `113:765`) sedangkan aplikasinya membukanya lewat sentuhan.
+  final bool soilListOpen;
 
   /// Judul top bar; kelima langkah design memakai judul yang sama.
   static const String topBarTitle = 'Tambah tanaman';
@@ -152,6 +160,7 @@ class _AddPlantFlowState extends State<AddPlantFlow> {
                         onBack: _back,
                         onNext: _next,
                         enabled: _canContinue,
+                        openListByDefault: widget.soilListOpen,
                       ),
                       3 => _RecommendationStep(
                         onBack: _back,
@@ -176,10 +185,21 @@ class _AddPlantFlowState extends State<AddPlantFlow> {
   }
 }
 
+/// Tebal garis tepi kartu di design (semuanya 1px).
+///
+/// Figma menggambar *stroke* **di dalam** kotak (`box-sizing: border-box`),
+/// sedangkan `Container` Flutter menambahkan lebar `Border` **di luar**
+/// `padding` (lihat `BoxDecoration.padding`). Jadi setiap padding yang
+/// berbatasan dengan garis tepi ditulis `design - _border`: inset dari tepi
+/// luar tetap sama, dan tinggi kartu tidak membengkak 2px — kartu 96px design
+/// jadi 98px kalau lupa, dan geseran itu menumpuk di kartu-kartu berikutnya.
+const double _border = 1;
+
 /// Kartu kepala yang sama di kelima langkah: indikator kemajuan, judul, dan
 /// satu paragraf pengantar. Menempel penuh kiri-kanan tanpa sudut
-/// (`left-0 w-[440px] pt-24 pb-16 px-16`). Tingginya tidak dipatok — yang
-/// dijaga tinggi tiap baris (16/20/20px) agar isi di bawah tidak bergeser.
+/// (`left-0 w-[440px] pt-24 pb-16 px-16`) dengan garis tepi penuh. Tingginya
+/// tidak dipatok — yang dijaga tinggi tiap baris (16/20/20px) agar isi di
+/// bawah tidak bergeser.
 class _HeaderCard extends StatelessWidget {
   const _HeaderCard({
     required this.step,
@@ -196,14 +216,17 @@ class _HeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(
-        AppSpacing.page,
-        AppSpacing.xxl,
-        AppSpacing.page,
-        AppSpacing.lg,
+        AppSpacing.page - _border,
+        AppSpacing.xxl - _border,
+        AppSpacing.page - _border,
+        AppSpacing.lg - _border,
       ),
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+        border: Border.fromBorderSide(
+          BorderSide(color: AppColors.border),
+        ),
+        boxShadow: AppColors.shadow1,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,29 +377,50 @@ class _StepActions extends StatelessWidget {
 // Langkah 1 — lokasi
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Langkah 1 — peta (baris 296..676) dan kartu konfirmasi yang **menimpa** 14px
-/// bagian bawah peta (baris 662..932, node `58:222`). Karena saling menimpa,
-/// keduanya disusun dengan [Positioned] terhadap area isi (mulai baris 120):
-/// peta di 176, kartu di 542. Di dalam kartu, ruang antara alamat dan tombol
-/// mengembang ([Spacer]), bukan dihitung.
+/// Lokasi contoh yang cocok dengan [name]; kalau nama itu tidak dikenal
+/// (mis. tanaman lama yang disimpan sebelum peta ada) dipakai contoh pertama
+/// supaya langkah ini selalu punya koordinat untuk ditampilkan.
+MapLocation _exampleLocation(String? name) => MockData.locations.firstWhere(
+  (loc) => loc.name == name,
+  orElse: () => MockData.locations.first,
+);
+
+/// Langkah 1 — kartu kepala (baris 120..308), peta (296..676), dan kartu
+/// konfirmasi yang **menimpa** 14px bagian bawah peta (baris 662..932, node
+/// `58:222`). Karena saling menimpa, ketiganya disusun dengan [Positioned]
+/// terhadap area isi (mulai baris 120): kepala di 0, peta di 176, kartu di 542.
+/// Design menggambar kepala **sesudah** peta, jadi kepala yang menutup 12px
+/// bagian atas peta — urutan anak [Stack] mengikuti itu. Di dalam kartu, ruang
+/// antara alamat dan tombol mengembang ([Spacer]), bukan dihitung.
 class _LocationStep extends StatelessWidget {
   const _LocationStep({required this.onNext, required this.enabled});
+
+  /// Judul dan pengantar kartu kepala langkah ini (`66:660`/`66:661`).
+  static const String _title = 'Dimana tanaman ini akan tumbuh?';
+  static const String _description =
+      'Aplikasi memerlukan akses lokasi untuk menganalisis data cuaca lokal, '
+      'kelembapan, dan kondisi cahaya matahari yang tepat bagi tanamanmu.';
 
   /// Tinggi peta pada design (296..676).
   static const double _mapHeight = 380;
 
-  /// Peta mulai di baris 296 = 176 di dalam area isi (yang mulai di 120).
-  static const double _mapTop = 176;
+  /// Peta mulai di baris 296 = 176 di dalam area isi (yang mulai di 120);
+  /// kartu kepala (120..308) menutup 12px di atasnya, seperti design.
+  static const double _mapTop = 296 - 120;
 
   /// Kartu konfirmasi mulai di baris 662 = 542 di dalam area isi.
-  static const double _cardTop = 542;
+  static const double _cardTop = 662 - 120;
 
   final VoidCallback onNext;
   final bool enabled;
 
   @override
   Widget build(BuildContext context) {
-    final location = MockData.locations.first;
+    final draft = context.watch<AddPlantController>().draft;
+    final picked = _exampleLocation(draft.locationName);
+    // Titik peta bebas (hasil geser di pemilih) menang atas contoh terdekat,
+    // supaya peta tidak "melompat" saat halaman dibangun ulang.
+    final center = draft.locationPosition ?? picked.position;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -386,7 +430,24 @@ class _LocationStep extends StatelessWidget {
           left: 0,
           right: 0,
           height: _mapHeight,
-          child: const _LocationMap(),
+          // Langkah ini hanya menampilkan titik; peta interaktif dibuka lewat
+          // "Ubah Lokasi" supaya gerakan jari tidak bertabrakan dengan kartu
+          // yang menimpa peta.
+          child: AgroMap(center: center, interactive: false),
+        ),
+        // Kartu kepala **di atas** peta, seperti urutan simpul di design.
+        // Tingginya sengaja tidak dipatok: dengan Inter isinya pas 188px
+        // (= 24 + 148 + 16), tetapi membiarkannya mengukur sendiri membuat
+        // paragraf yang membungkus lebih tinggi tidak melimpah keluar kartu.
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: const _HeaderCard(
+            step: 0,
+            title: _title,
+            description: _description,
+          ),
         ),
         Positioned(
           top: _cardTop,
@@ -394,62 +455,171 @@ class _LocationStep extends StatelessWidget {
           right: 0,
           bottom: 0,
           child: _LocationConfirmCard(
-            name: location['name']!,
-            address: location['address']!,
+            name: picked.name,
+            address: picked.address,
             onConfirm: () {
               context.read<AddPlantController>().setLocation(
-                location['name']!,
-                location['address']!,
+                picked.name,
+                picked.address,
+                position: center,
               );
               onNext();
             },
-            onChange: () => _showLocationPicker(context),
+            onChange: () => _showLocationPicker(context, picked, center),
           ),
         ),
       ],
     );
   }
 
-  /// "Ubah Lokasi" membuka sheet daftar lokasi contoh; design belum punya
-  /// frame untuk sheet ini, jadi bentuknya sengaja memakai komponen yang ada.
-  void _showLocationPicker(BuildContext context) {
-    final add = context.read<AddPlantController>();
+  /// "Ubah Lokasi" membuka pemilih lokasi (frame `127:721`: peta besar + pin
+  /// tetap di tengah + tombol "Pilih Lokasi Ini"). Design belum memuat daftar
+  /// lokasi contohnya, jadi daftar itu tetap disediakan di bawah peta sebagai
+  /// jalan pintas memilih titik yang sudah dikenal.
+  void _showLocationPicker(
+    BuildContext context,
+    MapLocation current,
+    LatLng? point,
+  ) {
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
       ),
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Ubah Lokasi', style: AppTextStyles.headlineLarge),
-              const SizedBox(height: AppSpacing.lg),
-              for (final loc in MockData.locations)
-                _LocationOption(
-                  name: loc['name']!,
-                  address: loc['address']!,
-                  selected: loc['name'] == add.draft.locationName,
-                  onTap: () {
+      builder: (_) => _LocationPickerSheet(
+        initial: current,
+        initialPoint: point,
+      ),
+    );
+  }
+}
+
+/// Pemilih lokasi (frame `127:721`): peta + pin tetap di tengah; menggeser peta
+/// memilih titik, lalu "Pilih Lokasi Ini" mengunci titik itu. Menggeser peta
+/// memakai [MapLocation] contoh terdekat sebagai nama/alamatnya — tanpa layanan
+/// geokode (yang menuntut kunci API) nama jalan sembarang memang tak bisa
+/// diperoleh.
+class _LocationPickerSheet extends StatefulWidget {
+  const _LocationPickerSheet({required this.initial, this.initialPoint});
+
+  final MapLocation initial;
+
+  /// Titik yang sudah dipilih sebelumnya, kalau ada.
+  final LatLng? initialPoint;
+
+  @override
+  State<_LocationPickerSheet> createState() => _LocationPickerSheetState();
+}
+
+class _LocationPickerSheetState extends State<_LocationPickerSheet> {
+  /// Titik yang sedang ditunjuk pin.
+  late LatLng _point = widget.initialPoint ?? widget.initial.position;
+
+  /// Lokasi contoh yang terpilih (untuk nama + alamat), atau null kalau pin
+  /// digeser jauh dari semua contoh.
+  late MapLocation? _nearest = _find(_point);
+
+  /// Contoh terdekat — jaraknya dihitung dengan [Distance] (meter).
+  static const Distance _distance = Distance();
+
+  MapLocation? _find(LatLng point) {
+    MapLocation? best;
+    var bestMeters = double.infinity;
+    for (final loc in MockData.locations) {
+      final meters = _distance.as(LengthUnit.Meter, point, loc.position);
+      if (meters < bestMeters) {
+        best = loc;
+        bestMeters = meters;
+      }
+    }
+    // Lebih dari ~2 km dianggap bukan lokasi contoh mana pun.
+    return bestMeters <= 2000 ? best : null;
+  }
+
+  void _onMoved(LatLng point) {
+    setState(() {
+      _point = point;
+      _nearest = _find(point);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final label = _nearest?.name ?? 'Titik di peta';
+    final detail =
+        _nearest?.address ??
+        '${_point.latitude.toStringAsFixed(5)}, '
+            '${_point.longitude.toStringAsFixed(5)}';
+
+    return SafeArea(
+      top: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Peta 551px pada design (188..739); di sheet dipendekkan supaya
+          // daftar contoh dan tombolnya tetap terlihat tanpa menggulir.
+          SizedBox(
+            height: 300,
+            child: AgroMap(center: _point, onCenterChanged: _onMoved),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const AgroIcon(AppAssets.locationFilled, size: 24),
+                    const SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: AppTextStyles.titleLarge.copyWith(
+                          color: AppColors.darkGrey,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  detail,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.grey,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                for (final loc in MockData.locations)
+                  _LocationOption(
+                    name: loc.name,
+                    address: loc.address,
+                    selected: loc == _nearest,
+                    onTap: () => setState(() {
+                      _point = loc.position;
+                      _nearest = loc;
+                    }),
+                  ),
+                const SizedBox(height: AppSpacing.sm),
+                AgroButton(
+                  label: 'Pilih Lokasi Ini',
+                  onPressed: () {
                     context.read<AddPlantController>().setLocation(
-                      loc['name']!,
-                      loc['address']!,
+                      label,
+                      detail,
+                      position: _point,
                     );
-                    Navigator.of(sheetContext).pop();
+                    Navigator.of(context).pop();
                   },
                 ),
-              const SizedBox(height: AppSpacing.sm),
-              AgroButton(
-                label: 'Tutup',
-                onPressed: () => Navigator.of(sheetContext).pop(),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -475,9 +645,9 @@ class _LocationConfirmCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(
-        AppSpacing.page,
-        AppSpacing.xxl,
-        AppSpacing.page,
+        AppSpacing.page - _border,
+        AppSpacing.xxl - _border,
+        AppSpacing.page - _border,
         AppSpacing.xxxl,
       ),
       decoration: const BoxDecoration(
@@ -586,33 +756,9 @@ class _TrimmedText extends StatelessWidget {
   }
 }
 
-/// Peta statis dengan penanda lokasi — gambar ubin, bukan peta sungguhan
-/// (ganti plugin = tambah kunci API & izin). Gambar asli 428x679 dipasang
-/// `w-full h-[183.69%] top-[-41.78%]` = `BoxFit.cover` yang dipusatkan.
-class _LocationMap extends StatelessWidget {
-  const _LocationMap();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      clipBehavior: Clip.none,
-      children: [
-        Image.asset(AppAssets.photoMap, fit: BoxFit.cover),
-        // Pin SVG 42x56,7 sengaja meluber dari kotak 34,3x41,7 (inset negatif);
-        // memaksa 34x41 justru menyusutkan pinnya.
-        const Positioned(
-          top: 162,
-          left: 0,
-          right: 0,
-          child: Center(
-            child: AgroIcon(AppAssets.mapPointer, size: 42, height: 56.714),
-          ),
-        ),
-      ],
-    );
-  }
-}
+/// Peta statis lama (`photo-map.jpg`) sudah diganti peta sungguhan [AgroMap]:
+/// design sebenarnya menampilkan tangkapan Google Maps, dan gambar statis tidak
+/// bisa mengikuti lokasi yang dipilih pengguna.
 
 class _LocationOption extends StatelessWidget {
   const _LocationOption({
@@ -723,6 +869,10 @@ class _MediaStep extends StatelessWidget {
                   title: media.label,
                   subtitle: media.description,
                   selected: draft.media == media.name,
+                  // Ikon media diekspor sebagai berkas satu warna dengan warna
+                  // varian aslinya (pot = putih), jadi warnanya diikuti keadaan
+                  // kartu.
+                  monochrome: true,
                   // Jarak 24px antar kartu di langkah ini (kartu 96px di
                   // baris 332, 452, 572).
                   gap: AppSpacing.xxl,
@@ -745,11 +895,15 @@ class _SoilStep extends StatefulWidget {
     required this.onBack,
     required this.onNext,
     required this.enabled,
+    this.openListByDefault = false,
   });
 
   final VoidCallback onBack;
   final VoidCallback onNext;
   final bool enabled;
+
+  /// Lihat [AddPlantFlow.soilListOpen].
+  final bool openListByDefault;
 
   @override
   State<_SoilStep> createState() => _SoilStepState();
@@ -757,7 +911,7 @@ class _SoilStep extends StatefulWidget {
 
 class _SoilStepState extends State<_SoilStep> {
   /// "Saya Tahu Jenis Tanah" dipilih sehingga daftarnya dibuka.
-  bool _manual = false;
+  late bool _manual = widget.openListByDefault;
 
   @override
   void initState() {
@@ -771,9 +925,6 @@ class _SoilStepState extends State<_SoilStep> {
   Widget build(BuildContext context) {
     final add = context.watch<AddPlantController>();
     final draft = add.draft;
-    // Daftar manual hanya dibuka lewat tombol kedua; kalau tanah sudah
-    // terdeteksi lewat kamera, kartunya tetap dua — sesuai design.
-    final openList = _manual;
 
     return Column(
       children: [
@@ -793,64 +944,163 @@ class _SoilStepState extends State<_SoilStep> {
               AppSpacing.page,
               AppSpacing.xxl,
             ),
-            children: [
-              _BigOptionCard(
-                icon: draft.soilDetected
-                    ? AppAssets.soilScanSelected
-                    : AppAssets.soilScan,
-                iconSize: 32,
-                title: 'Bantu Saya Scan Tanah',
-                subtitle: 'Gunakan kamera untuk analisis otomatis',
-                selected: draft.soilDetected,
-                onTap: draft.soilDetected
-                    ? null
-                    : () => showModalBottomSheet<void>(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (_) => const _DetectSoilSheet(),
-                      ),
-              ),
-              _BigOptionCard(
-                icon: AppAssets.soilListManual,
-                iconSize: 32,
-                title: 'Saya Tahu Jenis Tanah',
-                subtitle: 'Pilih dari daftar jenis tanah secara manual',
-                selected: openList && draft.soil != null,
-                onTap: () => setState(() => _manual = !_manual),
-              ),
-              if (openList) ...[
-                const SizedBox(height: AppSpacing.sm),
-                if (add.isLoading)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else
-                  for (final soil in add.soilTypes)
-                    _OptionCard(
-                      icon: soil.iconAsset,
-                      title: soil.name,
-                      subtitle: soil.description,
-                      trailing: Text(
-                        'pH ${soil.phRange}',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.grey,
+            children: _manual
+                // Frame `113:765` mengganti kedua kartu besar dengan daftar
+                // tujuh jenis tanah, bukan menumpuknya di bawah — karena itu
+                // pilihan pertama tidak lagi terlihat saat daftar terbuka.
+                ? [
+                    if (add.isLoading)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: AppSpacing.xxl,
                         ),
-                      ),
-                      selected: draft.soil?.id == soil.id,
-                      onTap: () =>
-                          context.read<AddPlantController>().selectSoil(soil),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else
+                      for (final soil in add.soilTypes)
+                        _SoilCard(
+                          photo: soil.photoAsset,
+                          title: soil.name,
+                          description: soil.description,
+                          selected: draft.soil?.id == soil.id,
+                          onTap: () => context
+                              .read<AddPlantController>()
+                              .selectSoil(soil),
+                        ),
+                  ]
+                : [
+                    _BigOptionCard(
+                      icon: draft.soilDetected
+                          ? AppAssets.soilScanSelected
+                          : AppAssets.soilScan,
+                      iconSize: 32,
+                      title: 'Bantu Saya Scan Tanah',
+                      subtitle: 'Gunakan kamera untuk analisis otomatis',
+                      selected: draft.soilDetected,
+                      onTap: draft.soilDetected
+                          ? null
+                          : () => showModalBottomSheet<void>(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (_) => const _DetectSoilSheet(),
+                            ),
                     ),
-              ],
-            ],
+                    _BigOptionCard(
+                      icon: AppAssets.soilListManual,
+                      iconSize: 32,
+                      title: 'Saya Tahu Jenis Tanah',
+                      subtitle: 'Pilih dari daftar jenis tanah secara manual',
+                      selected: false,
+                      onTap: () => setState(() => _manual = true),
+                    ),
+                  ],
           ),
         ),
         _StepActions(
-          onBack: widget.onBack,
+          // Saat daftar terbuka, "Kembali" pertama-tama menutup daftar supaya
+          // kedua kartu besar bisa dijangkau lagi; barulah mundur satu langkah.
+          onBack: _manual ? () => setState(() => _manual = false) : widget.onBack,
           onNext: widget.onNext,
           enabled: widget.enabled,
         ),
       ],
+    );
+  }
+}
+
+/// Satu baris daftar "Saya Tahu Jenis Tanah" (kartu `113:1198`): foto 80x80
+/// radius 8 di kiri, judul + keterangan tiga baris di tengah, slot centang 32px
+/// di kanan. Tinggi 112px = 16 (padding) + 80 (foto) + 16 (padding).
+class _SoilCard extends StatelessWidget {
+  const _SoilCard({
+    required this.photo,
+    required this.title,
+    required this.description,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String photo;
+  final String title;
+  final String description;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.lg - _border),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: AppRadius.lgAll,
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.border,
+          ),
+          boxShadow: selected
+              ? const [
+                  BoxShadow(
+                    color: Color(0xC7A1D650),
+                    offset: Offset(0, 1),
+                    blurRadius: 1,
+                  ),
+                ]
+              : AppColors.shadow1,
+        ),
+        child: Row(
+          // Judul design rata atas dengan tepi foto (bukan di tengah baris),
+          // jadi kolom teks 78px dan centang 32px dipisah sendiri-sendiri.
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+              child: Image.asset(
+                photo,
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.titleLarge.copyWith(
+                      letterSpacing: -1,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    description,
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: AppColors.grey,
+                      letterSpacing: -0.5,
+                      height: 18 / 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            SizedBox(
+              height: 80,
+              child: Center(
+                // Slot centang selalu ada; kartu yang belum dipilih hanya
+                // menyembunyikan centangnya (design `opacity-0`).
+                child: Opacity(
+                  opacity: selected ? 1 : 0,
+                  child: const AgroIcon(AppAssets.checkMarkGreen, size: 32),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1104,7 +1354,7 @@ class _RecommendationCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.lg - _border),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: AppRadius.lgAll,
@@ -1358,6 +1608,10 @@ class _PhaseStep extends StatelessWidget {
                   title: phase.label,
                   subtitle: phase.description,
                   selected: draft.phase == phase.name,
+                  // Keempat ikon fase diekspor hitam oleh Figma; abu di kartu
+                  // yang belum dipilih itu warna varian pada render, bukan
+                  // warna berkasnya.
+                  monochrome: true,
                   gap: 10,
                   onTap: () =>
                       context.read<AddPlantController>().setPhase(phase.name),
@@ -1395,8 +1649,8 @@ class _OptionCard extends StatelessWidget {
     required this.onTap,
     this.iconWidth,
     this.iconHeight,
-    this.trailing,
     this.gap = AppSpacing.lg,
+    this.monochrome = false,
   });
 
   final String icon;
@@ -1409,10 +1663,15 @@ class _OptionCard extends StatelessWidget {
   final double? iconWidth;
   final double? iconHeight;
 
-  final Widget? trailing;
+  /// Ikon satu warna yang harus mengikuti keadaan kartu.
+  ///
+  /// Berkas ekspor Figma membawa warna varian *default*-nya sendiri — mis.
+  /// `media-pot.svg` putih (varian terpilih) dan `phase-*.svg` hitam — jadi
+  /// warna itu harus ditimpa agar sama di kedua keadaan: abu di kartu yang
+  /// belum dipilih, putih di kartu terpilih (bulatannya hijau).
+  final bool monochrome;
 
-  /// Jarak ke kartu berikutnya: 24px (langkah 2), 10px (langkah 5), 16px
-  /// (daftar manual).
+  /// Jarak ke kartu berikutnya: 24px (langkah 2), 10px (langkah 5).
   final double gap;
 
   @override
@@ -1421,7 +1680,7 @@ class _OptionCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: EdgeInsets.only(bottom: gap),
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.lg - _border),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: AppRadius.lgAll,
@@ -1446,6 +1705,7 @@ class _OptionCard extends StatelessWidget {
               width: iconWidth ?? 18,
               height: iconHeight ?? 19.908,
               selected: selected,
+              monochrome: monochrome,
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -1469,10 +1729,6 @@ class _OptionCard extends StatelessWidget {
                 ],
               ),
             ),
-            if (trailing != null) ...[
-              const SizedBox(width: AppSpacing.sm),
-              trailing!,
-            ],
             const SizedBox(width: AppSpacing.sm),
             // Centang hijau saat terpilih, transparan saat belum.
             Opacity(
@@ -1512,8 +1768,8 @@ class _BigOptionCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: AppSpacing.xxl),
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.xxl,
-          vertical: AppSpacing.xxxl,
+          horizontal: AppSpacing.xxl - _border,
+          vertical: AppSpacing.xxxl - _border,
         ),
         decoration: BoxDecoration(
           color: AppColors.surface,
@@ -1585,12 +1841,16 @@ class _IconCircle extends StatelessWidget {
     required this.width,
     required this.height,
     required this.selected,
+    this.monochrome = false,
   });
 
   final String icon;
   final double width;
   final double height;
   final bool selected;
+
+  /// Lihat [_OptionCard.monochrome].
+  final bool monochrome;
 
   @override
   Widget build(BuildContext context) {
@@ -1602,7 +1862,14 @@ class _IconCircle extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: AgroIcon(icon, size: width, height: height),
+      child: AgroIcon(
+        icon,
+        size: width,
+        height: height,
+        color: monochrome
+            ? (selected ? AppColors.surface : AppColors.grey)
+            : null,
+      ),
     );
   }
 }
