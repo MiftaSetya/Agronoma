@@ -79,9 +79,9 @@ jarak kartu per langkah, tombol manual melayang, ikon daftar kartu tanah).
 | Login | 6.5 |
 | Profile | 6.8 |
 | Register | 9.8 |
-| Add plant — lokasi | 8.0 |
-| Home | 11.1 |
-| Plant detail | 12.2 |
+| Add plant — lokasi | 17.2 |
+| Home | 7.4 |
+| Plant detail | 11.7 |
 | Add plant — rekomendasi | 3.3 |
 | Plant chat | 18.7 |
 | Deteksi Penyakit | 78.9 |
@@ -90,6 +90,12 @@ jarak kartu per langkah, tombol manual melayang, ikon daftar kartu tanah).
 > (kartu kepala langkah 1, kompensasi border `border-box`, perataan ikon fase
 > dan media, serta daftar tujuh jenis tanah). Selisih rekomendasi (3.3) masih
 > didominasi perbedaan kompresi JPEG foto tanaman, bukan layout.
+>
+> Selisih **lokasi 17.2** bukan lagi sisa layout: peta sungguhan memakai ubin
+> OpenStreetMap, sedangkan Figma menampilkan tangkapan Google Maps (lihat
+> "Penyimpangan yang disengaja: peta langkah 1"). Selisih 8.0 yang lama diukur
+> saat langkah ini masih memakai `photo-map.jpg`. Karena ubin diambil dari
+> jaringan, angka ini juga naik-turun beberapa poin antar-tangkapan.
 
 ## Penyimpangan yang disengaja: peta langkah 1
 

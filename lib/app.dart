@@ -42,13 +42,13 @@ class AgronomaApp extends StatelessWidget {
   final String initialRoute;
 
   /// Layar yang langsung ditampilkan tanpa lewat router; dipakai widget test
-  /// dan `tool/dev_preview.dart`. Di produksi biarkan `null` agar
+  /// dan `lib/dev_preview.dart`. Di produksi biarkan `null` agar
   /// [initialRoute] yang berlaku.
   final Widget? home;
 
   /// Pengguna awal. Bila diisi, sesi langsung dianggap sudah masuk.
   ///
-  /// Dipakai `tool/dev_preview.dart` supaya Home dan Profile bisa dipotret
+  /// Dipakai `lib/dev_preview.dart` supaya Home dan Profile bisa dipotret
   /// dengan data yang benar tanpa melewati layar Login — kalau tidak, kedua
   /// layar itu hanya menampilkan nilai kosong.
   final AppUser? signedInUser;
