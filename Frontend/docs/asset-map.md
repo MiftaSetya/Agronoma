@@ -81,7 +81,8 @@ kalau aset baru ditambahkan, jalankan ulang supaya tabel tetap sinkron.
 | `photoMap` | images/photo-map.jpg | 68,854 B | Foto peta lama langkah "Lokasi penanaman" — kini digantikan peta sungguhan `AgroMap`, berkasnya disimpan sebagai cadangan |
 | `photoMulchStraw` | images/photo-mulch-straw.jpg | 421,352 B | Foto "Tanah gambut" di daftar jenis tanah (langkah 3) |
 | `photoMulchWood` | images/photo-mulch-wood.jpg | 582,671 B | Foto "Media Tanam Campuran" di daftar jenis tanah (langkah 3) |
-| `photoPlantDetection` | images/photo-plant-detection.jpg | 140,505 B | Foto hasil deteksi penyakit |
+| `photoPlantDetection` | images/photo-plant-detection.jpg | 140,505 B | Latar contoh layar kamera "Deteksi Penyakit" (frame `106:1124`) saat kamera tidak dipakai |
+| `photoPotSoil` | images/photo-pot-soil.jpg | 199,778 B | Latar contoh layar kamera "Deteksi Jenis Tanah" (frame `101:701`) saat kamera tidak dipakai |
 | `photoProfile` | images/photo-profile.jpg | 225,521 B | Foto profil pengguna |
 | `photoSirihGading` | images/photo-sirih-gading.jpg | 56,079 B | Foto "Sirih Gading" â€” rekomendasi ke-3 di langkah 4 |
 | `photoSoilBrown` | images/photo-soil-brown.jpg | 517,507 B | Foto "Tanah berpasir" di daftar jenis tanah (langkah 3) |
@@ -172,11 +173,12 @@ struktur repo 1:1 dengan ekspor design:
 | `target-reticle.svg` | 9b5154c0 | 1,947 B |
 | `avatar-placeholder.png` | 5fd926b6 | 9,156 B |
 | `photo-cabai-rawit-alt.jpg` | 615dabec | 364,017 B |
-| `photo-pot-soil.jpg` | 1f81b734 | 199,778 B |
 
 > Foto tanah untuk daftar langkah 3 (`photo-mulch-wood`, `photo-mulch-straw`,
 > `photo-soil-brown`, `-compost`, `-cracked`, `-dark`, `-gravel`) sempat ada di
 > tabel ini; sekarang dipakai kode, jadi barisnya pindah ke tabel utama di atas.
+> `photo-pot-soil.jpg` juga sudah keluar dari tabel ini sejak dipakai sebagai
+> latar contoh layar kamera "Deteksi Jenis Tanah".
 
 ## Kasus khusus
 
