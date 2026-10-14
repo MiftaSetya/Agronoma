@@ -68,11 +68,13 @@ class AddPlantController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Dipakai setelah analisis kamera berhasil.
-  void markSoilDetected({SoilType? soil}) {
+  /// Dipakai setelah analisis kamera berhasil. [photoPath] adalah berkas hasil
+  /// jepretan kamera (null bila pemindaian berjalan tanpa kamera — mode contoh).
+  void markSoilDetected({SoilType? soil, String? photoPath}) {
     _draft = _draft.copyWith(
       soilDetected: true,
       soil: soil ?? _soilTypes.firstOrNull,
+      soilPhotoPath: photoPath,
     );
     notifyListeners();
   }

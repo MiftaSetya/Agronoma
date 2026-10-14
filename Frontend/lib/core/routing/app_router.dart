@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:frontend/core/widgets/main_shell.dart';
 import 'package:frontend/features/add_plant/add_plant_flow.dart';
+import 'package:frontend/features/add_plant/soil_detection_screen.dart';
 import 'package:frontend/features/auth/login_screen.dart';
 import 'package:frontend/features/auth/register_screen.dart';
 import 'package:frontend/features/disease/disease_detection_screen.dart';
@@ -27,6 +28,7 @@ class Routes {
   static const plantDetail = '/plant-detail';
   static const plantChat = '/plant-chat';
   static const addPlant = '/add-plant';
+  static const soilDetection = '/soil-detection';
   static const diseaseDetection = '/disease-detection';
 }
 
@@ -75,6 +77,9 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
 
     case Routes.addPlant:
       return _page(const AddPlantFlow(), settings);
+
+    case Routes.soilDetection:
+      return _page(const SoilDetectionScreen(), settings);
 
     case Routes.diseaseDetection:
       return _page(const DiseaseDetectionScreen(), settings);

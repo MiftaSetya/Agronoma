@@ -61,6 +61,7 @@ class AddPlantDraft {
     this.media,
     this.soil,
     this.soilDetected = false,
+    this.soilPhotoPath,
     this.recommendation,
     this.manualName,
     this.manualScientificName,
@@ -83,6 +84,10 @@ class AddPlantDraft {
 
   /// Tanah sudah dianalisis lewat kamera.
   final bool soilDetected;
+
+  /// Berkas foto tanah hasil kamera (null bila mode contoh). Disimpan supaya
+  /// analisis sungguhan bisa dikirim ke backend tanpa memotret ulang.
+  final String? soilPhotoPath;
 
   final PlantRecommendation? recommendation;
 
@@ -108,6 +113,7 @@ class AddPlantDraft {
     String? media,
     SoilType? soil,
     bool? soilDetected,
+    String? soilPhotoPath,
     PlantRecommendation? recommendation,
     String? manualName,
     String? manualScientificName,
@@ -120,6 +126,7 @@ class AddPlantDraft {
     media: media ?? this.media,
     soil: soil ?? this.soil,
     soilDetected: soilDetected ?? this.soilDetected,
+    soilPhotoPath: soilPhotoPath ?? this.soilPhotoPath,
     recommendation: recommendation ?? this.recommendation,
     manualName: manualName ?? this.manualName,
     manualScientificName: manualScientificName ?? this.manualScientificName,

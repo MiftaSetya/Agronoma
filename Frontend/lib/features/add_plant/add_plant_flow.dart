@@ -16,6 +16,7 @@ import 'package:frontend/core/widgets/agro_icon.dart';
 import 'package:frontend/core/widgets/agro_map.dart';
 import 'package:frontend/core/widgets/agro_text_field.dart';
 import 'package:frontend/core/widgets/app_shell.dart';
+import 'package:frontend/features/add_plant/soil_detection_screen.dart';
 
 /// Alur "Tambah Tanaman" — lima frame Figma dijadikan **satu** wizard
 /// berindeks supaya isian dibawa antar langkah: `Add Plant 1 - Location`
@@ -1019,10 +1020,10 @@ class _SoilStepState extends State<_SoilStep> {
                       selected: draft.soilDetected,
                       onTap: draft.soilDetected
                           ? null
-                          : () => showModalBottomSheet<void>(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (_) => const _DetectSoilSheet(),
+                          : () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => const SoilDetectionScreen(),
+                              ),
                             ),
                     ),
                     _BigOptionCard(
@@ -1140,64 +1141,6 @@ class _SoilCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Tiruan layar "Arahkan kamera ke permukaan tanah" (`101:701`) — kamera fake:
-/// pratinjau statis + delay 1400ms, karena alur inti tetap bisa dicoba tanpa
-/// plugin kamera.
-class _DetectSoilSheet extends StatefulWidget {
-  const _DetectSoilSheet();
-
-  @override
-  State<_DetectSoilSheet> createState() => _DetectSoilSheetState();
-}
-
-class _DetectSoilSheetState extends State<_DetectSoilSheet> {
-  bool _analyzing = false;
-
-  Future<void> _analyze() async {
-    setState(() => _analyzing = true);
-    await Future<void>.delayed(const Duration(milliseconds: 1400));
-    if (!mounted) return;
-    context.read<AddPlantController>().markSoilDetected();
-    Navigator.of(context).pop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Arahkan kamera ke permukaan tanah',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.headlineLarge,
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          Container(
-            height: 220,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceMuted,
-              borderRadius: AppRadius.lgAll,
-              border: Border.all(color: AppColors.border),
-            ),
-            alignment: Alignment.center,
-            child: _analyzing
-                ? const CircularProgressIndicator()
-                : const AgroIcon(AppAssets.soilScan, size: 64),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          AgroButton(
-            label: _analyzing ? 'Menganalisis…' : 'Ambil Gambar',
-            loading: _analyzing,
-            onPressed: _analyze,
-          ),
-        ],
       ),
     );
   }
