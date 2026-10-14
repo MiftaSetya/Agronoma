@@ -45,6 +45,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   );
 
   Plant? _plant;
+  Object? _error;
   bool _loading = true;
 
   @override
@@ -66,6 +67,10 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
       if (id.isEmpty) return;
       final plant = await controller.fetch(id);
       if (mounted) setState(() => _plant = plant);
+    } catch (e) {
+      // Tanpa ini, kegagalan fetch (mis. backend fase berikutnya) bocor sebagai
+      // layar galat; di sini ditangkap agar bisa ditawari "Coba lagi".
+      if (mounted) setState(() => _error = e);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -85,11 +90,25 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
       backgroundColor: AppColors.surface,
       body: _loading
           ? const Center(child: CircularProgressIndicator())
+          : _error != null
+          ? EmptyState(
+              icon: AppAssets.pottedPlant,
+              title: 'Gagal memuat tanaman',
+              message: 'Periksa koneksi lalu coba lagi.',
+              actionLabel: 'Coba lagi',
+              onAction: () {
+                setState(() {
+                  _loading = true;
+                  _error = null;
+                });
+                _load();
+              },
+            )
           : plant == null
           ? const EmptyState(
               icon: AppAssets.pottedPlant,
               title: 'Tanaman tidak ditemukan',
-              message: 'Data tanaman ini sudah tersedia.',
+              message: 'Tanaman ini belum ada di daftarmu.',
             )
           : Stack(
               children: [

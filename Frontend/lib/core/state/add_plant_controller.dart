@@ -51,6 +51,7 @@ class AddPlantController extends ChangeNotifier {
   Future<void> loadSoilTypes() async {
     if (_soilTypes.isNotEmpty || _loading) return;
     _loading = true;
+    _error = null;
     notifyListeners();
     try {
       _soilTypes = await _repository.getSoilTypes();

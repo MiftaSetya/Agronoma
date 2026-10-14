@@ -88,12 +88,19 @@ class PlantController extends ChangeNotifier {
 
   /// Menandai tugas perawatan selesai/belum.
   Future<void> toggleTask(String plantId, String taskTitle, bool done) async {
-    final updated = await _repository.setTaskDone(plantId, taskTitle, done);
-    _plants = [
-      for (final p in _plants)
-        if (p.id == plantId) updated else p,
-    ];
-    notifyListeners();
+    try {
+      final updated = await _repository.setTaskDone(plantId, taskTitle, done);
+      _plants = [
+        for (final p in _plants)
+          if (p.id == plantId) updated else p,
+      ];
+      notifyListeners();
+    } catch (e) {
+      // Ditangkap agar kegagalan simpan (mis. saat fetch) tidak melempar dari
+      // handler ketukan; pemanggil bisa membaca [error].
+      _error = e;
+      notifyListeners();
+    }
   }
 
   /// Menyimpan hasil drawer "Setelan Tanaman".
@@ -105,19 +112,25 @@ class PlantController extends ChangeNotifier {
     GrowthPhase? phase,
     String? soilName,
   }) async {
-    final updated = await _repository.updatePlant(
-      plantId,
-      name: name,
-      location: location,
-      place: place,
-      phase: phase,
-      soilName: soilName,
-    );
-    _plants = [
-      for (final p in _plants)
-        if (p.id == plantId) updated else p,
-    ];
-    notifyListeners();
+    _error = null;
+    try {
+      final updated = await _repository.updatePlant(
+        plantId,
+        name: name,
+        location: location,
+        place: place,
+        phase: phase,
+        soilName: soilName,
+      );
+      _plants = [
+        for (final p in _plants)
+          if (p.id == plantId) updated else p,
+      ];
+      notifyListeners();
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+    }
   }
 
   /// Menambahkan tanaman baru hasil wizard, lalu mengembalikannya.
