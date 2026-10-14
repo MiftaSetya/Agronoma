@@ -13,6 +13,7 @@ import 'package:frontend/core/data/weather_repository.dart';
 import 'package:frontend/core/models/weather.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/add_plant/add_plant_flow.dart';
+import 'package:frontend/features/add_plant/soil_detection_screen.dart';
 
 /// Uji logika [AddPlantController] dan alur langkah wizard (bukan piksel) —
 /// kesetiaan visual dijaga pipeline tangkapan layar di `docs/testing.md`.
@@ -146,6 +147,34 @@ void main() {
 
       expect(find.text(MockData.soilTypes.first.name), findsOneWidget);
       expect(find.text(MockData.soilTypes.first.description), findsOneWidget);
+    });
+
+    testWidgets('langkah 3: "Bantu Saya Scan Tanah" membuka kamera deteksi', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(440, 956);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(wrap(const AddPlantFlow()));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Konfirmasi Lokasi'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(PlantingMedia.pot.label));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Lanjut'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Bantu Saya Scan Tanah'));
+      // Bingkai kamera beranimasi terus (garis pemindai) sehingga
+      // pumpAndSettle tidak akan selesai; cukup pump transisi rutenya.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Dulu ini membuka bottom sheet _DetectSoilSheet; sekarang layar
+      // penuh frame `101:701` yang memakai kamera sungguhan.
+      expect(find.byType(SoilDetectionScreen), findsOneWidget);
+      expect(find.text('Deteksi Jenis Tanah'), findsOneWidget);
     });
 
     testWidgets('alur manual lengkap sampai rekomendasi terisi', (
