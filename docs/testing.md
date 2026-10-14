@@ -87,9 +87,9 @@ jarak kartu per langkah, tombol manual melayang, ikon daftar kartu tanah).
 | Plant detail | 11.7 |
 | Add plant — rekomendasi | 3.3 |
 | Plant chat | 18.7 |
-| Deteksi Penyakit | 4.0 |
+| Deteksi Penyakit | 3.8 |
 | Deteksi Penyakit - hasil | 3.5 |
-| Deteksi Tanah (kamera) | 3.9 |
+| Deteksi Tanah (kamera) | 3.5 |
 
 > Angka wizard diukur ulang setelah langkah 1-5 ditata sesuai frame Figma
 > (kartu kepala langkah 1, kompensasi border `border-box`, perataan ikon fase
@@ -101,7 +101,9 @@ jarak kartu per langkah, tombol manual melayang, ikon daftar kartu tanah).
 > kamera sungguhan — lihat "Penyimpangan yang disengaja: kamera sungguhan".
 > Angka lama Deteksi Penyakit (78.9) diukur saat layar itu memakai foto lain
 > daripada frame Figma-nya; setelah fotonya disamakan dengan design, selisihnya
-> turun ke 4.0.
+> turun ke 3.8. Kedua layar kamera sedikit lebih jauh dari Figma karena bingkai
+> bidik tengah memang tidak digambar (lihat "Penyimpangan yang disengaja: kamera
+> sungguhan").
 >
 > Selisih **lokasi 17.2** bukan lagi sisa layout: peta sungguhan memakai ubin
 > OpenStreetMap, sedangkan Figma menampilkan tangkapan Google Maps (lihat
@@ -163,10 +165,19 @@ Kedua layar kamera memakai **kamera perangkat** lewat paket `camera` (kongsi
   (`/soil-detection`, `lib/features/add_plant/soil_detection_screen.dart`)
   karena frame `101:701` adalah layar penuh 440×956.
 
-Frame `101:701` dan `106:1124` memakai **kerangka yang sama** — bingkai bidik
-`92,299 256x256`, pil petunjuk di baris 587, baris kontrol 734, top bar baris 64
-— jadi seluruh bingkai hidup di satu widget (`AgroCameraView`) dan tiap layar
-cukup mengirim judul, teks, dan geometri fotonya.
+Frame `101:701` dan `106:1124` memakai **kerangka yang sama** — pil petunjuk di
+baris 587, baris kontrol 734, top bar baris 64 — jadi seluruh bingkai hidup di
+satu widget (`AgroCameraView`) dan tiap layar cukup mengirim judul, teks, dan
+geometri fotonya.
+
+Bingkai bidik tengah dari design (siku `92,299 256x256` + garis pemindai) dan
+`_Reticle`/`_Corner`-nya **dihapus atas permintaan pemilik proyek** — ini
+penyimpangan yang disengaja, dan arahnya menjauhi Figma: ditempelkan kembali
+region bingkai Figma ke tangkapan emulator menurunkan selisih baris-isinya dari
+**3,40 → 2,34**, jadi bingkainya "berharga" ≈**1,1** poin. Angka di tabel tetap
+memakai implementasi tanpa bingkai (yang memang dipakai aplikasi); bingkainya
+tipis (empat siku 30px + garis 4px) di atas foto, jadi tidak menghalangi
+pandangan ke objek.
 
 Fotonya **berbeda**, dan ini ditemukan lewat pengukuran, bukan dugaan: design
 menyimpan foto pada simpul `left-[-50px] w-[539px] h-[958px]`, tetapi frame

@@ -166,10 +166,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Bantu Saya Scan Tanah'));
-      // Bingkai kamera beranimasi terus (garis pemindai) sehingga
-      // pumpAndSettle tidak akan selesai; cukup pump transisi rutenya.
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
 
       // Dulu ini membuka bottom sheet _DetectSoilSheet; sekarang layar
       // penuh frame `101:701` yang memakai kamera sungguhan.
