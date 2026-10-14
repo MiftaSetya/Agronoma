@@ -314,27 +314,31 @@ class _AgroCameraViewState extends State<AgroCameraView>
         // Pil petunjuk/analisis diletakkan tepat di atas tombol rana, bukan di
         // baris 587 seperti design — atas permintaan pemilik proyek supaya
         // petunjuknya lebih dekat ke tombol. Tombol rana atasnya di baris 805,5
-        // (`top:734` + tinggi 223/2 dikurangi 80/2), jadi pil (tinggi ~42) ditaruh
-        // di baris 748 dengan sisa jarak ~16px.
+        // (`top:734` + tinggi 223/2 dikurangi 80/2), sedangkan tepi bawah pil
+        // ditaruh di baris 790 (sisa jarak ~16px).
+        //
+        // Dijangkarkan dari **bawah** (166 = tinggi kanvas 956 - 790), bukan dari
+        // atas, supaya pil pemberitahuan yang tingginya bisa berubah (teksnya
+        // bisa membungkus) tetap menempel di atas pil petunjuk tanpa menabrak.
         Positioned(
           left: 0,
           right: 0,
-          top: 748,
+          bottom: 166,
           child: Center(
-            child: _busy
-                ? _AnalyzingPill(label: widget.analyzingLabel)
-                : _InstructionPill(text: widget.instruction),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_problem != null) ...[
+                  _NoticePill(text: _problem!),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+                _busy
+                    ? _AnalyzingPill(label: widget.analyzingLabel)
+                    : _InstructionPill(text: widget.instruction),
+              ],
+            ),
           ),
         ),
-
-        if (_problem != null)
-          Positioned(
-            left: 0,
-            right: 0,
-            // Ditempel tepat di atas pil petunjuk (748 - tinggi pil 42 - 8).
-            top: 698,
-            child: Center(child: _NoticePill(text: _problem!)),
-          ),
 
         Positioned(
           left: 48,
