@@ -68,6 +68,15 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.symmetric(vertical: 48),
               child: Center(child: CircularProgressIndicator()),
             )
+          else if (controller.error != null && controller.plants.isEmpty)
+            EmptyState(
+              icon: AppAssets.pottedPlant,
+              title: 'Gagal memuat data',
+              message:
+                  'Periksa koneksi internet, lalu coba lagi.',
+              actionLabel: 'Coba lagi',
+              onAction: () => controller.load(force: true),
+            )
           else if (controller.isEmpty)
             EmptyState(
               icon: AppAssets.pottedPlant,

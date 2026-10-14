@@ -44,6 +44,13 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
       final disease = await chat.diagnose(imagePath: null);
       if (!mounted) return;
       setState(() => _result = disease);
+    } catch (_) {
+      if (!mounted) return;
+      // Kegagalan analisis tidak boleh muncul sebagai layar galat; pengguna
+      // diberi tahu dan bisa menekan rana lagi.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal menganalisis gambar. Coba lagi.')),
+      );
     } finally {
       if (mounted) setState(() => _analyzing = false);
     }

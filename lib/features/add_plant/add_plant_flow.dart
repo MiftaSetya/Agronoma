@@ -108,6 +108,11 @@ class _AddPlantFlowState extends State<AddPlantFlow> {
         Routes.plantDetail,
         arguments: PlantDetailArgs(plantId: plant.id),
       );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal menyimpan tanaman. Coba lagi.')),
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -376,9 +381,41 @@ class _StepActions extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Langkah 1 — lokasi
-// ─────────────────────────────────────────────────────────────────────────────
+/// Pesan kegagalan memuat data pada langkah wizard, dengan tombol ulangi.
+class _LoadError extends StatelessWidget {
+  const _LoadError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+      child: Column(
+        children: [
+          const AgroIcon(AppAssets.pottedPlant, size: 48),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            'Gagal memuat data',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.titleLarge,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Periksa koneksi internet, lalu coba lagi.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMuted,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          SizedBox(
+            width: 200,
+            child: AgroOutlineButton(label: 'Coba lagi', onPressed: onRetry),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 /// Lokasi contoh yang cocok dengan [name]; kalau nama itu tidak dikenal
 /// (mis. tanaman lama yang disimpan sebelum peta ada) dipakai contoh pertama
@@ -959,6 +996,12 @@ class _SoilStepState extends State<_SoilStep> {
                         ),
                         child: Center(child: CircularProgressIndicator()),
                       )
+                    else if (add.error != null)
+                      _LoadError(
+                        onRetry: () => context
+                            .read<AddPlantController>()
+                            .loadSoilTypes(),
+                      )
                     else
                       for (final soil in add.soilTypes)
                         _SoilCard(
@@ -1238,6 +1281,12 @@ class _RecommendationStepState extends State<_RecommendationStep> {
                             Text('Menganalisis tanaman…'),
                           ],
                         ),
+                      )
+                    else if (add.error != null)
+                      _LoadError(
+                        onRetry: () => context
+                            .read<AddPlantController>()
+                            .loadRecommendations(),
                       )
                     else if (draft.manualName != null &&
                         add.recommendations.isEmpty)
