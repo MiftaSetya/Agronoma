@@ -12,6 +12,7 @@ import 'package:frontend/core/state/auth_controller.dart';
 import 'package:frontend/core/state/chat_controller.dart';
 import 'package:frontend/core/state/plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/widgets/agro_camera_view.dart';
 import 'package:provider/provider.dart';
 /// Seluruh "kabel" aplikasi: repositori disuntikkan sebagai **antarmuka**
 /// ([PlantRepository] dkk., bukan kelas mock-nya) sehingga saat backend siap
@@ -27,6 +28,7 @@ class AgronomaApp extends StatelessWidget {
     this.initialRoute = Routes.splash,
     this.home,
     this.signedInUser,
+    this.sampleCamera = false,
   });
 
   /// Sumber data tanaman; default [MockPlantRepository].
@@ -52,6 +54,13 @@ class AgronomaApp extends StatelessWidget {
   /// dengan data yang benar tanpa melewati layar Login — kalau tidak, kedua
   /// layar itu hanya menampilkan nilai kosong.
   final AppUser? signedInUser;
+
+  /// Memaksa layar kamera memakai foto contoh alih-alih pratinjau langsung.
+  ///
+  /// Dinyalakan pipeline tangkapan layar: frame Figma menggambar sebuah foto,
+  /// jadi membandingkan pikselnya dengan pratinjau kamera sungguhan tidak akan
+  /// pernah masuk akal.
+  final bool sampleCamera;
 
   @override
   Widget build(BuildContext context) {
@@ -89,31 +98,34 @@ class AgronomaApp extends StatelessWidget {
           ),
         ),
       ],
-      child: MaterialApp(
-        title: 'Agronoma',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light,
-        // Kanvas Figma memakai status bar setinggi 64px (iPhone 16 Pro Max),
-        // sedangkan Android lebih pendek — inset-nya diseragamkan sekali di
-        // sini agar setiap layar tidak meleset ke atas. Lihat
-        // [AppSizes.normalizeTopInset].
-        builder: (context, child) {
-          final media = MediaQuery.of(context);
-          return MediaQuery(
-            data: media.copyWith(
-              padding: media.padding.copyWith(
-                top: AppSizes.normalizeTopInset(context),
+      child: CameraScope(
+        sampleOnly: sampleCamera,
+        child: MaterialApp(
+          title: 'Agronoma',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          // Kanvas Figma memakai status bar setinggi 64px (iPhone 16 Pro Max),
+          // sedangkan Android lebih pendek — inset-nya diseragamkan sekali di
+          // sini agar setiap layar tidak meleset ke atas. Lihat
+          // [AppSizes.normalizeTopInset].
+          builder: (context, child) {
+            final media = MediaQuery.of(context);
+            return MediaQuery(
+              data: media.copyWith(
+                padding: media.padding.copyWith(
+                  top: AppSizes.normalizeTopInset(context),
+                ),
               ),
-            ),
-            child: child ?? const SizedBox.shrink(),
-          );
-        },
-        // `home` dan `initialRoute` tidak boleh dua-duanya menentukan layar
-        // pertama: kalau `home` diisi, rute awal dibiarkan null karena
-        // `onGenerateRoute` tidak akan sempat dipanggil.
-        home: home,
-        initialRoute: home == null ? initialRoute : null,
-        onGenerateRoute: onGenerateRoute,
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
+          // `home` dan `initialRoute` tidak boleh dua-duanya menentukan layar
+          // pertama: kalau `home` diisi, rute awal dibiarkan null karena
+          // `onGenerateRoute` tidak akan sempat dipanggil.
+          home: home,
+          initialRoute: home == null ? initialRoute : null,
+          onGenerateRoute: onGenerateRoute,
+        ),
       ),
     );
   }
