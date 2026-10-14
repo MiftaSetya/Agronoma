@@ -14,6 +14,7 @@ abstract class PlantRepository {
     String? scientificName,
     required String location,
     required SoilType soil,
+    required PlantingMedia media,
     String? phase,
   });
   Future<Plant> setTaskDone(String plantId, String taskTitle, bool done);
@@ -66,6 +67,7 @@ class MockPlantRepository implements PlantRepository {
     String? scientificName,
     required String location,
     required SoilType soil,
+    required PlantingMedia media,
     String? phase,
   }) async {
     await Future<void>.delayed(_latency);
@@ -79,8 +81,10 @@ class MockPlantRepository implements PlantRepository {
       scientificName: scientificName,
       photoAsset: source.photoAsset,
       location: location,
-      place: 'Pekarangan Rumah',
-      media: PlantingMedia.pot,
+      // Media tanam pilihan langkah 2 menentukan "MEDIA TANAM" di Detail
+      // Tanaman; labelnya dipakai langsung supaya kartu dan wizard seragam.
+      place: media.label,
+      media: media,
       status: CareStatus.safe,
       phase: GrowthPhase.values.firstWhere(
         (g) => g.name == phase,

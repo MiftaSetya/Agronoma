@@ -126,6 +126,7 @@ class PlantController extends ChangeNotifier {
     String? scientificName,
     required String location,
     required SoilType soil,
+    required PlantingMedia media,
     String? phase,
   }) async {
     final plant = await _repository.addPlant(
@@ -133,6 +134,7 @@ class PlantController extends ChangeNotifier {
       scientificName: scientificName,
       location: location,
       soil: soil,
+      media: media,
       phase: phase,
     );
     _plants = [..._plants, plant];

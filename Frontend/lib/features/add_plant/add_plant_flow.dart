@@ -98,6 +98,9 @@ class _AddPlantFlowState extends State<AddPlantFlow> {
         scientificName: draft.manualScientificName,
         location: draft.locationName ?? 'Surabaya',
         soil: draft.soil ?? MockData.soilTypes.first,
+        media: draft.media != null
+            ? PlantingMedia.values.byName(draft.media!)
+            : PlantingMedia.pot,
         phase: draft.phase,
       );
       if (!mounted) return;
