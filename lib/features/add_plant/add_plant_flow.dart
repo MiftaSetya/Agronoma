@@ -157,7 +157,6 @@ class _AddPlantFlowState extends State<AddPlantFlow> {
                     child: switch (_step) {
                       0 => _LocationStep(
                         onNext: _next,
-                        enabled: _canContinue,
                       ),
                       1 => _MediaStep(
                         onBack: _back,
@@ -433,7 +432,7 @@ MapLocation _exampleLocation(String? name) => MockData.locations.firstWhere(
 /// bagian atas peta — urutan anak [Stack] mengikuti itu. Di dalam kartu, ruang
 /// antara alamat dan tombol mengembang ([Spacer]), bukan dihitung.
 class _LocationStep extends StatelessWidget {
-  const _LocationStep({required this.onNext, required this.enabled});
+  const _LocationStep({required this.onNext});
 
   /// Judul dan pengantar kartu kepala langkah ini (`66:660`/`66:661`).
   static const String _title = 'Dimana tanaman ini akan tumbuh?';
@@ -452,7 +451,6 @@ class _LocationStep extends StatelessWidget {
   static const double _cardTop = 662 - 120;
 
   final VoidCallback onNext;
-  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -795,10 +793,6 @@ class _TrimmedText extends StatelessWidget {
     );
   }
 }
-
-/// Peta statis lama (`photo-map.jpg`) sudah diganti peta sungguhan [AgroMap]:
-/// design sebenarnya menampilkan tangkapan Google Maps, dan gambar statis tidak
-/// bisa mengikuti lokasi yang dipilih pengguna.
 
 class _LocationOption extends StatelessWidget {
   const _LocationOption({
@@ -1782,7 +1776,6 @@ class _OptionCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            // Centang hijau saat terpilih, transparan saat belum.
             Opacity(
               opacity: selected ? 1 : 0,
               child: const AgroIcon(AppAssets.checkMarkGreen, size: 32),
