@@ -315,6 +315,11 @@ class AppAssets {
   static const String photoMulchStraw = '$_images/photo-mulch-straw.jpg';
   static const String photoMulchWood = '$_images/photo-mulch-wood.jpg';
 
+  /// Latar contoh layar kamera "Deteksi Jenis Tanah" (frame `101:701`) saat
+  /// kamera tidak dipakai. Bukan foto tanah pada daftar jenis tanah: frame itu
+  /// memang memotret pot dengan tanah gembur.
+  static const String photoPotSoil = '$_images/photo-pot-soil.jpg';
+
   static const String photoMap =
       '$_images/photo-map.jpg';
 

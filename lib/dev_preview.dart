@@ -10,6 +10,7 @@ import 'package:frontend/core/routing/app_router.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
 import 'package:frontend/core/widgets/main_shell.dart';
 import 'package:frontend/features/add_plant/add_plant_flow.dart';
+import 'package:frontend/features/add_plant/soil_detection_screen.dart';
 import 'package:frontend/features/auth/login_screen.dart';
 import 'package:frontend/features/auth/register_screen.dart';
 import 'package:frontend/features/disease/disease_detection_screen.dart';
@@ -40,6 +41,10 @@ Future<void> main() async {
 
   final route = await _setting('ROUTE', 'debug.agronoma.rute');
   final step = int.tryParse(await _setting('STEP', 'debug.agronoma.langkah'));
+  // `debug.agronoma.kamera asli` melepas mode contoh supaya bingkai kamera bisa
+  // diuji dengan pratinjau sungguhan; nilai lain (termasuk kosong) tetap mode
+  // contoh demi tangkapan layar yang deterministik.
+  final liveCamera = await _setting('KAMERA', 'debug.agronoma.kamera') == 'asli';
 
   runApp(
     AgronomaApp(
@@ -50,6 +55,7 @@ Future<void> main() async {
         route.isEmpty ? Routes.login : route,
         (step ?? 0).clamp(0, 5),
       ),
+      sampleCamera: !liveCamera,
     ),
   );
 }
@@ -69,6 +75,7 @@ Future<String> _setting(String define, String property) async {
   return switch (define) {
     'ROUTE' => const String.fromEnvironment('ROUTE'),
     'STEP' => '${const int.fromEnvironment('STEP')}',
+    'KAMERA' => const String.fromEnvironment('KAMERA'),
     _ => '',
   };
 }
@@ -94,6 +101,8 @@ Widget _previewFor(String route, int step) {
       return DiseaseDetectionScreen(
         initialResult: step == 1 ? MockData.disease : null,
       );
+    case Routes.soilDetection:
+      return const SoilDetectionScreen();
     default:
       throw ArgumentError.value(route, 'route', 'Rute preview tidak dikenal');
   }
