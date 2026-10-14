@@ -181,7 +181,16 @@ class _LocationLine extends StatelessWidget {
       children: [
         const AgroIcon(AppAssets.locationFill, size: 16),
         const SizedBox(width: AppSpacing.xs),
-        Text(plant.location, style: style),
+        // Lokasi bisa berupa nama tempat panjang (hasil wizard), jadi diberi
+        // batas + elipsis supaya baris ini tidak melimpah keluar kartu.
+        Flexible(
+          child: Text(
+            plant.location,
+            style: style,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
         const SizedBox(width: AppSpacing.sm),
         Container(
           width: 4,
