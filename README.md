@@ -46,6 +46,19 @@ Mode preview pengembangan (`lib/dev_preview.dart`) membuka layar mana pun
 langsung lewat properti sistem — dipakai pipeline tangkapan layar di
 `docs/testing.md`.
 
+## Izin perangkat
+
+- **Kamera** — dipakai dua layar (Deteksi Penyakit `106:1124` dan Deteksi Tanah
+  `101:701`) lewat paket `camera`. Izin `CAMERA` diminta saat layar kamera
+  dibuka. `enableAudio: false`, jadi mikrofon tidak diminta. Di iOS
+  `NSCameraUsageDescription` sudah ada di `ios/Runner/Info.plist`.
+- **Internet** — peta OpenStreetMap di langkah 1 wizard memuat ubin dari
+  jaringan (`android.permission.INTERNET`).
+
+Pipeline tangkapan layar menjalankan layar kamera dalam **mode contoh** (foto
+design) supaya perbandingan piksel tidak bergantung pada isi kamera; lihat
+`docs/testing.md`.
+
 ## Dokumentasi lain
 
 | Berkas | Isi |

@@ -63,7 +63,10 @@ dipastikan lewat pengukuran, bukan dugaan:
 - **Foto.** Titik berat objek merah (cabai) pada foto Detail Tanaman cocok
   sampai **0,1px** antara Figma dan emulator, jadi crop-nya sudah benar. Sisa
   selisihnya artefak pengecilan 3x → 1x (`tool/split_diff.py`).
-- **Layar gelap (Deteksi Penyakit).** Fotonya memang foto contoh yang lain.
+- **Layar kamera.** Kedua layar kamera (Deteksi Penyakit `106:1124` dan Deteksi
+  Tanah `101:701`) memotret **ruangan sungguhan** lewat kamera perangkat;
+  pipeline tangkapan layar menjalankannya dalam mode contoh supaya foto design
+  yang dipakai (lihat "Penyimpangan yang disengaja: kamera sungguhan").
 
 ## Tabel selisih
 
@@ -84,12 +87,21 @@ jarak kartu per langkah, tombol manual melayang, ikon daftar kartu tanah).
 | Plant detail | 11.7 |
 | Add plant — rekomendasi | 3.3 |
 | Plant chat | 18.7 |
-| Deteksi Penyakit | 78.9 |
+| Deteksi Penyakit | 4.0 |
+| Deteksi Penyakit - hasil | 3.5 |
+| Deteksi Tanah (kamera) | 3.9 |
 
 > Angka wizard diukur ulang setelah langkah 1-5 ditata sesuai frame Figma
 > (kartu kepala langkah 1, kompensasi border `border-box`, perataan ikon fase
 > dan media, serta daftar tujuh jenis tanah). Selisih rekomendasi (3.3) masih
 > didominasi perbedaan kompresi JPEG foto tanaman, bukan layout.
+>
+> Dua baris "Deteksi Penyakit" dan "Deteksi Tanah (kamera)" diukur dalam
+> **mode contoh** (`debug.agronoma.kamera` ≠ `asli`), bukan dengan pratinjau
+> kamera sungguhan — lihat "Penyimpangan yang disengaja: kamera sungguhan".
+> Angka lama Deteksi Penyakit (78.9) diukur saat layar itu memakai foto lain
+> daripada frame Figma-nya; setelah fotonya disamakan dengan design, selisihnya
+> turun ke 4.0.
 >
 > Selisih **lokasi 17.2** bukan lagi sisa layout: peta sungguhan memakai ubin
 > OpenStreetMap, sedangkan Figma menampilkan tangkapan Google Maps (lihat
@@ -139,6 +151,82 @@ Tiap baris memakai foto 80×80 dari berkas yang sudah ada
 `-dark`, `photo-mulch-straw`); pasangan nama ↔ gambar ditentukan dengan
 membandingkan render kartu Figma terhadap tiap berkas piksel per piksel, bukan
 ditebak dari namanya.
+
+## Penyimpangan yang disengaja: kamera sungguhan
+
+Kedua layar kamera memakai **kamera perangkat** lewat paket `camera` (kongsi
+`lib/core/widgets/agro_camera_view.dart`), bukan foto statis:
+
+- **Deteksi Penyakit** (frame `106:1124`) — dari layar Detail Tanaman.
+- **Deteksi Tanah** (frame `101:701`) — kartu "Bantu Saya Scan Tanah" di langkah
+  3 wizard. Dulu ini sebuah *bottom sheet* tiruan; sekarang rutenya sendiri
+  (`/soil-detection`, `lib/features/add_plant/soil_detection_screen.dart`)
+  karena frame `101:701` adalah layar penuh 440×956.
+
+Frame `101:701` dan `106:1124` memakai **kerangka yang sama** — bingkai bidik
+`92,299 256x256`, pil petunjuk di baris 587, baris kontrol 734, top bar baris 64
+— jadi seluruh bingkai hidup di satu widget (`AgroCameraView`) dan tiap layar
+cukup mengirim judul, teks, dan geometri fotonya.
+
+Fotonya **berbeda**, dan ini ditemukan lewat pengukuran, bukan dugaan: design
+menyimpan foto pada simpul `left-[-50px] w-[539px] h-[958px]`, tetapi frame
+`106:1124` (penyakit) menggambar berkasnya 115,08% dengan `left-[-11,69%]`
+sehingga hasilnya `-113,0 620x958`, sedangkan frame `101:701` (tanah) memakai
+simpulnya apa adanya (`-50,0 539x958`). Selisih rata-rata baris foto terhadap
+Figma: tanah **1,9** dengan simpul polos vs **34,4** dengan geometri penyakit;
+penyakit **3,5** dengan geometri penyakit vs **39,8** dengan simpul polos. Karena
+itu geometrinya jadi parameter `AgroCameraView.photoBox` (`photoBoxDisease` untuk
+layar penyakit), bukan satu angka untuk keduanya.
+
+Yang masih **contoh** adalah *hasil* analisisnya: mengenali penyakit atau jenis
+tanah dari foto butuh model/backend yang belum ada. Foto hasil jepretan tetap
+diteruskan (`AddPlantDraft.soilPhotoPath`, dan `ChatController.diagnose(imagePath:)`
+untuk penyakit) supaya tinggal disambungkan.
+
+### Kenapa pipeline tangkapan layar memakai mode contoh
+
+Frame Figma menggambar sebuah **foto** ruangan, sedangkan pratinjau kamera di
+emulator menampilkan ruangan virtual 3D yang tidak akan pernah sama. Membandingkan
+piksel layar kamera sungguhan karena itu tidak ada artinya. `CameraScope`
+(`sampleOnly`) memaksa bingkai menampilkan foto design — `photo-pot-soil.jpg`
+untuk tanah, `photo-plant-detection.jpg` untuk penyakit — sehingga tangkapan
+layar tetap deterministik dan selisihnya mengukur **layout**, bukan isi kamera.
+Mode ini aktif lewat `AgronomaApp(sampleCamera:)`; `lib/dev_preview.dart`
+menyalakannya kecuali properti sistem `debug.agronoma.kamera` bernilai `asli`.
+
+Selisih layar kamera dalam tabel di atas **bukan** nol karena foto mode contoh
+digambar *fill* pada kotak simpul design, dan berkas JPEG-nya berasio beda
+sehingga mengalami pengecilan + pemotongan — sama seperti foto lain di repo ini.
+Kotak fotonya per layar (`AgroCameraView.photoBox`): tanah memakai simpul polos,
+penyakit memakai kotak yang diperbesar 115,08% sesuai design (`photoBoxDisease`).
+
+### Menguji kamera sungguhan
+
+```
+adb shell setprop debug.agronoma.kamera asli
+adb shell setprop debug.agronoma.rute /soil-detection
+adb shell am force-stop com.agronoma.frontend
+adb shell am start -n com.agronoma.frontend/.MainActivity
+```
+
+Cara membuktikan kamera memang nyata (bukan sekadar tidak error), dengan
+emulator Pixel 9 Pro yang `hw.camera.back=virtualscene`:
+
+| Bukti | Perintah / tempat melihat |
+|---|---|
+| izin runtime diminta plugin | `GrantPermissionsActivity` muncul saat layar dibuka |
+| kamera benar-benar dibuka | `adb logcat` berisi `CXCP`/`Camera2CameraController`, `CameraId-10` (`virtualscene`) |
+| pratinjau hidup (bukan foto design) | layar menampilkan ruangan virtual, bukan pot |
+| jepretan menghasilkan berkas | `adb shell run-as com.agronoma.frontend ls -la cache/` → `CAP*.jpg` ~142 KB |
+
+Saat aplikasi dikecilkan kamera dilepas dan dibuka lagi ketika kembali
+(`WidgetsBindingObserver` di `_AgroCameraViewState`): sejak `camera` 0.5.0 plugin
+tidak lagi mengurus siklus hidup sendiri, dan sebagian perangkat gagal
+melanjutkan pratinjau kalau kamera dibiarkan hidup di latar.
+
+`enableAudio: false` dipakai karena tidak ada rekaman video, sehingga Android
+hanya perlu izin `CAMERA` (tanpa `RECORD_AUDIO`/mikrofon). Di iOS,
+`NSCameraUsageDescription` sudah ditambahkan ke `ios/Runner/Info.plist`.
 
 
 ## Alat ukur
