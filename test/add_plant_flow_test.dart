@@ -8,6 +8,9 @@ import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/models/soil_type.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
+import 'package:frontend/core/state/plant_controller.dart';
+import 'package:frontend/core/data/weather_repository.dart';
+import 'package:frontend/core/models/weather.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/add_plant/add_plant_flow.dart';
 
@@ -26,6 +29,15 @@ class _FakeRepository implements PlantRepository {
   // Sisanya tidak dipakai uji ini.
   @override
   noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+/// Cuaca tiruan; `PlantController.addPlant` tidak memakainya.
+class _FakeWeather implements WeatherRepository {
+  @override
+  Future<Weather> current(String city) async => MockData.weather;
+
+  @override
+  Future<List<WeatherForecast>> forecast(String city) async => MockData.forecast;
 }
 
 void main() {
@@ -67,6 +79,26 @@ void main() {
       expect(c.draft.media, isNull);
       expect(c.draft.locationName, isNull);
       expect(c.draft.soilDetected, isFalse);
+    });
+  });
+
+  group('PlantController.addPlant', () {
+    test('meneruskan media tanam pilihan ke tanaman baru', () async {
+      final plants = PlantController(
+        plantRepository: MockPlantRepository(),
+        weatherSource: _FakeWeather(),
+      );
+
+      final plant = await plants.addPlant(
+        name: 'Sirih Gading',
+        location: 'Surabaya',
+        soil: MockData.soilTypes.first,
+        media: PlantingMedia.openField,
+      );
+
+      // Dulu media pilihan langkah 2 dibuang dan selalu jadi `pot`.
+      expect(plant.media, PlantingMedia.openField);
+      expect(plant.place, PlantingMedia.openField.label);
     });
   });
 
