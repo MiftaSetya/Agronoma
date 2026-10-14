@@ -34,11 +34,14 @@ class CameraScope extends InheritedWidget {
 /// Bingkai kamera layar penuh, dipakai dua layar: "Plant Disease Detection"
 /// (frame `106:1124`) dan "Add Plant 3 - Detect Soil" (frame `101:701`).
 ///
-/// Kedua frame memakai **kerangka yang sama** — bingkai bidik `92,299 256x256`,
-/// pil petunjuk di baris 587, kontrol di baris 734, top bar di baris 64 — jadi
-/// seluruh tata letaknya hidup di sini dan tiap layar cukup mengirim judul,
-/// teks petunjuk, serta geometri fotonya ([photoBox]) karena kedua design
-/// menggambar foto dengan ukuran berbeda.
+/// Kedua frame memakai **kerangka yang sama** — pil petunjuk di baris 587,
+/// kontrol di baris 734, top bar di baris 64 — jadi seluruh tata letaknya hidup
+/// di sini dan tiap layar cukup mengirim judul, teks petunjuk, serta geometri
+/// fotonya ([photoBox]) karena kedua design menggambar foto dengan ukuran
+/// berbeda.
+///
+/// Bingkai bidik tengah (siku `92,299 256x256` + garis pemindai) dari design
+/// **sengaja tidak digambar** — pemilik proyek memintanya dihilangkan.
 ///
 /// Yang ditampilkan adalah **kamera sungguhan** (`camera`). Bila perangkat tidak
 /// punya kamera, izinnya ditolak, atau [CameraScope.sampleOnly] aktif, bingkai
@@ -59,7 +62,7 @@ class AgroCameraView extends StatefulWidget {
   /// Judul di top bar.
   final String title;
 
-  /// Teks pil petunjuk di bawah bingkai bidik.
+  /// Teks pil petunjuk di bawah tengah bingkai.
   final String instruction;
 
   /// Teks pil selagi [analyzing].
@@ -308,14 +311,6 @@ class _AgroCameraViewState extends State<AgroCameraView>
           child: _TopBar(title: widget.title),
         ),
 
-        const Positioned(
-          left: 92,
-          top: 299,
-          width: 256,
-          height: 256,
-          child: _Reticle(),
-        ),
-
         Positioned(
           left: 0,
           right: 0,
@@ -460,105 +455,7 @@ class _CloseGlyph extends StatelessWidget {
   }
 }
 
-/// Bingkai bidik: empat siku sudut + garis pemindai.
-class _Reticle extends StatefulWidget {
-  const _Reticle();
-
-  @override
-  State<_Reticle> createState() => _ReticleState();
-}
-
-class _ReticleState extends State<_Reticle>
-    with SingleTickerProviderStateMixin {
-  /// Garis pemindai naik-turun, sesuai "Scanning animation line" pada design.
-  late final AnimationController _scan = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 2200),
-  )..repeat(reverse: true);
-
-  @override
-  void dispose() {
-    _scan.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Empat siku sudut, bukan kotak penuh: menutup seluruh sisi akan
-        // memotong pandangan ke objek di dalam bingkai.
-        const _Corner(alignment: Alignment.topLeft, top: true, left: true),
-        const _Corner(alignment: Alignment.topRight, top: true, left: false),
-        const _Corner(alignment: Alignment.bottomLeft, top: false, left: true),
-        const _Corner(
-          alignment: Alignment.bottomRight,
-          top: false,
-          left: false,
-        ),
-        AnimatedBuilder(
-          animation: _scan,
-          builder: (context, _) => Positioned(
-            left: 0,
-            right: 0,
-            top: _scan.value * (256 - 4),
-            child: Container(
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFA1E834),
-                borderRadius: AppRadius.chipAll,
-                boxShadow: const [
-                  BoxShadow(color: Color(0xFFA8E64A), blurRadius: 12),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Satu siku sudut bingkai bidik (30x30, garis 4px, radius 12).
-class _Corner extends StatelessWidget {
-  const _Corner({
-    required this.alignment,
-    required this.top,
-    required this.left,
-  });
-
-  final Alignment alignment;
-  final bool top;
-  final bool left;
-
-  @override
-  Widget build(BuildContext context) {
-    const side = BorderSide(color: Color(0x80FFFFFF), width: 4);
-    return Align(
-      alignment: alignment,
-      child: Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          border: Border(
-            top: top ? side : BorderSide.none,
-            bottom: top ? BorderSide.none : side,
-            left: left ? side : BorderSide.none,
-            right: left ? BorderSide.none : side,
-          ),
-          borderRadius: BorderRadius.only(
-            topLeft: top && left ? const Radius.circular(12) : Radius.zero,
-            topRight: top && !left ? const Radius.circular(12) : Radius.zero,
-            bottomLeft: !top && left ? const Radius.circular(12) : Radius.zero,
-            bottomRight: !top && !left ? const Radius.circular(12) : Radius.zero,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Pil petunjuk di bawah bingkai bidik.
+/// Pil petunjuk di bawah tengah bingkai.
 class _InstructionPill extends StatelessWidget {
   const _InstructionPill({required this.text});
 

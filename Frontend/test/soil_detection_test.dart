@@ -33,9 +33,8 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
-  /// Bingkai bidik beranimasi terus-menerus (garis pemindai), jadi
-  /// `pumpAndSettle` tidak pernah selesai — transisi rute diselesaikan dengan
-  /// `pump` berdurasi tetap.
+  /// Transisi rute diselesaikan dengan `pump` berdurasi tetap supaya tidak
+  /// bergantung pada ada/tidaknya animasi berulang di layar kamera.
   Future<void> settleRoute(WidgetTester tester) async {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
