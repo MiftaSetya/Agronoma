@@ -87,9 +87,9 @@ jarak kartu per langkah, tombol manual melayang, ikon daftar kartu tanah).
 | Plant detail | 11.7 |
 | Add plant — rekomendasi | 3.3 |
 | Plant chat | 18.7 |
-| Deteksi Penyakit | 3.8 |
+| Deteksi Penyakit | 8.5 |
 | Deteksi Penyakit - hasil | 3.5 |
-| Deteksi Tanah (kamera) | 3.5 |
+| Deteksi Tanah (kamera) | 7.3 |
 
 > Angka wizard diukur ulang setelah langkah 1-5 ditata sesuai frame Figma
 > (kartu kepala langkah 1, kompensasi border `border-box`, perataan ikon fase
@@ -101,9 +101,9 @@ jarak kartu per langkah, tombol manual melayang, ikon daftar kartu tanah).
 > kamera sungguhan — lihat "Penyimpangan yang disengaja: kamera sungguhan".
 > Angka lama Deteksi Penyakit (78.9) diukur saat layar itu memakai foto lain
 > daripada frame Figma-nya; setelah fotonya disamakan dengan design, selisihnya
-> turun ke 3.8. Kedua layar kamera sedikit lebih jauh dari Figma karena bingkai
-> bidik tengah memang tidak digambar (lihat "Penyimpangan yang disengaja: kamera
-> sungguhan").
+> turun ke ~3,8. Kedua layar kamera kini 7,3-8,5 karena bingkai bidik tengah dan
+> posisi pil petunjuk sengaja menyimpang dari design (lihat "Penyimpangan yang
+> disengaja: kamera sungguhan").
 >
 > Selisih **lokasi 17.2** bukan lagi sisa layout: peta sungguhan memakai ubin
 > OpenStreetMap, sedangkan Figma menampilkan tangkapan Google Maps (lihat
@@ -174,10 +174,16 @@ Bingkai bidik tengah dari design (siku `92,299 256x256` + garis pemindai) dan
 `_Reticle`/`_Corner`-nya **dihapus atas permintaan pemilik proyek** — ini
 penyimpangan yang disengaja, dan arahnya menjauhi Figma: ditempelkan kembali
 region bingkai Figma ke tangkapan emulator menurunkan selisih baris-isinya dari
-**3,40 → 2,34**, jadi bingkainya "berharga" ≈**1,1** poin. Angka di tabel tetap
-memakai implementasi tanpa bingkai (yang memang dipakai aplikasi); bingkainya
-tipis (empat siku 30px + garis 4px) di atas foto, jadi tidak menghalangi
-pandangan ke objek.
+**3,40 → 2,34**, jadi bingkainya "berharga" ≈**1,1** poin.
+
+Pil petunjuk/analisis juga **digeser ke bawah**, dari baris 587 (design) ke baris
+748 — tepat di atas tombol rana (atasnya baris 805,5, sisa jarak ~16px) — atas
+permintaan pemilik proyek. Karena pilnya berpindah jauh, selisih kedua layar
+kamera naik dari ~3,5-3,8 ke **7,3 (tanah)** dan **8,5 (penyakit)**; kenaikannya
+murni dari pil yang berpindah, bukan dari regresi lain.
+
+Angka di tabel memakai implementasi yang benar-benar dipakai aplikasi (tanpa
+bingkai bidik, pil di atas rana).
 
 Fotonya **berbeda**, dan ini ditemukan lewat pengukuran, bukan dugaan: design
 menyimpan foto pada simpul `left-[-50px] w-[539px] h-[958px]`, tetapi frame
