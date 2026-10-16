@@ -195,10 +195,17 @@ penyakit **3,5** dengan geometri penyakit vs **39,8** dengan simpul polos. Karen
 itu geometrinya jadi parameter `AgroCameraView.photoBox` (`photoBoxDisease` untuk
 layar penyakit), bukan satu angka untuk keduanya.
 
-Yang masih **contoh** adalah *hasil* analisisnya: mengenali penyakit atau jenis
-tanah dari foto butuh model/backend yang belum ada. Foto hasil jepretan tetap
-diteruskan (`AddPlantDraft.soilPhotoPath`, dan `ChatController.diagnose(imagePath:)`
-untuk penyakit) supaya tinggal disambungkan.
+Yang masih **contoh** adalah *hasil* analisis penyakit: mengenali penyakit dari
+foto butuh model/backend yang belum ada. Foto hasil jepretan tetap diteruskan
+(`ChatController.diagnose(imagePath:)`) supaya tinggal disambungkan.
+
+Hasil analisis **tanah** sudah sungguhan: `POST /soil-scan` mengembalikan
+`detected_soil_type` + `ai_confidence` (0–100, dinormalkan ke 0..1) dan
+jenisnya disimpan ke `AddPlantDraft.soil`. Kegagalannya (429/500/tanpa berkas
+jepretan) memunculkan SnackBar dan layar **tidak** ditutup, supaya pengguna
+bisa memotret ulang atau memilih jenis tanah manual. Dijaga
+`test/api_wizard_test.dart` (kontrak HTTP tanpa server) dan
+`tool/verify-wizard-contract.ps1` (kontrak lawan server sungguhan).
 
 ### Kenapa pipeline tangkapan layar memakai mode contoh
 

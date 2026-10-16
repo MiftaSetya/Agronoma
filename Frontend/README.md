@@ -33,7 +33,9 @@ Prinsip yang dipegang kode ini:
   dari yang terlihat di Figma (mis. `leading-[normal]`), alasannya tertulis
   di tempat angka itu didefinisikan.
 - **Repositori sebagai antarmuka.** Data contoh bisa ditukar backend sungguhan
-  tanpa menyentuh widget.
+  tanpa menyentuh widget. Login/Register dan wizard "Tambah Tanaman" sudah
+  memakai backend (`HttpAuthRepository`, `HttpAddPlantRepository`); sisanya
+  masih data contoh.
 
 ## Menjalankan
 
@@ -41,6 +43,14 @@ Prinsip yang dipegang kode ini:
 flutter pub get
 flutter run            # atau: flutter run -t lib/dev_preview.dart untuk mode potret
 ```
+
+Backend di `C:\Project\Agronoma\backend` dijalankan dengan
+`php artisan serve --host=0.0.0.0 --port=8000`; emulator Android menjangkaunya
+lewat `10.0.2.2:8000` (lihat `lib/core/data/api/api_config.dart`).
+
+`tool/verify-wizard-contract.ps1` memeriksa kontrak HTTP langkah 3–5 wizard
+(register → locations → soil-scan → plants → get plant) pada server yang
+sedang hidup.
 
 Mode preview pengembangan (`lib/dev_preview.dart`) membuka layar mana pun
 langsung lewat properti sistem — dipakai pipeline tangkapan layar di
