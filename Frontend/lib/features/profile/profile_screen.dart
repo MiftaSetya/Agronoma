@@ -64,12 +64,11 @@ class ProfileScreen extends StatelessWidget {
         _SettingsGroup(
           onArchiveTap: () {},
           logout: _LogoutCard(
-            onTap: () {
-              context.read<AuthController>().signOut();
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                Routes.login,
-                (route) => false,
-              );
+            onTap: () async {
+              await context.read<AuthController>().signOut();
+              if (!context.mounted) return;
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil(Routes.login, (route) => false);
             },
           ),
         ),
@@ -152,9 +151,7 @@ class _CareScoreCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             caption,
-            style: AppTextStyles.titleWide.copyWith(
-              color: AppColors.onPrimary,
-            ),
+            style: AppTextStyles.titleWide.copyWith(color: AppColors.onPrimary),
           ),
         ],
       ),
@@ -205,10 +202,7 @@ class _SettingsGroup extends StatelessWidget {
                 title: 'Arsip tanaman',
                 subtitle: 'Riwayat tanaman',
                 onTap: onArchiveTap,
-                trailing: const AgroIcon(
-                  AppAssets.chevronRightSmall,
-                  size: 12,
-                ),
+                trailing: const AgroIcon(AppAssets.chevronRightSmall, size: 12),
               ),
             ],
           ),
@@ -227,12 +221,7 @@ class _PreferenceHeading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        8,
-        AppSpacing.lg,
-        9,
-      ),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 8, AppSpacing.lg, 9),
       decoration: const BoxDecoration(
         color: AppColors.surfaceAlt,
         border: Border(bottom: BorderSide(color: AppColors.border)),

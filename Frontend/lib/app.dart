@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:frontend/core/data/api/api_client.dart';
+import 'package:frontend/core/data/api/token_store.dart';
+import 'package:frontend/core/data/auth_repository.dart';
 import 'package:frontend/core/data/disease_repository.dart';
 import 'package:frontend/core/data/mock_disease_repository.dart';
 import 'package:frontend/core/data/mock_weather_repository.dart';
@@ -14,6 +17,7 @@ import 'package:frontend/core/state/plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_camera_view.dart';
 import 'package:provider/provider.dart';
+
 /// Seluruh "kabel" aplikasi: repositori disuntikkan sebagai **antarmuka**
 /// ([PlantRepository] dkk., bukan kelas mock-nya) sehingga saat backend siap
 /// cukup ganti satu baris di sini tanpa menyentuh layar. Parameter repositori
@@ -29,6 +33,8 @@ class AgronomaApp extends StatelessWidget {
     this.home,
     this.signedInUser,
     this.sampleCamera = false,
+    this.authRepository,
+    this.useSampleData = false,
   });
 
   /// Sumber data tanaman; default [MockPlantRepository].
@@ -39,6 +45,17 @@ class AgronomaApp extends StatelessWidget {
 
   /// Sumber data diagnosis; default [MockDiseaseRepository].
   final DiseaseRepository? diseaseRepository;
+
+  /// Sumber autentikasi. `null` = otomatis: [HttpAuthRepository] bila
+  /// [useSampleData] `false`, [SampleAuthRepository] bila `true`.
+  final AuthRepository? authRepository;
+
+  /// Memakai data contoh alih-alih backend.
+  ///
+  /// `true` saat pratinjau desain & widget test (tanpa server), `false` untuk
+  /// aplikasi sungguhan. Saat `false`, [authRepository] boleh diisi sendiri —
+  /// dipakai test integrasi yang mengganti [TokenStore] dengan versi memori.
+  final bool useSampleData;
 
   /// Rute pertama yang dibuka. Default splash.
   final String initialRoute;
@@ -77,10 +94,36 @@ class AgronomaApp extends StatelessWidget {
           create: (_) => diseaseRepository ?? const MockDiseaseRepository(),
         ),
 
+        // Autentikasi: backend sungguhan, atau contoh saat [useSampleData].
+        // `TokenStore` disuntikkan ke `ApiClient` supaya test bisa memakai
+        // penyimpanan dalam memori.
+        Provider<TokenStore>(
+          create: (_) =>
+              useSampleData ? InMemoryTokenStore() : const SecureTokenStore(),
+        ),
+        Provider<ApiClient>(
+          create: (ctx) => ApiClient(tokenStore: ctx.read<TokenStore>()),
+        ),
+        Provider<AuthRepository>(
+          create: (ctx) =>
+              authRepository ??
+              (useSampleData
+                  ? SampleAuthRepository()
+                  : HttpAuthRepository(
+                      apiClient: ctx.read<ApiClient>(),
+                      tokenStore: ctx.read<TokenStore>(),
+                    )),
+        ),
+
         // Controller didaftarkan di root supaya state-nya tidak hilang saat
         // berpindah halaman: sesi login, daftar tanaman, draft wizard, dan
         // percakapan bot.
-        ChangeNotifierProvider(create: (_) => AuthController(initialUser: signedInUser)),
+        ChangeNotifierProvider(
+          create: (ctx) => AuthController(
+            authSource: ctx.read<AuthRepository>(),
+            initialUser: signedInUser,
+          ),
+        ),
         ChangeNotifierProvider(
           create: (ctx) => PlantController(
             plantRepository: ctx.read<PlantRepository>(),
@@ -88,14 +131,12 @@ class AgronomaApp extends StatelessWidget {
           ),
         ),
         ChangeNotifierProvider(
-          create: (ctx) => AddPlantController(
-            dataSource: ctx.read<PlantRepository>(),
-          ),
+          create: (ctx) =>
+              AddPlantController(dataSource: ctx.read<PlantRepository>()),
         ),
         ChangeNotifierProvider(
-          create: (ctx) => ChatController(
-            detector: ctx.read<DiseaseRepository>(),
-          ),
+          create: (ctx) =>
+              ChatController(detector: ctx.read<DiseaseRepository>()),
         ),
       ],
       child: CameraScope(

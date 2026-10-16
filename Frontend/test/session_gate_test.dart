@@ -1,0 +1,95 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+
+import 'package:frontend/core/data/auth_repository.dart';
+import 'package:frontend/core/models/app_user.dart';
+import 'package:frontend/core/routing/app_router.dart';
+import 'package:frontend/core/state/auth_controller.dart';
+import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/features/auth/login_screen.dart';
+import 'package:frontend/features/auth/session_gate.dart';
+
+/// Gerbang sesi harus mengarahkan ke Beranda bila token masih sah dan ke Login
+/// bila belum ada token — perilaku yang tidak terlihat pada uji unit.
+///
+/// Rute Beranda sengaja diganti layar penanda: `MainShell` butuh provider lain
+/// (repositori tanaman) yang tidak relevan untuk uji pengarahan ini.
+void main() {
+  Widget wrap(AuthController auth) =>
+      ChangeNotifierProvider<AuthController>.value(
+        value: auth,
+        child: MaterialApp(
+          theme: AppTheme.light,
+          home: const SessionGate(),
+          onGenerateRoute: (settings) {
+            // Hanya Beranda yang diganti; rute lain (Login) memakai router
+            // sungguhan supaya pengarahan ke sana bisa diperiksa.
+            if (settings.name == Routes.home) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (_) => const Scaffold(body: Text('LAYAR-TUJUAN')),
+              );
+            }
+            return onGenerateRoute(settings);
+          },
+        ),
+      );
+
+  testWidgets('tanpa token tersimpan mengarah ke Login', (tester) async {
+    // `SampleAuthRepository.hasSession()` selalu `false`.
+    final auth = AuthController(authSource: SampleAuthRepository());
+
+    await tester.pumpWidget(wrap(auth));
+    await tester.pumpAndSettle();
+
+    expect(auth.isSignedIn, isFalse);
+    expect(find.byType(LoginScreen), findsOneWidget);
+  });
+
+  testWidgets('token tersimpan memulihkan sesi dan meninggalkan gerbang', (
+    tester,
+  ) async {
+    final auth = AuthController(authSource: _RestoringAuthRepository());
+
+    await tester.pumpWidget(wrap(auth));
+    await tester.pumpAndSettle();
+
+    expect(auth.isSignedIn, isTrue);
+    expect(find.text('LAYAR-TUJUAN'), findsOneWidget);
+    expect(find.byType(LoginScreen), findsNothing);
+  });
+}
+
+/// Meniru backend yang menerima token tersimpan dan mengembalikan pengguna.
+class _RestoringAuthRepository implements AuthRepository {
+  @override
+  Future<bool> hasSession() async => true;
+
+  @override
+  Future<AppUser?> currentUser() async => const AppUser(
+    id: '11',
+    name: 'Pulih Sesi',
+    email: 'pulih@agronoma.test',
+    photoAsset: '',
+    totalPlants: 0,
+    harvestedThisSeason: 0,
+    careScore: 0,
+  );
+
+  @override
+  Future<AuthResult> login({
+    required String email,
+    required String password,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<AuthResult> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<void> logout() async {}
+}

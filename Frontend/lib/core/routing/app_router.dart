@@ -5,6 +5,7 @@ import 'package:frontend/features/add_plant/add_plant_flow.dart';
 import 'package:frontend/features/add_plant/soil_detection_screen.dart';
 import 'package:frontend/features/auth/login_screen.dart';
 import 'package:frontend/features/auth/register_screen.dart';
+import 'package:frontend/features/auth/session_gate.dart';
 import 'package:frontend/features/disease/disease_detection_screen.dart';
 import 'package:frontend/features/plant_detail/ai_chatbot_screen.dart';
 import 'package:frontend/features/plant_detail/plant_detail_screen.dart';
@@ -47,7 +48,7 @@ class PlantDetailArgs {
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   switch (settings.name) {
     case Routes.splash:
-      return _page(const SplashScreen(next: LoginScreen()), settings);
+      return _page(const SplashScreen(next: SessionGate()), settings);
 
     case Routes.login:
       return _page(const LoginScreen(), settings);

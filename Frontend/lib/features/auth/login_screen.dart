@@ -31,16 +31,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     final auth = context.read<AuthController>();
-    final ok = await auth.signIn(
-      email: _email.text,
-      password: _password.text,
-    );
+    final ok = await auth.signIn(email: _email.text, password: _password.text);
     if (!mounted) return;
     if (ok) {
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        Routes.home,
-        (route) => false,
-      );
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil(Routes.home, (route) => false);
     } else {
       setState(() => _errors = auth.consumeErrors());
     }
@@ -79,6 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ],
       submit: AgroButton(label: 'Masuk', loading: loading, onPressed: _submit),
+      error: _errors['general'],
       footer: AuthFooterLink(
         prefix: 'Belum punya akun? ',
         actionLabel: 'Daftar',

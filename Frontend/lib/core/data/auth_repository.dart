@@ -1,0 +1,209 @@
+import 'package:frontend/core/assets/app_assets.dart';
+import 'package:frontend/core/data/api/api_client.dart';
+import 'package:frontend/core/data/api/api_exception.dart';
+import 'package:frontend/core/data/api/token_store.dart';
+import 'package:frontend/core/models/app_user.dart';
+
+/// Hasil satu operasi autentikasi.
+class AuthResult {
+  const AuthResult.success(this.user) : error = null;
+
+  const AuthResult.failure(this.error) : user = null;
+
+  final AppUser? user;
+  final ApiException? error;
+
+  bool get isSuccess => user != null;
+}
+
+/// Antarmuka autentikasi.
+///
+/// [AuthController] hanya berbicara ke antarmuka ini, sehingga mode contoh
+/// (tanpa backend) dan mode sungguhan bisa ditukar tanpa menyentuh layar.
+abstract class AuthRepository {
+  /// Masuk, lalu menyimpan token akses.
+  Future<AuthResult> login({required String email, required String password});
+
+  /// Mendaftar akun baru, lalu menyimpan token akses.
+  Future<AuthResult> register({
+    required String name,
+    required String email,
+    required String password,
+  });
+
+  /// Menghapus token di server lalu di perangkat.
+  Future<void> logout();
+
+  /// Mengambil pengguna dari token tersimpan; `null` bila tidak ada/kedaluwarsa.
+  Future<AppUser?> currentUser();
+
+  /// Menandai apakah ada sesi yang perlu dipulihkan saat aplikasi dibuka.
+  Future<bool> hasSession();
+}
+
+/// Implementasi nyata di atas REST API.
+class HttpAuthRepository implements AuthRepository {
+  /// Nama parameter dibedakan dari field privat agar `prefer_initializing_formals`
+  /// tidak menyala (pola yang sama dipakai [PlantController]).
+  HttpAuthRepository({
+    required ApiClient apiClient,
+    required TokenStore tokenStore,
+  }) : _client = apiClient,
+       _tokens = tokenStore;
+
+  final ApiClient _client;
+  final TokenStore _tokens;
+
+  @override
+  Future<bool> hasSession() async {
+    final token = await _tokens.read();
+    return token != null && token.isNotEmpty;
+  }
+
+  @override
+  Future<AuthResult> login({
+    required String email,
+    required String password,
+  }) async {
+    return _authenticate('login', {'email': email, 'password': password});
+  }
+
+  @override
+  Future<AuthResult> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    return _authenticate('register', {
+      'name': name,
+      'email': email,
+      'password': password,
+      'password_confirmation': password,
+    });
+  }
+
+  @override
+  Future<void> logout() async {
+    try {
+      await _client.post('logout');
+    } on ApiException {
+      // Token mungkin sudah tidak valid di server; sesi lokal tetap dibersihkan.
+    }
+    await _tokens.clear();
+  }
+
+  @override
+  Future<AppUser?> currentUser() async {
+    if (!await hasSession()) return null;
+    try {
+      final body = await _client.get('user');
+      return _userFrom(body);
+    } on ApiException catch (e) {
+      if (e.isUnauthorized) {
+        await _tokens.clear();
+        return null;
+      }
+      rethrow;
+    }
+  }
+
+  Future<AuthResult> _authenticate(
+    String path,
+    Map<String, dynamic> payload,
+  ) async {
+    try {
+      final body = await _client.post(path, body: payload);
+      final map = body is Map<String, dynamic>
+          ? body
+          : const <String, dynamic>{};
+      final token = map['token'] as String?;
+      if (token == null || token.isEmpty) {
+        return const AuthResult.failure(
+          ApiException(message: 'Server tidak mengirim token akses.'),
+        );
+      }
+      await _tokens.write(token);
+      final user = _userFrom(body);
+      if (user == null) {
+        return const AuthResult.failure(
+          ApiException(message: 'Server tidak mengirim data pengguna.'),
+        );
+      }
+      return AuthResult.success(user);
+    } on ApiException catch (e) {
+      return AuthResult.failure(e);
+    }
+  }
+
+  /// Backend membalas `{user: {...}}`, baik saat login maupun `GET /user`.
+  AppUser? _userFrom(Object? body) {
+    if (body is! Map<String, dynamic>) return null;
+    final raw = body['user'];
+    if (raw is! Map<String, dynamic>) return null;
+    return _mapUser(raw);
+  }
+
+  AppUser _mapUser(Map<String, dynamic> json) {
+    final createdAt = json['created_at'] as String?;
+    return AppUser(
+      id: '${json['id']}',
+      name: (json['name'] as String?) ?? 'Pengguna',
+      email: (json['email'] as String?) ?? '',
+      // Foto profil belum disediakan API; aset design dipakai apa adanya.
+      photoAsset: AppAssets.photoProfile,
+      // Statistik dan skor perawatan didapat dari `GET /profile` — pada tahap
+      // ini nilainya nol sampai alur itu disambungkan.
+      totalPlants: 0,
+      harvestedThisSeason: 0,
+      careScore: 0,
+      joinedAt: createdAt == null ? null : DateTime.tryParse(createdAt),
+    );
+  }
+}
+
+/// Implementasi contoh: selalu berhasil selama validasi lokal lolos.
+///
+/// Dipakai mode pratinjau dan widget test supaya alur Login/Register bisa
+/// dicoba tanpa server.
+class SampleAuthRepository implements AuthRepository {
+  SampleAuthRepository({AppUser? user}) : _user = user ?? _sampleUser;
+
+  static const AppUser _sampleUser = AppUser(
+    id: '1',
+    name: 'Budi Santoso',
+    email: 'budi@agronoma.test',
+    photoAsset: AppAssets.photoProfile,
+    totalPlants: 5,
+    harvestedThisSeason: 2,
+    careScore: 92,
+  );
+
+  final AppUser _user;
+
+  @override
+  Future<bool> hasSession() async => false;
+
+  @override
+  Future<AuthResult> login({
+    required String email,
+    required String password,
+  }) async => AuthResult.success(_user);
+
+  @override
+  Future<AuthResult> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async => AuthResult.failure(
+    const ApiException(
+      message: 'Mode contoh hanya mendukung masuk.',
+      statusCode: 501,
+    ),
+  );
+
+  @override
+  Future<void> logout() async {}
+
+  @override
+  Future<AppUser?> currentUser() async => _user;
+}

@@ -18,12 +18,17 @@ class AuthLayout extends StatelessWidget {
     required this.fields,
     required this.submit,
     required this.footer,
+    this.error,
   });
 
   final String title;
   final String subtitle;
 
   final List<Widget> fields;
+
+  /// Kesalahan yang tidak terikat satu kolom tertentu (mis. kredensial salah
+  /// atau server tidak terjangkau), ditampilkan di atas kolom pertama.
+  final String? error;
 
   final Widget submit;
 
@@ -81,6 +86,10 @@ class AuthLayout extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.xxxl),
+              if (error != null) ...[
+                _ErrorBanner(message: error!),
+                const SizedBox(height: AppSpacing.xxl),
+              ],
               for (var i = 0; i < fields.length; i++) ...[
                 if (i > 0) const SizedBox(height: AppSpacing.xxl),
                 fields[i],
@@ -93,6 +102,34 @@ class AuthLayout extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Kesalahan yang tidak terikat kolom: kotak merah muda tipis, sejajar dengan
+/// bahasa visual lencana di design.
+class _ErrorBanner extends StatelessWidget {
+  const _ErrorBanner({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.dangerTint,
+        borderRadius: AppRadius.mdAll,
+        border: Border.all(color: AppColors.danger),
+      ),
+      child: Text(
+        message,
+        style: AppTextStyles.bodyLarge.copyWith(color: AppColors.danger),
       ),
     );
   }

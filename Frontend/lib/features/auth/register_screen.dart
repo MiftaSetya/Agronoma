@@ -46,10 +46,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
     if (!mounted) return;
     if (ok) {
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        Routes.home,
-        (route) => false,
-      );
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil(Routes.home, (route) => false);
     } else {
       setState(() => _errors = auth.consumeErrors());
     }
@@ -109,6 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ],
       submit: AgroButton(label: 'Masuk', loading: loading, onPressed: _submit),
+      error: _errors['general'],
       footer: AuthFooterLink(
         prefix: 'Sudah punya akun? ',
         actionLabel: 'Masuk',

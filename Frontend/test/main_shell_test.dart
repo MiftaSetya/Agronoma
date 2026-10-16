@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
+import 'package:frontend/core/data/auth_repository.dart';
 import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/data/plant_repository.dart';
 import 'package:frontend/core/data/weather_repository.dart';
@@ -41,7 +42,10 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider<AuthController>(
-            create: (_) => AuthController(initialUser: MockData.user),
+            create: (_) => AuthController(
+              authSource: SampleAuthRepository(),
+              initialUser: MockData.user,
+            ),
           ),
           ChangeNotifierProvider<PlantController>(
             create: (_) => PlantController(

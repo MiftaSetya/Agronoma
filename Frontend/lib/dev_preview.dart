@@ -44,7 +44,8 @@ Future<void> main() async {
   // `debug.agronoma.kamera asli` melepas mode contoh supaya bingkai kamera bisa
   // diuji dengan pratinjau sungguhan; nilai lain (termasuk kosong) tetap mode
   // contoh demi tangkapan layar yang deterministik.
-  final liveCamera = await _setting('KAMERA', 'debug.agronoma.kamera') == 'asli';
+  final liveCamera =
+      await _setting('KAMERA', 'debug.agronoma.kamera') == 'asli';
 
   runApp(
     AgronomaApp(
@@ -56,6 +57,8 @@ Future<void> main() async {
         (step ?? 0).clamp(0, 5),
       ),
       sampleCamera: !liveCamera,
+      // Pratinjau pengembangan tidak pernah menyentuh backend.
+      useSampleData: true,
     ),
   );
 }
