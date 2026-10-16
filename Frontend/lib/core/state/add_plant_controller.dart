@@ -150,16 +150,24 @@ class AddPlantController extends ChangeNotifier {
     }
   }
 
+  /// Memilih kartu rekomendasi AI; kartu manual dibuang karena hanya satu
+  /// tanaman yang bisa dipilih.
   void selectRecommendation(PlantRecommendation recommendation) {
-    _draft = _draft.copyWith(recommendation: recommendation);
+    _draft = _draft.copyWith(
+      recommendation: recommendation,
+      clearManualName: true,
+    );
     notifyListeners();
   }
 
-  /// Mengisi tanaman secara manual (sheet "Tambah manual tanaman").
+  /// Mengisi tanaman secara manual (sheet "Tambah manual tanaman"). Pilihan
+  /// kartu rekomendasi dibuang supaya kartu manual menggantikan pilihan AI,
+  /// bukan tersembunyi di belakangnya.
   void setManualPlant(String name, String? scientificName) {
     _draft = _draft.copyWith(
       manualName: name.trim(),
       manualScientificName: scientificName?.trim(),
+      clearRecommendation: true,
     );
     notifyListeners();
   }

@@ -71,6 +71,28 @@ void main() {
       expect(c.draft.locationName, isNull);
       expect(c.draft.soilDetected, isFalse);
     });
+
+    test('tambah manual membuang pilihan kartu AI', () {
+      final c = AddPlantController(dataSource: _FakeRepository());
+      c.selectRecommendation(MockData.recommendations.first);
+      expect(c.draft.hasPlant, isTrue);
+
+      // Tanpa membuang pilihan AI, kartu manual tidak akan pernah tampil di
+      // langkah 4 (cabang `recommendation != null` yang menang).
+      c.setManualPlant('Daun Bawang', null);
+      expect(c.draft.recommendation, isNull);
+      expect(c.draft.manualName, 'Daun Bawang');
+      expect(c.draft.resolvedName, 'Daun Bawang');
+    });
+
+    test('memilih kartu AI membuang nama manual', () {
+      final c = AddPlantController(dataSource: _FakeRepository());
+      c.setManualPlant('Daun Bawang', null);
+
+      c.selectRecommendation(MockData.recommendations.first);
+      expect(c.draft.manualName, isNull);
+      expect(c.draft.resolvedName, MockData.recommendations.first.name);
+    });
   });
 
   group('SampleAddPlantRepository.createPlant', () {
@@ -210,6 +232,52 @@ void main() {
       await controller.loadRecommendations();
       expect(controller.recommendations, isNotEmpty);
       expect(controller.recommendations.first, isA<PlantRecommendation>());
+    });
+
+    testWidgets('langkah 4: tanaman manual tampil bersama daftar AI', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(440, 956);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(wrap(const AddPlantFlow()));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Konfirmasi Lokasi'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(PlantingMedia.pot.label));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Lanjut'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Saya Tahu Jenis Tanah'));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text(MockData.soilTypes.first.name),
+        200,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(MockData.soilTypes.first.name).first);
+      await tester.pumpAndSettle();
+
+      // Langkah 4 memuat rekomendasi AI sendiri; tunggu sampai terisi.
+      await tester.tap(find.text('Lanjut'));
+      await tester.pumpAndSettle();
+      expect(find.text(MockData.recommendations.first.name), findsWidgets);
+
+      await tester.tap(find.text('Tambah manual tanaman'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).first, 'Daun Bawang');
+      await tester.tap(find.text('Tambah Tanaman'));
+      await tester.pumpAndSettle();
+
+      // Bug lama: kartu manual tersembunyi selama daftar AI tidak kosong.
+      expect(find.text('Ditambahkan manual'), findsOneWidget);
+      expect(find.text('Daun Bawang'), findsOneWidget);
+      // Daftar AI tetap tersedia supaya rekomendasi yang sudah dimuat tidak
+      // terbuang — mengetuknya membatalkan pilihan manual.
+      expect(find.text(MockData.recommendations.first.name), findsWidgets);
     });
   });
 }

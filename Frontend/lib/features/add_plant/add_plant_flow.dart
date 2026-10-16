@@ -1267,25 +1267,34 @@ class _RecommendationStepState extends State<_RecommendationStep> {
                             .read<AddPlantController>()
                             .loadRecommendations(),
                       )
-                    else if (draft.manualName != null &&
-                        add.recommendations.isEmpty)
-                      _OptionCard(
-                        icon: AppAssets.pottedPlant,
-                        title: draft.manualName!,
-                        subtitle: 'Ditambahkan manual',
-                        selected: true,
-                        onTap: () {},
-                      )
-                    else if (add.recommendations.isEmpty)
-                      // Endpoint AI mengembalikan array kosong (model menolak
-                      // menjawab, mis. kuota habis) — keadaan ini tidak boleh
-                      // tampil sebagai layar kosong tanpa penjelasan.
-                      _EmptyRecommendations(
-                        onRetry: () => context
-                            .read<AddPlantController>()
-                            .loadRecommendations(),
-                      )
-                    else
+                    else ...[
+                      // Kartu manual tampil di ATAS daftar AI (bukan
+                      // menggantinya) supaya isian sheet langsung terlihat
+                      // sebagai pilihan aktif — dulu kartunya hanya muncul bila
+                      // daftar AI kosong, jadi menambah manual seolah tidak
+                      // terjadi apa-apa. Daftar AI dibiarkan di bawah agar
+                      // rekomendasi yang sudah diambil tidak terbuang:
+                      // mengetuk salah satu kartunya membatalkan pilihan
+                      // manual.
+                      if (draft.manualName != null)
+                        _OptionCard(
+                          icon: AppAssets.pottedPlant,
+                          title: draft.manualName!,
+                          subtitle: 'Ditambahkan manual',
+                          selected: true,
+                          onTap: () {},
+                        )
+                      else if (add.recommendations.isEmpty)
+                        // Endpoint AI mengembalikan array kosong (model
+                        // menolak menjawab, mis. kuota habis) — keadaan ini
+                        // tidak boleh tampil sebagai layar kosong tanpa
+                        // penjelasan. Bila pengguna justru memilih manual,
+                        // keadaan kosong itu tidak perlu diumumkan.
+                        _EmptyRecommendations(
+                          onRetry: () => context
+                              .read<AddPlantController>()
+                              .loadRecommendations(),
+                        ),
                       for (final r in add.recommendations)
                         _RecommendationCard(
                           recommendation: r,
@@ -1294,6 +1303,7 @@ class _RecommendationStepState extends State<_RecommendationStep> {
                               .read<AddPlantController>()
                               .selectRecommendation(r),
                         ),
+                    ],
                   ],
                 ),
               ),
@@ -1442,19 +1452,22 @@ class _RecommendationCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      Row(
+                      // `Wrap`, bukan `Row`: dua chip ("Pilihan Terbaik" +
+                      // Indoor/Outdoor) muat satu baris di ukuran teks normal,
+                      // tetapi ukuran teks aksesibilitas yang lebih besar
+                      // membuatnya melimpah keluar kartu. Wrap membiarkannya
+                      // turun baris bila perlu, dengan jarak yang sama saat
+                      // masih satu baris.
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
                         children: [
-                          for (var i = 0;
-                              i < recommendation.tags.length;
-                              i++) ...[
-                            if (i > 0) const SizedBox(width: 6),
+                          for (final tag in recommendation.tags)
                             _RecommendationChip(
-                              label: recommendation.tags[i],
+                              label: tag,
                               highlighted:
-                                  recommendation.tags[i] ==
-                                  PlantRecommendation.bestForTag,
+                                  tag == PlantRecommendation.bestForTag,
                             ),
-                          ],
                         ],
                       ),
                       const SizedBox(height: AppSpacing.sm),

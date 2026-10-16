@@ -128,6 +128,8 @@ class AddPlantDraft {
     String? manualName,
     String? manualScientificName,
     String? phase,
+    bool clearRecommendation = false,
+    bool clearManualName = false,
   }) => AddPlantDraft(
     locationName: locationName ?? this.locationName,
     locationAddress: locationAddress ?? this.locationAddress,
@@ -139,9 +141,13 @@ class AddPlantDraft {
     soil: soil ?? this.soil,
     soilDetected: soilDetected ?? this.soilDetected,
     soilPhotoPath: soilPhotoPath ?? this.soilPhotoPath,
-    recommendation: recommendation ?? this.recommendation,
-    manualName: manualName ?? this.manualName,
-    manualScientificName: manualScientificName ?? this.manualScientificName,
+    recommendation: clearRecommendation
+        ? null
+        : (recommendation ?? this.recommendation),
+    manualName: clearManualName ? null : (manualName ?? this.manualName),
+    manualScientificName: clearManualName
+        ? null
+        : (manualScientificName ?? this.manualScientificName),
     phase: phase ?? this.phase,
   );
 }
