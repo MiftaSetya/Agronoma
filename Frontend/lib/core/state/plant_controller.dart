@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 
 import 'package:frontend/core/data/plant_repository.dart';
 import 'package:frontend/core/models/plant.dart';
-import 'package:frontend/core/models/soil_type.dart';
 import 'package:frontend/core/models/weather.dart';
 import 'package:frontend/core/data/weather_repository.dart';
 
@@ -133,25 +132,17 @@ class PlantController extends ChangeNotifier {
     }
   }
 
-  /// Menambahkan tanaman baru hasil wizard, lalu mengembalikannya.
-  Future<Plant> addPlant({
-    required String name,
-    String? scientificName,
-    required String location,
-    required SoilType soil,
-    required PlantingMedia media,
-    String? phase,
-  }) async {
-    final plant = await _repository.addPlant(
-      name: name,
-      scientificName: scientificName,
-      location: location,
-      soil: soil,
-      media: media,
-      phase: phase,
-    );
+  /// Menambahkan tanaman yang **sudah disimpan** wizard ke daftar di memori.
+  ///
+  /// Penyimpanannya sendiri diurus `AddPlantRepository` (`POST /plants`),
+  /// bukan [PlantRepository]; di sini tanaman itu hanya ditempel ke daftar
+  /// supaya Home dan Detail langsung bisa membukanya tanpa menunggu muat ulang.
+  ///
+  /// Catatan masa peralihan: daftar Home masih berasal dari data contoh, jadi
+  /// setelah `load(force: true)` tanaman yang baru ditempel ini belum ikut
+  /// terbaca (baru muncul lagi setelah `GET /plants` disambungkan).
+  void adopt(Plant plant) {
     _plants = [..._plants, plant];
     notifyListeners();
-    return plant;
   }
 }

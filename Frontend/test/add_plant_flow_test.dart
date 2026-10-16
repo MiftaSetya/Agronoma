@@ -2,29 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
+import 'package:frontend/core/data/add_plant_repository.dart';
 import 'package:frontend/core/data/mock_data.dart';
-import 'package:frontend/core/data/plant_repository.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/models/soil_type.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
-import 'package:frontend/core/state/plant_controller.dart';
-import 'package:frontend/core/data/weather_repository.dart';
-import 'package:frontend/core/models/weather.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/add_plant/add_plant_flow.dart';
 import 'package:frontend/features/add_plant/soil_detection_screen.dart';
 
 /// Uji logika [AddPlantController] dan alur langkah wizard (bukan piksel) —
 /// kesetiaan visual dijaga pipeline tangkapan layar di `docs/testing.md`.
-class _FakeRepository implements PlantRepository {
+class _FakeRepository implements AddPlantRepository {
   @override
   Future<List<SoilType>> getSoilTypes() async => MockData.soilTypes;
 
   @override
   Future<List<PlantRecommendation>> getRecommendations({
-    required String location,
+    required PlantingMedia media,
     required SoilType soil,
+    required String city,
+    required String province,
   }) async => MockData.recommendations;
 
   // Sisanya tidak dipakai uji ini.
@@ -32,19 +31,10 @@ class _FakeRepository implements PlantRepository {
   noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
-/// Cuaca tiruan; `PlantController.addPlant` tidak memakainya.
-class _FakeWeather implements WeatherRepository {
-  @override
-  Future<Weather> current(String city) async => MockData.weather;
-
-  @override
-  Future<List<WeatherForecast>> forecast(String city) async => MockData.forecast;
-}
-
 void main() {
   Widget wrap(Widget child) => MultiProvider(
     providers: [
-      Provider<PlantRepository>.value(value: _FakeRepository()),
+      Provider<AddPlantRepository>.value(value: _FakeRepository()),
       ChangeNotifierProvider<AddPlantController>(
         create: (_) => AddPlantController(dataSource: _FakeRepository()),
       ),
@@ -83,23 +73,33 @@ void main() {
     });
   });
 
-  group('PlantController.addPlant', () {
+  group('SampleAddPlantRepository.createPlant', () {
     test('meneruskan media tanam pilihan ke tanaman baru', () async {
-      final plants = PlantController(
-        plantRepository: MockPlantRepository(),
-        weatherSource: _FakeWeather(),
-      );
-
-      final plant = await plants.addPlant(
+      final plant = await SampleAddPlantRepository().createPlant(
         name: 'Sirih Gading',
-        location: 'Surabaya',
-        soil: MockData.soilTypes.first,
         media: PlantingMedia.openField,
+        soil: MockData.soilTypes.first,
+        city: 'Surabaya',
+        province: 'Jawa Timur',
+        locationLabel: 'Rumah Kaca Sukolilo',
+        phase: GrowthPhase.seedling,
       );
 
       // Dulu media pilihan langkah 2 dibuang dan selalu jadi `pot`.
       expect(plant.media, PlantingMedia.openField);
       expect(plant.place, PlantingMedia.openField.label);
+      // Tanaman baru selalu mulai dari nol: jadwal perawatan menyusul dari
+      // care-calendar, tonggak pertumbuhan belum ada yang terlewati.
+      expect(plant.tasks, isEmpty);
+      expect(plant.timeline, isEmpty);
+    });
+
+    test('kota dan provinsi contoh dipakai bila lokasi belum dipilih', () {
+      final c = AddPlantController(dataSource: _FakeRepository());
+      // Wizard bisa dibuka langsung di langkah 4 (pratinjau design), jadi
+      // endpoint AI tidak boleh kehilangan kota/provinsi.
+      expect(c.city, AddPlantController.fallbackCity);
+      expect(c.province, AddPlantController.fallbackProvince);
     });
   });
 

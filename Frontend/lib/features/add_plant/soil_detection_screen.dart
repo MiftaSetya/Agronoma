@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
+import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
 import 'package:frontend/core/widgets/agro_camera_view.dart';
 
@@ -10,19 +11,13 @@ import 'package:frontend/core/widgets/agro_camera_view.dart';
 /// Bingkainya sama persis dengan layar deteksi penyakit — keduanya memakai
 /// [AgroCameraView] — hanya judul dan teks petunjuknya yang berbeda.
 ///
-/// **Kamera sungguhan**; yang masih contoh adalah *hasil analisisnya*, karena
-/// mengklasifikasi jenis tanah dari foto butuh model/backend (lihat
-/// `docs/testing.md`). Foto hasil jepretan tetap disimpan di draft supaya siap
-/// dikirim saat backend tersedia.
+/// Hasil analisisnya **sungguhan**: foto jepretan dikirim ke `POST /soil-scan`
+/// lewat [AddPlantController.scanSoil], lalu jenis tanah yang dikembalikan
+/// model disimpan ke draft. Mode contoh ([CameraScope.sampleOnly]) tidak punya
+/// berkas jepretan, jadi repositori contoh yang menjawab — layar ini tidak
+/// membedakan keduanya.
 class SoilDetectionScreen extends StatefulWidget {
-  const SoilDetectionScreen({
-    super.key,
-    this.analysisDelay = const Duration(milliseconds: 1400),
-  });
-
-  /// Jeda "menganalisis" sebelum hasil dikembalikan; dinolkan oleh uji agar
-  /// tidak perlu menunggu.
-  final Duration analysisDelay;
+  const SoilDetectionScreen({super.key});
 
   @override
   State<SoilDetectionScreen> createState() => _SoilDetectionScreenState();
@@ -33,10 +28,28 @@ class _SoilDetectionScreenState extends State<SoilDetectionScreen> {
 
   Future<void> _capture(String? imagePath) async {
     setState(() => _analyzing = true);
-    // Di sini nanti panggilan backend: kirim [imagePath], terima jenis tanahnya.
-    await Future<void>.delayed(widget.analysisDelay);
+    final result = await context.read<AddPlantController>().scanSoil(
+      imagePath: imagePath,
+    );
     if (!mounted) return;
-    context.read<AddPlantController>().markSoilDetected(photoPath: imagePath);
+    setState(() => _analyzing = false);
+
+    // Analisis gagal: layar tetap terbuka supaya pengguna bisa memotret ulang
+    // (jenis tanah manual juga masih tersedia lewat "Kembali" di wizard).
+    if (result == null) {
+      final error = context.read<AddPlantController>().error;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error is ApiException
+                ? error.message
+                : 'Gagal menganalisis tanah. Coba lagi.',
+          ),
+        ),
+      );
+      return;
+    }
+
     Navigator.of(context).pop();
   }
 

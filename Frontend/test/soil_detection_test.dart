@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
-import 'package:frontend/core/data/mock_data.dart';
-import 'package:frontend/core/data/plant_repository.dart';
+import 'package:frontend/core/data/add_plant_repository.dart';
+import 'package:frontend/core/data/soil_catalog.dart';
 import 'package:frontend/core/models/soil_type.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
@@ -17,9 +17,16 @@ import 'package:frontend/features/add_plant/soil_detection_screen.dart';
 /// adalah **mode contoh** ([CameraScope.sampleOnly]): foto design dipakai dan
 /// plugin tidak pernah disentuh. Perilaku kamera sungguhan diverifikasi di
 /// emulator (lihat `docs/testing.md`).
-class _FakeRepository implements PlantRepository {
+class _FakeRepository implements AddPlantRepository {
+  /// Dipanggil saat rana ditekan; disimpan supaya uji bisa memastikan foto
+  /// jepretan memang diteruskan ke repositori (mode contoh: null).
+  String? lastImagePath;
+
   @override
-  Future<List<SoilType>> getSoilTypes() async => MockData.soilTypes;
+  Future<SoilScanResult> scanSoil({String? imagePath}) async {
+    lastImagePath = imagePath;
+    return SoilScanResult(soil: SoilCatalog.types[1], confidence: 0.9);
+  }
 
   @override
   noSuchMethod(Invocation invocation) => throw UnimplementedError();
@@ -87,7 +94,8 @@ void main() {
     tester,
   ) async {
     useDesignSize(tester);
-    final controller = AddPlantController(dataSource: _FakeRepository());
+    final repository = _FakeRepository();
+    final controller = AddPlantController(dataSource: repository);
 
     await tester.pumpWidget(
       wrap(
@@ -97,8 +105,7 @@ void main() {
               child: ElevatedButton(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) =>
-                        const SoilDetectionScreen(analysisDelay: Duration.zero),
+                    builder: (_) => const SoilDetectionScreen(),
                   ),
                 ),
                 child: const Text('buka'),
@@ -117,11 +124,14 @@ void main() {
     // Rana bundar 80px di tengah baris kontrol (baris 734, tinggi 223).
     await tester.tapAt(const Offset(220, 845.5));
     await tester.pump(); // ganti ke keadaan "menganalisis"
-    await settleRoute(tester); // analisis selesai → markSoilDetected → pop
+    await settleRoute(tester); // analisis selesai → jenis tanah tersimpan → pop
 
     expect(controller.draft.soilDetected, isTrue);
+    expect(controller.draft.soil, SoilCatalog.types[1]);
     // Mode contoh tidak punya berkas jepretan, jadi jalurnya null — tetapi
-    // jalurnya tetap diteruskan supaya backend bisa dikirimi foto nanti.
+    // jalurnya tetap diteruskan supaya backend bisa dikirimi foto saat kamera
+    // sungguhan yang menjepret.
+    expect(repository.lastImagePath, isNull);
     expect(controller.draft.soilPhotoPath, isNull);
     // Layar sudah ditutup, kembali ke tombol pembuka.
     expect(find.text('buka'), findsOneWidget);

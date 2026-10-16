@@ -93,17 +93,11 @@ class _AddPlantFlowState extends State<AddPlantFlow> {
     final add = context.read<AddPlantController>();
     final plants = context.read<PlantController>();
     try {
-      final draft = add.draft;
-      final plant = await plants.addPlant(
-        name: draft.resolvedName,
-        scientificName: draft.manualScientificName,
-        location: draft.locationName ?? 'Surabaya',
-        soil: draft.soil ?? MockData.soilTypes.first,
-        media: draft.media != null
-            ? PlantingMedia.values.byName(draft.media!)
-            : PlantingMedia.pot,
-        phase: draft.phase,
-      );
+      // Penyimpanan (lokasi + jadwal perawatan dari AI + `POST /plants`)
+      // seluruhnya diurus `AddPlantRepository`; di sini hasilnya cuma
+      // ditempelkan ke daftar Home/Detail yang sudah dimuat.
+      final plant = await add.savePlant();
+      plants.adopt(plant);
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed(
         Routes.plantDetail,
@@ -417,6 +411,46 @@ class _LoadError extends StatelessWidget {
   }
 }
 
+/// Keadaan ketika endpoint rekomendasi menjawab normal tetapi tanpa satu pun
+/// saran (model menolak menjawab, mis. kuota habis). Dibedakan dari
+/// [_LoadError] supaya pengguna tahu permintaannya tidak sekadar gagal, dan
+/// tetap bisa mencoba memilih tanaman sendiri lewat tombol manual di atas.
+class _EmptyRecommendations extends StatelessWidget {
+  const _EmptyRecommendations({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+      child: Column(
+        children: [
+          const AgroIcon(AppAssets.pottedPlant, size: 48),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            'Belum ada rekomendasi',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.titleLarge,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'AI belum bisa menyarankan tanaman untuk kondisi ini. '
+            'Coba lagi atau tambahkan tanamanmu sendiri.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMuted,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          SizedBox(
+            width: 200,
+            child: AgroOutlineButton(label: 'Coba lagi', onPressed: onRetry),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Lokasi contoh yang cocok dengan [name]; kalau nama itu tidak dikenal
 /// (mis. tanaman lama yang disimpan sebelum peta ada) dipakai contoh pertama
 /// supaya langkah ini selalu punya koordinat untuk ditampilkan.
@@ -501,6 +535,8 @@ class _LocationStep extends StatelessWidget {
                 picked.name,
                 picked.address,
                 position: center,
+                city: picked.city,
+                province: picked.province,
               );
               onNext();
             },
@@ -647,10 +683,16 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                 AgroButton(
                   label: 'Pilih Lokasi Ini',
                   onPressed: () {
+                    // Titik bebas (>2 km dari semua contoh) tidak punya
+                    // kota/provinsi sendiri; dipakai kota example terdekat
+                    // supaya endpoint AI tetap punya data iklim yang benar.
+                    final known = _nearest ?? MockData.locations.first;
                     context.read<AddPlantController>().setLocation(
                       label,
                       detail,
                       position: _point,
+                      city: known.city,
+                      province: known.province,
                     );
                     Navigator.of(context).pop();
                   },
@@ -1233,6 +1275,15 @@ class _RecommendationStepState extends State<_RecommendationStep> {
                         subtitle: 'Ditambahkan manual',
                         selected: true,
                         onTap: () {},
+                      )
+                    else if (add.recommendations.isEmpty)
+                      // Endpoint AI mengembalikan array kosong (model menolak
+                      // menjawab, mis. kuota habis) — keadaan ini tidak boleh
+                      // tampil sebagai layar kosong tanpa penjelasan.
+                      _EmptyRecommendations(
+                        onRetry: () => context
+                            .read<AddPlantController>()
+                            .loadRecommendations(),
                       )
                     else
                       for (final r in add.recommendations)

@@ -1,6 +1,7 @@
 import 'package:latlong2/latlong.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
+import 'package:frontend/core/data/soil_catalog.dart';
 import 'package:frontend/core/models/app_user.dart';
 import 'package:frontend/core/models/chat_message.dart';
 import 'package:frontend/core/models/disease.dart';
@@ -211,75 +212,31 @@ class MockData {
           'Politeknik Elektronika Surabaya, Jl. Raya ITS, Keputih, Sukolilo, '
           'Surabaya, East Java 60111',
       position: LatLng(-7.28161, 112.79500),
+      city: 'Surabaya',
+      province: 'Jawa Timur',
     ),
     MapLocation(
       name: 'Kebun Bibit Wonorejo',
       address: 'Jl. Wonorejo Rungkut, Surabaya, East Java 60296',
       position: LatLng(-7.30814, 112.83417),
+      city: 'Surabaya',
+      province: 'Jawa Timur',
     ),
     MapLocation(
       name: 'Rumah Kaca Sukolilo',
       address: 'Jl. Teknik Kimia, Sukolilo, Surabaya, East Java 60111',
       position: LatLng(-7.28633, 112.79457),
+      city: 'Surabaya',
+      province: 'Jawa Timur',
     ),
   ];
 
   /// Tujuh jenis tanah pada daftar "Saya Tahu Jenis Tanah" (frame `113:765`).
-  /// Nama dan keterangannya disalin dari render design; fotonya adalah aset
-  /// yang sudah ada dan pasangannya dipastikan dengan membandingkan piksel
-  /// kartu design terhadap tiap berkas — dulu daftar ini meminjam foto tanaman
-  /// cabai/tomat sehingga gambarnya sama sekali tidak berhubungan.
-  static const List<SoilType> soilTypes = [
-    SoilType(
-      id: 's1',
-      name: 'Media Tanam Campuran',
-      description: 'Racikan buatan khusus yang biasanya terdiri dari pupuk '
-          'kompos, sekam, atau sabut kelapa.',
-      photoAsset: AppAssets.photoMulchWood,
-    ),
-    SoilType(
-      id: 's2',
-      name: 'Tanah gembur',
-      description: 'Kaya nutrisi, bertekstur remah, dan subur. Pilihan '
-          'terbaik untuk mayoritas tanaman.',
-      photoAsset: AppAssets.photoSoilCompost,
-    ),
-    SoilType(
-      id: 's3',
-      name: 'Tanah liat',
-      description: 'Bertekstur padat, menggumpal, dan lengket saat basah. '
-          'Mengikat air lebih lama.',
-      photoAsset: AppAssets.photoSoilCracked,
-    ),
-    SoilType(
-      id: 's4',
-      name: 'Tanah berpasir',
-      description: 'Berbutir kasar dan sangat cepat kering. Air mengalir ke '
-          'bawah dengan sangat bebas.',
-      photoAsset: AppAssets.photoSoilBrown,
-    ),
-    SoilType(
-      id: 's5',
-      name: 'Tanah kapur',
-      description: 'Berwarna pucat dan sering bercampur kerikil atau serpihan '
-          'batu. Cenderung cepat kering.',
-      photoAsset: AppAssets.photoSoilGravel,
-    ),
-    SoilType(
-      id: 's6',
-      name: 'Tanah vulkanik',
-      description: 'Berwarna hitam pekat yang sangat subur. Kaya mineral '
-          'alami dari abu pegunungan.',
-      photoAsset: AppAssets.photoSoilDark,
-    ),
-    SoilType(
-      id: 's7',
-      name: 'Tanah gambut',
-      description: 'Terasa berserat dari sisa pelapukan tanaman. Sangat empuk '
-          'dan menyimpan banyak air.',
-      photoAsset: AppAssets.photoMulchStraw,
-    ),
-  ];
+  ///
+  /// Katalognya sendiri ada di [SoilCatalog] karena jenis tanah bukan data
+  /// contoh: backend tidak menyediakan endpoint daftarnya, jadi daftar yang
+  /// sama dipakai mode contoh maupun mode sungguhan.
+  static const List<SoilType> soilTypes = SoilCatalog.types;
 
   /// Teks kartu rekomendasi diambil persis dari frame
   /// `Add Plant 4 - AI Recommendation` (`336:2882`) untuk perbandingan

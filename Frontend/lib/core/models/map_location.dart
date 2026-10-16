@@ -12,11 +12,20 @@ class MapLocation {
     required this.name,
     required this.address,
     required this.position,
+    required this.city,
+    required this.province,
   });
 
   final String name;
   final String address;
   final LatLng position;
+
+  /// Kota dan provinsi terpisah dari [address]: endpoint AI
+  /// (`/plant-recommendations`, `/plant-suitability`) dan `POST /plants`
+  /// menuntut keduanya sebagai field sendiri, sedangkan design hanya
+  /// menggambar satu blok alamat.
+  final String city;
+  final String province;
 
   factory MapLocation.fromJson(Map<String, dynamic> json) => MapLocation(
     name: json['name'] as String,
@@ -25,6 +34,8 @@ class MapLocation {
       (json['lat'] as num).toDouble(),
       (json['lng'] as num).toDouble(),
     ),
+    city: json['city'] as String,
+    province: json['province'] as String,
   );
 
   Map<String, dynamic> toJson() => {
@@ -32,5 +43,7 @@ class MapLocation {
     'address': address,
     'lat': position.latitude,
     'lng': position.longitude,
+    'city': city,
+    'province': province,
   };
 }

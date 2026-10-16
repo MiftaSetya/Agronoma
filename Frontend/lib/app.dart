@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:frontend/core/data/add_plant_repository.dart';
 import 'package:frontend/core/data/api/api_client.dart';
 import 'package:frontend/core/data/api/token_store.dart';
 import 'package:frontend/core/data/auth_repository.dart';
@@ -27,6 +28,7 @@ class AgronomaApp extends StatelessWidget {
   const AgronomaApp({
     super.key,
     this.plantRepository,
+    this.addPlantRepository,
     this.weatherRepository,
     this.diseaseRepository,
     this.initialRoute = Routes.splash,
@@ -39,6 +41,11 @@ class AgronomaApp extends StatelessWidget {
 
   /// Sumber data tanaman; default [MockPlantRepository].
   final PlantRepository? plantRepository;
+
+  /// Sumber data wizard "Tambah Tanaman" (scan tanah, rekomendasi AI, simpan
+  /// lewat `POST /plants`). `null` = otomatis: [HttpAddPlantRepository] bila
+  /// [useSampleData] `false`, [SampleAddPlantRepository] bila `true`.
+  final AddPlantRepository? addPlantRepository;
 
   /// Sumber data cuaca; default [MockWeatherRepository].
   final WeatherRepository? weatherRepository;
@@ -104,6 +111,16 @@ class AgronomaApp extends StatelessWidget {
         Provider<ApiClient>(
           create: (ctx) => ApiClient(tokenStore: ctx.read<TokenStore>()),
         ),
+        // Sumber data wizard "Tambah Tanaman". Didaftarkan **sesudah**
+        // [ApiClient] karena `Provider` hanya bisa membaca provider yang
+        // dituliskan lebih dulu.
+        Provider<AddPlantRepository>(
+          create: (ctx) =>
+              addPlantRepository ??
+              (useSampleData
+                  ? SampleAddPlantRepository()
+                  : HttpAddPlantRepository(apiClient: ctx.read<ApiClient>())),
+        ),
         Provider<AuthRepository>(
           create: (ctx) =>
               authRepository ??
@@ -132,7 +149,7 @@ class AgronomaApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (ctx) =>
-              AddPlantController(dataSource: ctx.read<PlantRepository>()),
+              AddPlantController(dataSource: ctx.read<AddPlantRepository>()),
         ),
         ChangeNotifierProvider(
           create: (ctx) =>

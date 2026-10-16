@@ -1,22 +1,19 @@
 import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/models/plant.dart';
-import 'package:frontend/core/models/plant_recommendation.dart';
-import 'package:frontend/core/models/soil_type.dart';
 
-/// Antarmuka sumber data tanaman — satu-satunya tempat yang tahu asal data;
-/// nanti cukup tambahkan `HttpPlantRepository` dan tukar di `main.dart`
+/// Antarmuka sumber data **daftar tanaman** — satu-satunya tempat yang tahu
+/// asal data; nanti cukup tambahkan `HttpPlantRepository` dan tukar di `app.dart`
 /// tanpa menyentuh widget mana pun.
+///
+/// Data khusus wizard "Tambah Tanaman" (scan tanah, rekomendasi AI, simpan
+/// tanaman) sengaja tidak ada di sini melainkan di `AddPlantRepository`, karena
+/// keempat operasi itu sudah tersambung backend sedangkan daftar tanaman baru
+/// menyusul.
+///
+/// [AddPlantRepository]: ./add_plant_repository.dart
 abstract class PlantRepository {
   Future<List<Plant>> getPlants();
   Future<Plant> getPlant(String id);
-  Future<Plant> addPlant({
-    required String name,
-    String? scientificName,
-    required String location,
-    required SoilType soil,
-    required PlantingMedia media,
-    String? phase,
-  });
   Future<Plant> setTaskDone(String plantId, String taskTitle, bool done);
   Future<Plant> updatePlant(
     String plantId, {
@@ -26,16 +23,10 @@ abstract class PlantRepository {
     GrowthPhase? phase,
     String? soilName,
   });
-  Future<List<PlantRecommendation>> getRecommendations({
-    required String location,
-    required SoilType soil,
-  });
-  Future<List<SoilType>> getSoilTypes();
 }
 
-/// Implementasi contoh dari [MockData] di memori; perubahan (tambah tanaman,
-/// tandai tugas) tersimpan selama aplikasi hidup sehingga wizard bisa dicoba
-/// sampai selesai.
+/// Implementasi contoh dari [MockData] di memori; perubahan (tandai tugas,
+/// ubah setelan) tersimpan selama aplikasi hidup.
 class MockPlantRepository implements PlantRepository {
   MockPlantRepository();
 
@@ -43,11 +34,6 @@ class MockPlantRepository implements PlantRepository {
 
   /// Jeda buatan supaya indikator loading benar-benar terlihat.
   static const Duration _latency = Duration(milliseconds: 900);
-
-  /// Jenis tanah paling kaya bahan organik pada daftar design, jadi satu-satunya
-  /// yang diberi pupuk organik. Dicocokkan lewat [SoilType.id] — nama tanah
-  /// adalah teks design yang bisa berubah kapan saja.
-  static const String _organicSoilId = 's2';
 
   @override
   Future<List<Plant>> getPlants() async {
@@ -59,50 +45,6 @@ class MockPlantRepository implements PlantRepository {
   Future<Plant> getPlant(String id) async {
     await Future<void>.delayed(const Duration(milliseconds: 150));
     return _plants.firstWhere((p) => p.id == id);
-  }
-
-  @override
-  Future<Plant> addPlant({
-    required String name,
-    String? scientificName,
-    required String location,
-    required SoilType soil,
-    required PlantingMedia media,
-    String? phase,
-  }) async {
-    await Future<void>.delayed(_latency);
-    final source = MockData.recommendations.firstWhere(
-      (r) => r.name.toLowerCase() == name.toLowerCase(),
-      orElse: () => MockData.recommendations.first,
-    );
-    final plant = Plant(
-      id: 'p${_plants.length + 1}-${DateTime.now().millisecondsSinceEpoch}',
-      name: name,
-      scientificName: scientificName,
-      photoAsset: source.photoAsset,
-      location: location,
-      // Media tanam pilihan langkah 2 menentukan "MEDIA TANAM" di Detail
-      // Tanaman; labelnya dipakai langsung supaya kartu dan wizard seragam.
-      place: media.label,
-      media: media,
-      status: CareStatus.safe,
-      phase: GrowthPhase.values.firstWhere(
-        (g) => g.name == phase,
-        orElse: () => GrowthPhase.seedling,
-      ),
-      plantedAt: DateTime.now(),
-      careScore: 100,
-      description: source.description,
-      tags: const ['Indoor'],
-      fertilizer: soil.id == _organicSoilId ? 'NPK Organik' : 'NPK Daun',
-      soilName: soil.name,
-      // Tanaman baru selalu mulai dari nol: belum ada jadwal perawatan dan
-      // belum ada tonggak pertumbuhan yang terlewati.
-      tasks: const [],
-      timeline: const [],
-    );
-    _plants.add(plant);
-    return plant;
   }
 
   @override
@@ -145,20 +87,5 @@ class MockPlantRepository implements PlantRepository {
     );
     _plants[index] = updated;
     return updated;
-  }
-
-  @override
-  Future<List<PlantRecommendation>> getRecommendations({
-    required String location,
-    required SoilType soil,
-  }) async {
-    await Future<void>.delayed(_latency);
-    return MockData.recommendations;
-  }
-
-  @override
-  Future<List<SoilType>> getSoilTypes() async {
-    await Future<void>.delayed(const Duration(milliseconds: 200));
-    return MockData.soilTypes;
   }
 }

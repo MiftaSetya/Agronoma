@@ -57,6 +57,8 @@ class AddPlantDraft {
     this.locationName,
     this.locationAddress,
     this.locationPosition,
+    this.locationCity,
+    this.locationProvince,
     this.locationConfirmed = false,
     this.media,
     this.soil,
@@ -75,6 +77,12 @@ class AddPlantDraft {
   /// titik bebas hasil menggeser peta; disimpan supaya pilihan itu tidak hilang
   /// saat berpindah langkah.
   final LatLng? locationPosition;
+
+  /// Kota dan provinsi lokasi terpilih. Design hanya menggambar satu blok
+  /// alamat, padahal endpoint AI dan `POST /plants` menuntut keduanya terpisah;
+  /// nilainya diambil dari [MapLocation] contoh (lihat [AddPlantController]).
+  final String? locationCity;
+  final String? locationProvince;
 
   /// Pengguna sudah menekan "Konfirmasi Lokasi".
   final bool locationConfirmed;
@@ -109,6 +117,8 @@ class AddPlantDraft {
     String? locationName,
     String? locationAddress,
     LatLng? locationPosition,
+    String? locationCity,
+    String? locationProvince,
     bool? locationConfirmed,
     String? media,
     SoilType? soil,
@@ -122,6 +132,8 @@ class AddPlantDraft {
     locationName: locationName ?? this.locationName,
     locationAddress: locationAddress ?? this.locationAddress,
     locationPosition: locationPosition ?? this.locationPosition,
+    locationCity: locationCity ?? this.locationCity,
+    locationProvince: locationProvince ?? this.locationProvince,
     locationConfirmed: locationConfirmed ?? this.locationConfirmed,
     media: media ?? this.media,
     soil: soil ?? this.soil,
