@@ -35,6 +35,14 @@ class PlantController extends ChangeNotifier {
 
   bool get isEmpty => !_loading && _plants.isEmpty;
 
+  /// Tanaman yang **belum ada di backend**: hasil `POST /plants` dari wizard.
+  ///
+  /// Home masih membaca `MockPlantRepository`, sedangkan wizard menyimpan lewat
+  /// `AddPlantRepository`. Karena itu hasil muat ulang tidak mengenal tanaman
+  /// baru; daftar ini disimpan supaya tanaman yang baru ditanam tidak hilang
+  /// dari Beranda — catatan `load(force: true)` di [adopt].
+  List<Plant> _adopted = const [];
+
   /// Jumlah tugas yang belum selesai di seluruh tanaman.
   int get pendingTaskCount =>
       _plants.fold(0, (sum, p) => sum + p.tasks.where((t) => !t.done).length);
@@ -54,9 +62,19 @@ class PlantController extends ChangeNotifier {
         _weatherRepository.current('Surabaya'),
         _weatherRepository.forecast('Surabaya'),
       ]);
-      _plants = results[0] as List<Plant>;
+      final fetched = results[0] as List<Plant>;
       _weather = results[1] as Weather;
       _forecast = results[2] as List<WeatherForecast>;
+      // Tanaman yang baru disimpan wizard digabung kembali: muat ulang tidak
+      // boleh menghapus tanaman yang sudah benar-benar tersimpan di backend.
+      // Digabung berdasarkan id supaya tanaman yang sudah ikut terbaca dari
+      // `getPlants()` tidak muncul dua kali.
+      final fetchedIds = {for (final p in fetched) p.id};
+      _plants = [
+        ...fetched,
+        for (final p in _adopted)
+          if (!fetchedIds.contains(p.id)) p,
+      ];
     } catch (e) {
       _error = e;
     } finally {
@@ -138,10 +156,15 @@ class PlantController extends ChangeNotifier {
   /// bukan [PlantRepository]; di sini tanaman itu hanya ditempel ke daftar
   /// supaya Home dan Detail langsung bisa membukanya tanpa menunggu muat ulang.
   ///
-  /// Catatan masa peralihan: daftar Home masih berasal dari data contoh, jadi
-  /// setelah `load(force: true)` tanaman yang baru ditempel ini belum ikut
-  /// terbaca (baru muncul lagi setelah `GET /plants` disambungkan).
+  /// Tanaman juga dicatat di [_adopted] supaya **tetap ada** setelah Beranda
+  /// dimuat ulang, selama `GET /plants` belum disambungkan. Ketika slice Home
+  /// datang, tanaman itu akan terbaca dari backend dan penggabungan berdasarkan
+  /// id membuatnya tidak dobel.
   void adopt(Plant plant) {
+    // Sudah dikenal — mis. sudah ikut terbaca `GET /plants`, atau `adopt`
+    // dipanggil dua kali: jangan digandakan.
+    if (_plants.any((p) => p.id == plant.id)) return;
+    _adopted = [..._adopted, plant];
     _plants = [..._plants, plant];
     notifyListeners();
   }
