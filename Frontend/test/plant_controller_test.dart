@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
-import 'package:frontend/core/data/mock_data.dart';
+import 'package:frontend/core/data/api/plant_schedule.dart';
 import 'package:frontend/core/data/plant_repository.dart';
 import 'package:frontend/core/data/weather_repository.dart';
 import 'package:frontend/core/models/plant.dart';
@@ -25,26 +25,49 @@ class _FakePlantRepository implements PlantRepository {
   }
 
   @override
+  Future<List<CareDay>> careDays(
+    Plant plant, {
+    required DateTime today,
+  }) async => const [];
+
+  @override
   noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
 class _FakeWeatherRepository implements WeatherRepository {
-  @override
-  Future<Weather> current(String city) async => MockData.weather;
+  _FakeWeatherRepository({this.failing = const {}});
+
+  /// Kota yang sengaja gagal (mis. cache backend belum terisi).
+  final Set<String> failing;
+  final List<String> requested = [];
 
   @override
-  Future<List<WeatherForecast>> forecast(String city) async => const [];
+  Future<Weather?> forPlant({
+    required String plantId,
+    required String city,
+  }) async {
+    requested.add('$plantId@$city');
+    if (failing.contains(city)) return null;
+    return Weather(
+      city: city,
+      condition: 'Cerah',
+      temperature: 30,
+      forecast: [
+        WeatherForecast(day: 'Hari ini', condition: 'Cerah', high: 32, low: 24),
+      ],
+    );
+  }
 
   @override
   noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
 /// Tanaman contoh seadanya — hanya `id`/`name` yang dibedakan uji ini.
-Plant _plant(String id, String name) => Plant(
+Plant _plant(String id, String name, {String city = 'Surabaya'}) => Plant(
   id: id,
   name: name,
   photoAsset: AppAssets.photoPotSoil,
-  location: 'Surabaya',
+  location: city,
   place: 'Pot tanaman',
   media: PlantingMedia.pot,
   status: CareStatus.safe,
@@ -74,7 +97,7 @@ void main() {
       await controller.load();
       expect(controller.plants.map((p) => p.id), ['1']);
 
-      controller.adopt(_plant('99', 'Kangkung'));
+      await controller.adopt(_plant('99', 'Kangkung'));
       expect(controller.plants.map((p) => p.id), ['1', '99']);
 
       // Inti perbaikan: muat ulang tidak boleh menghapus tanaman yang sudah
@@ -96,7 +119,7 @@ void main() {
       );
 
       await controller.load();
-      controller.adopt(_plant('99', 'Kangkung'));
+      await controller.adopt(_plant('99', 'Kangkung'));
       expect(controller.plants.map((p) => p.id), ['1', '99']);
 
       await controller.load(force: true);
@@ -113,9 +136,93 @@ void main() {
       );
 
       await controller.load();
-      controller.adopt(_plant('99', 'Kangkung'));
-      controller.adopt(_plant('99', 'Kangkung'));
+      await controller.adopt(_plant('99', 'Kangkung'));
+      await controller.adopt(_plant('99', 'Kangkung'));
       expect(controller.plants.map((p) => p.id), ['1', '99']);
+    });
+  });
+
+  group('PlantController — cuaca per lokasi', () {
+    testWidgets('satu kartu per kota, bukan per tanaman', (tester) async {
+      final weather = _FakeWeatherRepository();
+      final controller = PlantController(
+        plantRepository: _FakePlantRepository([
+          [
+            _plant('1', 'Cabai Rawit', city: 'Surabaya'),
+            _plant('2', 'Tomat Ceri', city: 'Surabaya'),
+            _plant('3', 'Kangkung', city: 'Malang'),
+          ],
+        ]),
+        weatherSource: weather,
+      );
+
+      await controller.load();
+
+      // Dua kota → dua kartu, dan hanya dua permintaan cuaca walau ada tiga
+      // tanaman. Inilah penghematan yang dimaksud "per lokasi".
+      expect(controller.cityWeather.map((w) => w.city), ['Surabaya', 'Malang']);
+      expect(weather.requested, ['1@Surabaya', '3@Malang']);
+    });
+
+    testWidgets('tanaman baru di kota baru menambah kartu cuacanya', (
+      tester,
+    ) async {
+      final weather = _FakeWeatherRepository();
+      final controller = PlantController(
+        plantRepository: _FakePlantRepository([
+          [_plant('1', 'Cabai Rawit', city: 'Surabaya')],
+        ]),
+        weatherSource: weather,
+      );
+
+      await controller.load();
+      expect(controller.cityWeather.map((w) => w.city), ['Surabaya']);
+
+      // Tanaman hasil wizard disimpan di kota lain: Beranda harus ikut
+      // menampilkan cuaca kota itu, bukan memakai kartu Surabaya.
+      await controller.adopt(_plant('9', 'Selada', city: 'Batu'));
+      expect(controller.cityWeather.map((w) => w.city), ['Surabaya', 'Batu']);
+      expect(controller.weatherForCity('Batu')?.city, 'Batu');
+    });
+
+    testWidgets('kota tanpa data cuaca dilewati, daftar tanaman tetap ada', (
+      tester,
+    ) async {
+      final controller = PlantController(
+        plantRepository: _FakePlantRepository([
+          [
+            _plant('1', 'Cabai Rawit', city: 'Surabaya'),
+            _plant('2', 'Tomat Ceri', city: 'Malang'),
+          ],
+        ]),
+        weatherSource: _FakeWeatherRepository(failing: {'Malang'}),
+      );
+
+      await controller.load();
+
+      expect(controller.plants, hasLength(2));
+      expect(controller.cityWeather.map((w) => w.city), ['Surabaya']);
+    });
+
+    testWidgets('ramalan Detail mengikuti kota tanaman itu sendiri', (
+      tester,
+    ) async {
+      final controller = PlantController(
+        plantRepository: _FakePlantRepository([
+          [
+            _plant('1', 'Cabai Rawit', city: 'Surabaya'),
+            _plant('2', 'Tomat Ceri', city: 'Malang'),
+          ],
+        ]),
+        weatherSource: _FakeWeatherRepository(),
+      );
+
+      await controller.load();
+
+      // Tanaman Malang tidak boleh menampilkan ramalan Surabaya.
+      expect(controller.forecastFor('Malang'), isNotEmpty);
+      expect(controller.forecastFor('Malang').first.condition, 'Cerah');
+      expect(controller.forecastFor('Jakarta'), isEmpty);
     });
   });
 }

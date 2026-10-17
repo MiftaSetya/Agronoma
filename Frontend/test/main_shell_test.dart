@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
+import 'package:frontend/core/data/api/plant_schedule.dart';
 import 'package:frontend/core/data/auth_repository.dart';
 import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/data/plant_repository.dart';
@@ -20,12 +21,21 @@ class _FakePlantRepository implements PlantRepository {
   Future<List<Plant>> getPlants() async => MockData.plants;
 
   @override
+  Future<List<CareDay>> careDays(
+    Plant plant, {
+    required DateTime today,
+  }) async => const [];
+
+  @override
   noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
 class _FakeWeatherRepository implements WeatherRepository {
   @override
-  Future<Weather> current(String city) async => MockData.weather;
+  Future<Weather?> forPlant({
+    required String plantId,
+    required String city,
+  }) async => MockData.weather;
 
   @override
   noSuchMethod(Invocation invocation) => throw UnimplementedError();
