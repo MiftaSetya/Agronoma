@@ -234,6 +234,37 @@ Catatan jujur soal cakupan: `PATCH /plants/{id}` hanya menerima `status` dan
 Tanaman" **tidak** tersimpan di backend. Itu celah backend, bukan kelalaian
 aplikasi — dan sengaja tidak ditambal di sisi Flutter.
 
+### Detail Tanaman: kolom tombol bulat vs isi daftar
+
+Dua tombol bulat di kanan bawah (peringatan hujan + obrolan AI) **mengambang di
+atas** daftar, jadi isi daftar bisa berhenti di baliknya. Dua hal yang dijaga
+`test/plant_detail_fab_test.dart`, keduanya diukur dari `Rect` sungguhan — bukan
+sekadar "tidak overflow":
+
+| Perilaku | Cara diukur |
+|---|---|
+| Baris tugas terakhir bisa digulir **seluruhnya** ke atas tombol | setelah digulir sampai ujung, `rect(baris).bottom ≤ rect(tombol).top` |
+| Kolom tombol tetap di dalam layar pada ponsel pendek | `rect(tombol).bottom ≤ tinggi layar` dan `top > 0` |
+| Ketukan di area centang mencatat penyiraman (bukan membuka obrolan) | `tapAt` di sisi kanan baris → repository menerima 1 aksi |
+
+Dua bug yang pernah terjadi di sini:
+
+- **Baris tugas tertutup tombol.** Daftar hanya punya ruang bawah 32px, padahal
+  kolom tombol 128px tingginya dan duduk 64px di atas dasar. Ruang bawah daftar
+  sekarang `AppShellBottom.gutterUnderFabs` (= 64 + 128 + 8). Diukur pada layar
+  uji 440×740: baris berakhir di **691px** sementara tombol mulai di **620px** —
+  perbaikannya menurunkan ujung baris ke atas 620px.
+- **Posisi tombol memakai `top: 764`** (koordinat kanvas Figma 956). Di layar
+  yang tidak setinggi kanvas kolomnya melayang di tengah atau keluar layar; kini
+  dijangkar dengan `bottom: AppShellBottom.fabInset` (64), sama seperti design
+  pada kanvas 956.
+
+Satu bug lain ikut ketahuan saat menulis test itu: `_PlantDetailScreenState`
+memanggil `PlantController.load()` dari `initState`, dan `load()` memberi tahu
+pendengarnya **sebelum** `await` pertama — pada deep link langsung ke Detail
+(daftar tanaman belum termuat) itu memicu "setState() called during build".
+Pemanggilannya kini ditunda satu frame lewat `addPostFrameCallback`.
+
 ### Kenapa pipeline tangkapan layar memakai mode contoh
 Frame Figma menggambar sebuah **foto** ruangan, sedangkan pratinjau kamera di
 emulator menampilkan ruangan virtual 3D yang tidak akan pernah sama. Membandingkan
