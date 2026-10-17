@@ -19,8 +19,13 @@ class PlantSettingsSheet extends StatefulWidget {
 
   final Plant plant;
 
-  static Future<void> show(BuildContext context, Plant plant) {
-    return showModalBottomSheet<void>(
+  /// Mengembalikan `true` bila ada perubahan yang benar-benar tersimpan.
+  ///
+  /// Pemanggil memakainya untuk memuat ulang tanaman: layar Detail memegang
+  /// salinannya sendiri (`_plant`), jadi tanpa sinyal ini header dan ringkasan
+  /// tetap menampilkan nilai lama sampai halaman dibuka ulang.
+  static Future<bool> show(BuildContext context, Plant plant) async {
+    final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
@@ -29,6 +34,8 @@ class PlantSettingsSheet extends StatefulWidget {
       ),
       builder: (_) => PlantSettingsSheet(plant: plant),
     );
+
+    return saved ?? false;
   }
 
   @override
@@ -41,6 +48,10 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
   late String _place;
   late String _soilName;
   late GrowthPhase _phase;
+
+  /// Menahan tombol selama penyimpanan berjalan supaya ketukan ganda tidak
+  /// mengirim dua permintaan.
+  bool _saving = false;
 
   @override
   void initState() {
@@ -190,16 +201,41 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                   Expanded(
                     child: AgroButton(
                       label: 'Simpan',
-                      onPressed: () {
-                        context.read<PlantController>().updatePlant(
-                          widget.plant.id,
-                          name: _name.text.trim(),
-                          place: _place,
-                          phase: _phase,
-                          soilName: _soilName,
-                        );
-                        Navigator.of(context).pop();
-                      },
+                      loading: _saving,
+                      onPressed: _saving
+                          ? null
+                          : () async {
+                              setState(() => _saving = true);
+
+                              final ok = await context
+                                  .read<PlantController>()
+                                  .updatePlant(
+                                    widget.plant.id,
+                                    name: _name.text.trim(),
+                                    place: _place,
+                                    phase: _phase,
+                                    soilName: _soilName,
+                                  );
+
+                              if (!context.mounted) return;
+                              setState(() => _saving = false);
+
+                              // Sheet hanya menutup bila benar-benar tersimpan;
+                              // dulu ia menutup lebih dulu sehingga kegagalan
+                              // terlihat seperti berhasil. Nilai `true` juga
+                              // memberi tahu Detail bahwa datanya sudah basi.
+                              if (ok) {
+                                Navigator.of(context).pop(true);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Perubahan gagal disimpan. Periksa koneksi lalu coba lagi.',
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
                     ),
                   ),
                 ],

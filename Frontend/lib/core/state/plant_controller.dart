@@ -235,7 +235,12 @@ class PlantController extends ChangeNotifier {
   }
 
   /// Menyimpan hasil drawer "Setelan Tanaman".
-  Future<void> updatePlant(
+  /// Menyimpan hasil drawer "Setelan Tanaman".
+  ///
+  /// Mengembalikan `true` bila berhasil. Pemanggil **harus** memeriksanya:
+  /// dulu kegagalan hanya disimpan di [error] dan sheet menutup diri seolah
+  /// tersimpan, sehingga pengguna tidak pernah tahu perubahannya hilang.
+  Future<bool> updatePlant(
     String plantId, {
     String? name,
     String? location,
@@ -258,9 +263,11 @@ class PlantController extends ChangeNotifier {
           if (p.id == plantId) updated else p,
       ];
       notifyListeners();
+      return true;
     } catch (e) {
       _error = e;
       notifyListeners();
+      return false;
     }
   }
 

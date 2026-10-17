@@ -3,6 +3,7 @@ import 'package:frontend/core/data/api/backend_codes.dart';
 import 'package:frontend/core/data/api/plant_mapper.dart';
 import 'package:frontend/core/data/api/plant_schedule.dart';
 import 'package:frontend/core/data/plant_repository.dart';
+import 'package:frontend/core/data/soil_catalog.dart';
 import 'package:frontend/core/models/plant.dart';
 
 /// Sumber data tanaman yang berbicara ke backend sungguhan.
@@ -113,10 +114,10 @@ class HttpPlantRepository implements PlantRepository {
 
   /// Menyimpan hasil drawer "Setelan Tanaman".
   ///
-  /// Backend hanya menerima `status` & `current_phase`; nama, tempat, dan jenis
-  /// tanah adalah label design yang tidak punya kolomnya di `user_plants`.
-  /// Perubahan itu karena itu tidak dikirim — dan memang tidak akan bertahan
-  /// setelah muat ulang, bukan karena aplikasi lupa mengirimnya.
+  /// `PATCH /plants/{id}` menerima `current_phase`, `plant_name`,
+  /// `planting_medium`, dan `soil_type` (ketiganya kolom asli di `user_plants`).
+  /// Lokasi tidak dikirim: memindahkan tanaman berarti membuat/memilih
+  /// `location_id` lain, dan itu alur tersendiri.
   @override
   Future<Plant> updatePlant(
     String plantId, {
@@ -126,12 +127,30 @@ class HttpPlantRepository implements PlantRepository {
     GrowthPhase? phase,
     String? soilName,
   }) async {
-    if (phase != null) {
-      await _api.patch(
-        'plants/$plantId',
-        body: {'current_phase': BackendCodes.phase(phase)},
-      );
+    final body = <String, dynamic>{};
+
+    if (name != null && name.trim().isNotEmpty) {
+      body['plant_name'] = name.trim();
     }
+    if (phase != null) {
+      body['current_phase'] = BackendCodes.phase(phase);
+    }
+    if (place != null) {
+      final media = PlantingMedia.values.firstWhere(
+        (m) => m.label == place,
+        orElse: () => PlantingMedia.pot,
+      );
+      body['planting_medium'] = BackendCodes.plantingMedium(media);
+    }
+    if (soilName != null) {
+      final soil = SoilCatalog.byName(soilName);
+      if (soil != null) body['soil_type'] = soil.code;
+    }
+
+    if (body.isNotEmpty) {
+      await _api.patch('plants/$plantId', body: body);
+    }
+
     return getPlant(plantId);
   }
 }

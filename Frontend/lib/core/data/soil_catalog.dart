@@ -81,4 +81,14 @@ class SoilCatalog {
     (soil) => soil.code == code,
     orElse: () => types[1],
   );
+
+  /// Kebalikan [byCode]: nama tampilan → jenis tanah, atau `null` bila tidak
+  /// ada yang cocok. Dipakai saat menyimpan "Setelan Tanaman"; `null` berarti
+  /// pilihan tidak berubah, jadi tidak ada yang perlu dikirim.
+  static SoilType? byName(String name) {
+    for (final soil in types) {
+      if (soil.name == name) return soil;
+    }
+    return null;
+  }
 }

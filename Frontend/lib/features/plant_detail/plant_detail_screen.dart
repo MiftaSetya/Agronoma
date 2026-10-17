@@ -86,6 +86,26 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     }
   }
 
+  /// Membuka "Setelan Tanaman" lalu menyegarkan salinan tanaman milik layar ini.
+  ///
+  /// Detail memegang `_plant` sendiri, sedangkan `PlantController` menyimpan
+  /// daftar tanaman yang sudah diperbarui. Tanpa memungut ulang di sini, header,
+  /// "Media Tanam", dan "Jenis Tanah" tetap menampilkan nilai sebelum disimpan
+  /// sampai halaman dibuka ulang — persis yang terjadi saat uji di emulator
+  /// meski `PATCH` sudah berhasil di backend.
+  Future<void> _openSettings() async {
+    final plant = _plant;
+    if (plant == null) return;
+
+    final saved = await PlantSettingsSheet.show(context, plant);
+
+    if (!saved || !mounted) return;
+
+    final updated = context.read<PlantController>().findById(plant.id);
+
+    if (updated != null) setState(() => _plant = updated);
+  }
+
   @override
   void dispose() {
     _tabs.dispose();
@@ -127,7 +147,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                   left: 0,
                   right: 0,
                   height: _photoHeight,
-                  child: _PhotoHeader(plant: plant),
+                  child: _PhotoHeader(plant: plant, onOpenSettings: _openSettings),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: _sheetTop),
@@ -155,9 +175,14 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
 
 /// Foto tanaman + gradasi gelap + bilah atas "Detail Tanaman".
 class _PhotoHeader extends StatelessWidget {
-  const _PhotoHeader({required this.plant});
+  const _PhotoHeader({required this.plant, required this.onOpenSettings});
 
   final Plant plant;
+
+  /// Membuka "Setelan Tanaman". Diteruskan dari layar karena hanya layar itu
+  /// yang boleh memperbarui salinan `_plant` miliknya setelah penyimpanan
+  /// berhasil — tanpa itu header tetap menampilkan nama/media lama.
+  final VoidCallback onOpenSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +226,7 @@ class _PhotoHeader extends StatelessWidget {
                   // Membuka panel "Setelan Tanaman" (frame `EditPlant drawer`,
                   // node `291:2872`).
                   GestureDetector(
-                    onTap: () => PlantSettingsSheet.show(context, plant),
+                    onTap: onOpenSettings,
                     child: SizedBox(
                       width: 24,
                       height: 24,
