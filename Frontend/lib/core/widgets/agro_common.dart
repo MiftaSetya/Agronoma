@@ -123,13 +123,16 @@ class PlantCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       // Design bisa menampilkan dua chip sekaligus (kartu pertama
                       // di frame Home memasang "PERLU DISIRAM" + "PERLU PUPUK").
-                      Row(
+                      // `Wrap`, bukan `Row`: pada lebar kartu design keduanya
+                      // memang sebaris, tetapi dengan teks diperbesar (atau di
+                      // layar sempit) dua chip itu meluber keluar kartu.
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.xs,
                         children: [
                           CareStatusChip(status: plant.status),
-                          if (plant.secondaryStatus != null) ...[
-                            const SizedBox(width: AppSpacing.sm),
+                          if (plant.secondaryStatus != null)
                             CareStatusChip(status: plant.secondaryStatus!),
-                          ],
                         ],
                       ),
                     ],

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
+import 'package:frontend/core/data/api/plant_schedule.dart';
+import 'package:frontend/core/data/api/weather_codes.dart';
 import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/weather.dart';
@@ -405,7 +407,10 @@ class _RingkasanTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final forecast = context.read<PlantController>().forecast;
+    // Ramalan mengikuti kota tanaman ini, bukan satu kota tetap: tanaman bisa
+    // berada di lokasi berbeda, dan cuaca yang ditampilkan harus cuaca tempat
+    // tanaman itu tumbuh.
+    final forecast = context.watch<PlantController>().forecastFor(plant.location);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -741,15 +746,37 @@ class _ForecastTile extends StatelessWidget {
   }
 }
 
-class _PerawatanTab extends StatelessWidget {
+class _PerawatanTab extends StatefulWidget {
   const _PerawatanTab({required this.plant});
 
   final Plant plant;
 
   @override
+  State<_PerawatanTab> createState() => _PerawatanTabState();
+}
+
+class _PerawatanTabState extends State<_PerawatanTab> {
+  @override
+  void initState() {
+    super.initState();
+    // Jadwal perawatan butuh satu permintaan sendiri (`care-calendar`), jadi
+    // baru diambil saat tab ini benar-benar dibuka — Beranda tidak ikut
+    // menunggunya, dan tanaman yang tidak pernah dibuka tidak memakan request.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<PlantController>().loadTasks(widget.plant.id);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final plant = widget.plant;
     final controller = context.watch<PlantController>();
-    final tasks = controller.findById(plant.id)?.tasks ?? plant.tasks;
+    // Dihitung dari kalender bulan berjalan, bukan dari `Plant.tasks`: resource
+    // tanaman dari backend tidak memuat jadwal.
+    final tasks = controller.tasksFor(plant.id);
+    final careDays = controller.careDaysFor(plant.id);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -766,7 +793,7 @@ class _PerawatanTab extends StatelessWidget {
               Navigator.of(context).pushNamed(Routes.diseaseDetection),
         ),
         const SizedBox(height: AppSpacing.lg),
-        const _CareCalendarCard(),
+        _CareCalendarCard(days: careDays),
         const SizedBox(height: AppSpacing.lg),
         _CareListCard(plant: plant, tasks: tasks),
       ],
@@ -853,22 +880,19 @@ class _ScanCard extends StatelessWidget {
 }
 
 /// Kartu "Kalender Perawatan" — tujuh kolom tanggal + legenda ikon.
+///
+/// Datanya dari `GET /plants/{id}/care-calendar` (bulan berjalan), bukan lagi
+/// daftar contoh: kartu ini menampilkan **hari ini dan enam hari berikutnya**,
+/// dengan ikon siram/pupuk hanya pada hari yang memang punya jadwal.
 class _CareCalendarCard extends StatelessWidget {
-  const _CareCalendarCard();
+  const _CareCalendarCard({required this.days});
 
-  static const List<({String day, String date, bool active, bool fertilizer})>
-  _days = [
-    (day: 'Sen', date: '10', active: true, fertilizer: false),
-    (day: 'Sel', date: '11', active: false, fertilizer: false),
-    (day: 'Rab', date: '12', active: false, fertilizer: true),
-    (day: 'Kam', date: '13', active: false, fertilizer: false),
-    (day: 'Jum', date: '14', active: false, fertilizer: false),
-    (day: 'Sab', date: '15', active: false, fertilizer: false),
-    (day: 'Min', date: '15', active: false, fertilizer: false),
-  ];
+  final List<CareDay> days;
 
   @override
   Widget build(BuildContext context) {
+    final weeks = _weekFrom(days);
+
     return _DetailCard(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -880,10 +904,10 @@ class _CareCalendarCard extends StatelessWidget {
             height: 86,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: _days.length,
+              itemCount: weeks.length,
               separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
               itemBuilder: (_, i) {
-                final d = _days[i];
+                final d = weeks[i];
                 return Container(
                   constraints: const BoxConstraints(minWidth: 56),
                   padding: const EdgeInsets.all(9),
@@ -911,12 +935,14 @@ class _CareCalendarCard extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const AgroIcon(
-                            AppAssets.calendarWatering,
-                            size: 12,
-                          ),
+                          if (d.watering) ...[
+                            const AgroIcon(
+                              AppAssets.calendarWatering,
+                              size: 12,
+                            ),
+                          ],
                           if (d.fertilizer) ...[
-                            const SizedBox(width: AppSpacing.xs),
+                            if (d.watering) const SizedBox(width: AppSpacing.xs),
                             const AgroIcon(
                               AppAssets.calendarFertilizer,
                               size: 12,
@@ -947,6 +973,39 @@ class _CareCalendarCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Tujuh hari mulai hari ini → data tampilan kartu.
+  ///
+  /// Backend mengirim sebulan penuh; kartu ini hanya selebar tujuh kolom dan
+  /// design-nya menandai satu hari sebagai "aktif" (hari ini), jadi yang
+  /// ditampilkan adalah pekan berjalan. Hari tanpa baris kalender tetap muncul
+  /// sebagai kolom kosong supaya tanggalnya tidak melompat.
+  static List<
+    ({String day, String date, bool active, bool watering, bool fertilizer})
+  >
+  _weekFrom(List<CareDay> days) {
+    final today = DateTime.now();
+    final byDate = {for (final day in days) day.date: day};
+
+    return [
+      for (var offset = 0; offset < 7; offset++)
+        () {
+          final date = today.add(Duration(days: offset));
+          final entry = byDate[PlantSchedule.isoDate(date)];
+          return (
+            day: WeatherCodes.dayLabel(PlantSchedule.isoDate(date)),
+            date: '${date.day}',
+            active: offset == 0,
+            watering:
+                entry != null &&
+                (entry.needsWater ||
+                    entry.waitsForRain ||
+                    entry.watered),
+            fertilizer: entry != null && entry.fertilized,
+          );
+        }(),
+    ];
   }
 }
 
@@ -995,7 +1054,7 @@ class _CareListCard extends StatelessWidget {
                 task: task,
                 onToggle: () => context
                     .read<PlantController>()
-                    .toggleTask(plant.id, task.title, !task.done),
+                    .toggleTask(plant.id, task.kind, !task.done),
               ),
               if (task != tasks.last) const SizedBox(height: AppSpacing.sm),
             ],

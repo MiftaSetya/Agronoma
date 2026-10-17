@@ -97,7 +97,9 @@ class _AddPlantFlowState extends State<AddPlantFlow> {
       // seluruhnya diurus `AddPlantRepository`; di sini hasilnya cuma
       // ditempelkan ke daftar Home/Detail yang sudah dimuat.
       final plant = await add.savePlant();
-      plants.adopt(plant);
+      // `await` karena cuaca kota tanaman baru ikut diambil bila kotanya belum
+      // punya kartu; tanpa ini Detail bisa terbuka sebelum cuacanya siap.
+      await plants.adopt(plant);
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed(
         Routes.plantDetail,

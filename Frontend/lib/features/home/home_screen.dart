@@ -51,14 +51,21 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _Greeting(name: name),
           const SizedBox(height: AppSpacing.xxl),
-          if (controller.weather != null)
-            WeatherCard(
-              city: controller.weather!.city,
-              condition: controller.weather!.condition,
-              temperature: controller.weather!.temperatureLabel,
-              iconAsset: controller.weather!.iconAsset,
-            ),
-          const SizedBox(height: AppSpacing.xxl),
+          // Satu kartu per kota unik: tanaman pengguna boleh berada di tempat
+          // berbeda, jadi satu kartu "Surabaya" untuk semuanya akan salah.
+          // Dengan satu lokasi, hasilnya persis seperti design.
+          if (controller.cityWeather.isNotEmpty) ...[
+            for (var i = 0; i < controller.cityWeather.length; i++) ...[
+              if (i > 0) const SizedBox(height: AppSpacing.md),
+              WeatherCard(
+                city: controller.cityWeather[i].city,
+                condition: controller.cityWeather[i].condition,
+                temperature: controller.cityWeather[i].temperatureLabel,
+                iconAsset: controller.cityWeather[i].iconAsset,
+              ),
+            ],
+            const SizedBox(height: AppSpacing.xxl),
+          ],
           // Tanpa `actionLabel`: di frame Home, container "Lihat Semua"
           // berstatus hidden, jadi design memang hanya menampilkan judulnya.
           const SectionHeader(title: 'Tanaman Saya'),

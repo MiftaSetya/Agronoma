@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:frontend/core/data/add_plant_repository.dart';
 import 'package:frontend/core/data/api/api_client.dart';
+import 'package:frontend/core/data/api/http_plant_repository.dart';
+import 'package:frontend/core/data/api/http_weather_repository.dart';
 import 'package:frontend/core/data/api/token_store.dart';
 import 'package:frontend/core/data/auth_repository.dart';
 import 'package:frontend/core/data/disease_repository.dart';
@@ -90,13 +92,7 @@ class AgronomaApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Sumber data — tukar di sini saat backend siap.
-        Provider<PlantRepository>(
-          create: (_) => plantRepository ?? MockPlantRepository(),
-        ),
-        Provider<WeatherRepository>(
-          create: (_) => weatherRepository ?? const MockWeatherRepository(),
-        ),
+        // Sumber data yang tidak butuh jaringan.
         Provider<DiseaseRepository>(
           create: (_) => diseaseRepository ?? const MockDiseaseRepository(),
         ),
@@ -110,6 +106,25 @@ class AgronomaApp extends StatelessWidget {
         ),
         Provider<ApiClient>(
           create: (ctx) => ApiClient(tokenStore: ctx.read<TokenStore>()),
+        ),
+
+        // Sumber data yang membaca backend. Didaftarkan **sesudah** [ApiClient]
+        // karena `Provider` hanya bisa membaca provider yang ditulis lebih dulu.
+        // Cuaca ikut lewat backend (`GET /plants/{id}/weather`) dan bukan lagi
+        // satu kota tetap, karena tanaman pengguna bisa berada di banyak lokasi.
+        Provider<PlantRepository>(
+          create: (ctx) =>
+              plantRepository ??
+              (useSampleData
+                  ? MockPlantRepository()
+                  : HttpPlantRepository(apiClient: ctx.read<ApiClient>())),
+        ),
+        Provider<WeatherRepository>(
+          create: (ctx) =>
+              weatherRepository ??
+              (useSampleData
+                  ? const MockWeatherRepository()
+                  : HttpWeatherRepository(apiClient: ctx.read<ApiClient>())),
         ),
         // Sumber data wizard "Tambah Tanaman". Didaftarkan **sesudah**
         // [ApiClient] karena `Provider` hanya bisa membaca provider yang
