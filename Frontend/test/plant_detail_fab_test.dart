@@ -1,0 +1,184 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+
+import 'package:frontend/core/assets/app_assets.dart';
+import 'package:frontend/core/data/api/plant_schedule.dart';
+import 'package:frontend/core/data/plant_repository.dart';
+import 'package:frontend/core/data/weather_repository.dart';
+import 'package:frontend/core/models/plant.dart';
+import 'package:frontend/core/models/weather.dart';
+import 'package:frontend/core/state/plant_controller.dart';
+import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/features/plant_detail/plant_detail_screen.dart';
+
+Plant _plant() => Plant(
+  id: '6',
+  name: 'Kangkung',
+  photoAsset: AppAssets.photoPotSoil,
+  location: 'Surabaya',
+  place: 'Pot tanaman',
+  media: PlantingMedia.pot,
+  status: CareStatus.safe,
+  phase: GrowthPhase.seedling,
+  plantedAt: DateTime(2026, 10, 17),
+  careScore: 100,
+  description: 'Ditanam di pot tanaman dengan media tanam campuran.',
+);
+
+class _FakePlantRepository implements PlantRepository {
+  int completed = 0;
+
+  @override
+  Future<List<Plant>> getPlants() async => [_plant()];
+
+  @override
+  Future<Plant> getPlant(String id) async => _plant();
+
+  @override
+  Future<List<CareDay>> careDays(
+    Plant plant, {
+    required DateTime today,
+  }) async => [
+    CareDay(
+      date: PlantSchedule.isoDate(today),
+      wateringStatus: completed > 0 ? 'watered' : 'need_water',
+      fertilizingStatus: 'none',
+    ),
+  ];
+
+  @override
+  Future<Plant> setTaskDone(String plantId, CareTaskKind kind, bool done) async {
+    completed++;
+    return _plant();
+  }
+
+  @override
+  noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+class _FakeWeatherRepository implements WeatherRepository {
+  @override
+  Future<Weather?> forPlant({
+    required String plantId,
+    required String city,
+  }) async => null;
+
+  @override
+  noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+void main() {
+  /// Membuka Detail Tanaman langsung di tab Perawatan (tempat kolom tombol
+  /// bulat dan daftar tugas bertemu).
+  Future<_FakePlantRepository> pumpDetail(
+    WidgetTester tester, {
+    required Size screen,
+  }) async {
+    tester.view.physicalSize = screen;
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final repo = _FakePlantRepository();
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<PlantController>(
+            create: (_) => PlantController(
+              plantRepository: repo,
+              weatherSource: _FakeWeatherRepository(),
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          home: const PlantDetailScreen(plantId: '6', initialTab: 1),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return repo;
+  }
+
+  Finder verticalList() => find.byWidgetPredicate(
+    (w) => w is ListView && w.scrollDirection == Axis.vertical,
+  );
+
+  testWidgets('baris tugas terakhir bisa digulir keluar dari balik tombol bulat', (
+    tester,
+  ) async {
+    await pumpDetail(tester, screen: const Size(440, 740));
+
+    final list = verticalList();
+    expect(list, findsOne);
+    // Gulir sampai ujung: di sinilah bug lama muncul — baris terakhir berhenti
+    // di belakang tombol obrolan dan area centangnya tidak bisa disentuh.
+    for (var i = 0; i < 6; i++) {
+      await tester.drag(list, const Offset(0, -400));
+      await tester.pumpAndSettle();
+    }
+
+    final fab = tester.getRect(find.byKey(plantDetailChatFabKey));
+    final row = tester.getRect(
+      find
+          .ancestor(
+            of: find.text(CareTaskKind.watering.actionLabel),
+            matching: find.byType(InkWell),
+          )
+          .first,
+    );
+
+    // Baris tugas harus berada **seluruhnya** di atas tombol, bukan sekadar
+    // sebagian terlihat.
+    expect(
+      row.bottom,
+      lessThanOrEqualTo(fab.top),
+      reason:
+          'baris tugas (bawah ${row.bottom}) tertutup tombol obrolan '
+          '(atas ${fab.top})',
+    );
+  });
+
+  testWidgets('tombol bulat tetap di dalam layar pada layar pendek', (
+    tester,
+  ) async {
+    // Posisi lama memakai `top: 764` dari kanvas 956; di layar 600 tinggi
+    // tombolnya jatuh di luar layar.
+    await pumpDetail(tester, screen: const Size(440, 600));
+
+    final screenHeight = tester.view.physicalSize.height;
+    final fab = tester.getRect(find.byKey(plantDetailChatFabKey));
+    final rain = tester.getRect(find.byKey(plantDetailRainFabKey));
+
+    expect(fab.bottom, lessThanOrEqualTo(screenHeight));
+    expect(fab.top, greaterThan(0));
+    expect(rain.top, greaterThan(0));
+  });
+
+  testWidgets('mengetuk baris tugas mencatat penyiraman, bukan membuka obrolan', (
+    tester,
+  ) async {
+    final repo = await pumpDetail(tester, screen: const Size(440, 740));
+
+    final list = verticalList();
+    for (var i = 0; i < 6; i++) {
+      await tester.drag(list, const Offset(0, -400));
+      await tester.pumpAndSettle();
+    }
+
+    // Ketuk di sisi kanan baris (tempat ikon centang), titik yang dulu tertutup
+    // tombol obrolan.
+    final row = tester.getRect(
+      find
+          .ancestor(
+            of: find.text(CareTaskKind.watering.actionLabel),
+            matching: find.byType(InkWell),
+          )
+          .first,
+    );
+    await tester.tapAt(Offset(row.right - 24, row.center.dy));
+    await tester.pumpAndSettle();
+
+    expect(repo.completed, 1);
+  });
+}
