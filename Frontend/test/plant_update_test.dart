@@ -1,0 +1,121 @@
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:frontend/core/data/api/plant_schedule.dart';
+import 'package:frontend/core/data/plant_repository.dart';
+import 'package:frontend/core/data/weather_repository.dart';
+import 'package:frontend/core/models/plant.dart';
+import 'package:frontend/core/models/weather.dart';
+import 'package:frontend/core/state/plant_controller.dart';
+
+/// Repositori yang bisa disuruh gagal, untuk memastikan kegagalan simpan
+/// benar-benar dilaporkan ke pemanggil — bukan ditelan diam-diam.
+class _FakePlantRepository implements PlantRepository {
+  _FakePlantRepository(this.plant, {this.failUpdates = false});
+
+  final Plant plant;
+  bool failUpdates;
+  int updateCalls = 0;
+
+  @override
+  Future<List<Plant>> getPlants() async => [plant];
+
+  @override
+  Future<Plant> getPlant(String id) async => plant;
+
+  @override
+  Future<List<CareDay>> careDays(
+    Plant plant, {
+    required DateTime today,
+  }) async => const [];
+
+  @override
+  Future<Plant> setTaskDone(
+    String plantId,
+    CareTaskKind kind,
+    bool done,
+  ) async => plant;
+
+  @override
+  Future<Plant> updatePlant(
+    String plantId, {
+    String? name,
+    String? location,
+    String? place,
+    GrowthPhase? phase,
+    String? soilName,
+  }) async {
+    updateCalls++;
+
+    if (failUpdates) throw Exception('jaringan putus');
+
+    return plant.copyWith(name: name, place: place, phase: phase);
+  }
+}
+
+class _FakeWeatherRepository implements WeatherRepository {
+  @override
+  Future<Weather?> forPlant({
+    required String plantId,
+    required String city,
+  }) async => null;
+
+  @override
+  noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+Plant _plant() => Plant(
+  id: '6',
+  name: 'Kangkung',
+  photoAsset: 'assets/images/plants/kangkung.png',
+  location: 'Surabaya',
+  place: 'Pot tanaman',
+  media: PlantingMedia.pot,
+  status: CareStatus.safe,
+  phase: GrowthPhase.seedling,
+  plantedAt: DateTime(2026, 10, 17),
+  careScore: 100,
+  description: 'Kangkung di pot.',
+);
+
+PlantController build(PlantRepository repo) => PlantController(
+  plantRepository: repo,
+  weatherSource: _FakeWeatherRepository(),
+);
+
+void main() {
+  test('simpan yang berhasil melaporkan true', () async {
+    final repo = _FakePlantRepository(_plant());
+    final controller = build(repo);
+    await controller.load();
+
+    final ok = await controller.updatePlant('6', name: 'Kangkung Uji');
+
+    expect(ok, isTrue);
+    expect(controller.findById('6')!.name, 'Kangkung Uji');
+  });
+
+  test('simpan yang gagal melaporkan false, bukan menutup seolah berhasil', () async {
+    final repo = _FakePlantRepository(_plant(), failUpdates: true);
+    final controller = build(repo);
+    await controller.load();
+
+    final ok = await controller.updatePlant('6', name: 'Kangkung Uji');
+
+    // Inti bug lama: kegagalan hanya disimpan di `error`, pemanggil tidak tahu
+    // apa pun dan tetap menutup sheet.
+    expect(ok, isFalse);
+    expect(controller.error, isNotNull);
+    expect(controller.findById('6')!.name, 'Kangkung');
+  });
+
+  test('simpan yang gagal tidak mengubah daftar tanaman', () async {
+    final repo = _FakePlantRepository(_plant(), failUpdates: true);
+    final controller = build(repo);
+    await controller.load();
+
+    await controller.updatePlant('6', name: 'Nama Baru');
+
+    expect(controller.plants, hasLength(1));
+    expect(controller.plants.single.name, 'Kangkung');
+  });
+}
