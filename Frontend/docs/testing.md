@@ -265,6 +265,36 @@ pendengarnya **sebelum** `await` pertama — pada deep link langsung ke Detail
 (daftar tanaman belum termuat) itu memicu "setState() called during build".
 Pemanggilannya kini ditunda satu frame lewat `addPostFrameCallback`.
 
+### Setelan Tanaman: nilai yang benar-benar terkirim dan tersimpan
+
+Tiga hal yang dijaga `test/api_plant_update_test.dart` +
+`test/plant_update_test.dart`:
+
+| Perilaku | Cara diukur |
+|---|---|
+| Nama, media tanam, jenis tanah benar-benar masuk body `PATCH` | rekam body lewat `MockClient`, periksa kuncinya |
+| Nama kosong / jenis tanah tak dikenal tidak dikirim | body tetap kosong → tidak ada `PATCH` sama sekali |
+| Kegagalan simpan dilaporkan ke pemanggil | `updatePlant` mengembalikan `false`, daftar tanaman tidak berubah |
+| Setiap `PlantingMedia` punya kode backend | loop seluruh nilai, hasilnya harus salah satu dari tiga kode |
+
+Bug yang pernah terjadi di sini:
+
+- **Perubahan dibuang diam-diam.** `PATCH /plants/{id}` hanya menerima `status`
+  dan `current_phase`, padahal `plant_name`, `planting_medium`, dan `soil_type`
+  sudah ada di `user_plants` sejak migrasi awal. Frontend pun tidak mengirimnya,
+  jadi drawer menutup seolah tersimpan.
+- **Kegagalan terlihat seperti berhasil.** `PlantController.updatePlant` dulu
+  `Future<void>` yang menelan error, dan sheet memanggil `Navigator.pop()`
+  tanpa menunggu. Sekarang ia mengembalikan `bool`; sheet hanya menutup bila
+  `true`, dan tombol memakai `loading` milik `AgroButton` agar tidak terkirim dua
+  kali.
+- **Detail menampilkan nilai lama.** `_PlantDetailScreenState` memegang `_plant`
+  sendiri dan hanya mengisinya di `_load()`. `PATCH` sudah sukses di backend
+  (dibuktikan lewat query DB), tetapi header tetap "Kangkung" dan media tetap
+  "Pot tanaman". `PlantSettingsSheet.show` sekarang mengembalikan `bool`, dan
+  Detail memungut salinan baru lewat `findById` lalu `setState`. Terbukti di
+  emulator: ganti nama → Simpan → header berubah tanpa membuka ulang halaman.
+
 ### Kenapa pipeline tangkapan layar memakai mode contoh
 Frame Figma menggambar sebuah **foto** ruangan, sedangkan pratinjau kamera di
 emulator menampilkan ruangan virtual 3D yang tidak akan pernah sama. Membandingkan
