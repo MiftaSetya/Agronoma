@@ -53,7 +53,15 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   @override
   void initState() {
     super.initState();
-    _load();
+    // Ditunda satu frame. `PlantController.load()` memberi tahu pendengarnya
+    // sebelum `await` pertama, dan memanggilnya dari `initState` berarti
+    // `notifyListeners()` terjadi saat fase build rute ini berjalan — melanggar
+    // "setState() called during build" bila daftar tanaman belum termuat
+    // (mis. deep link langsung ke Detail, atau kota tanpa cache cuaca sehingga
+    // `load()` tidak berhenti lebih awal).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _load();
+    });
   }
 
   Future<void> _load() async {
@@ -417,7 +425,9 @@ class _RingkasanTab extends StatelessWidget {
         AppSpacing.lg,
         AppSpacing.xxxl,
         AppSpacing.lg,
-        AppShellBottom.gutter,
+        // Bukan `gutter`: daftar ini bergulir di belakang kolom tombol bulat,
+        // jadi ujungnya harus berhenti di atas tombol.
+        AppShellBottom.gutterUnderFabs,
       ),
       children: [
         Text('Ringkasan', style: AppTextStyles.sectionTitle),
@@ -783,7 +793,9 @@ class _PerawatanTabState extends State<_PerawatanTab> {
         AppSpacing.lg,
         AppSpacing.xxxl,
         AppSpacing.lg,
-        AppShellBottom.gutter,
+        // Sama seperti tab Ringkasan: sisakan tinggi kolom tombol bulat supaya
+        // baris tugas terakhir bisa digulir keluar dari baliknya.
+        AppShellBottom.gutterUnderFabs,
       ),
       children: [
         Text('Perawatan', style: AppTextStyles.sectionTitle),
@@ -1168,10 +1180,19 @@ class _DetailCard extends StatelessWidget {
   }
 }
 
+/// Kunci dua tombol bulat di layar Detail.
+///
+/// Dipakai tes untuk mengukur geometrinya: kolom tombol tidak boleh menutupi
+/// isi daftar dan tidak boleh keluar layar.
+const Key plantDetailChatFabKey = Key('plant-detail-chat-fab');
+const Key plantDetailRainFabKey = Key('plant-detail-rain-fab');
+
 /// Dua tombol bulat di kanan bawah: peringatan hujan dan obrolan AI.
 ///
-/// Kolomnya diposisikan di `top: 764` (berakhir 64px dari dasar kanvas 956),
-/// bukan menempel navbar seperti kartu biasa.
+/// Di design kolomnya berada di `top: 764` pada kanvas 956 — yaitu berakhir
+/// 64px di atas dasar. Yang dipakai di sini `bottom`, bukan `top`: pada layar
+/// yang tidak setinggi kanvas (ponsel pendek, tablet), `top` membuat kolom
+/// tombol melayang di tengah atau keluar dari layar.
 class _DetailFabs extends StatelessWidget {
   const _DetailFabs({required this.plant});
 
@@ -1181,11 +1202,12 @@ class _DetailFabs extends StatelessWidget {
   Widget build(BuildContext context) {
     return Positioned(
       right: AppSpacing.lg,
-      top: 764,
+      bottom: AppShellBottom.fabInset,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Material(
+            key: plantDetailRainFabKey,
             color: AppColors.surface,
             shape: const CircleBorder(side: BorderSide(color: AppColors.border)),
             child: InkWell(
@@ -1203,6 +1225,7 @@ class _DetailFabs extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Material(
+            key: plantDetailChatFabKey,
             color: AppColors.primary,
             shape: const CircleBorder(),
             child: InkWell(
@@ -1231,4 +1254,21 @@ class _DetailFabs extends StatelessWidget {
 class AppShellBottom {
   AppShellBottom._();
   static const double gutter = 32;
+
+  /// Tinggi kolom dua tombol bulat di layar Detail: 2×56 + 16 jarak antar.
+  static const double fabStackHeight = AppSizes.fabSize * 2 + AppSpacing.lg;
+
+  /// Jarak dasar kolom tombol dari tepi bawah layar.
+  ///
+  /// Diukur dari design: kolom mulai `top: 764` pada kanvas 956 dan berakhir
+  /// 64px di atas dasar. Dipakai sebagai `bottom` — bukan `top` — supaya kolom
+  /// tetap di tempatnya di layar yang lebih pendek/tinggi dari kanvas.
+  static const double fabInset = 64;
+
+  /// Ruang bawah untuk daftar yang **digulir di bawah** kolom tombol.
+  ///
+  /// Tanpa ini, kartu terakhir berhenti tepat di belakang tombol: isinya
+  /// tertutup dan area centangnya tidak bisa disentuh.
+  static const double gutterUnderFabs =
+      fabInset + fabStackHeight + AppSpacing.sm;
 }
