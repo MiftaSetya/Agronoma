@@ -207,8 +207,34 @@ bisa memotret ulang atau memilih jenis tanah manual. Dijaga
 `test/api_wizard_test.dart` (kontrak HTTP tanpa server) dan
 `tool/verify-wizard-contract.ps1` (kontrak lawan server sungguhan).
 
-### Kenapa pipeline tangkapan layar memakai mode contoh
+### Beranda: daftar tanaman dan cuaca per lokasi
 
+Beranda sudah membaca backend sungguhan (`HttpPlantRepository` +
+`HttpWeatherRepository`). Tiga hal yang dijaga test karena mudah rusak diam-diam:
+
+| Perilaku | Dijaga oleh |
+|---|---|
+| `GET /plants` → kartu tanaman (badge, fase, tanggal, kota) | `test/api_home_test.dart`, `test/plant_mapper_scenarios_test.dart` |
+| Satu kartu cuaca **per kota unik**, bukan per tanaman | `test/home_weather_test.dart`, `test/plant_controller_test.dart` |
+| Tugas "Perawatan Hari Ini" berasal dari `care-calendar` | `test/plant_care_test.dart`, `test/api_home_test.dart` |
+
+Dua bug yang pernah terjadi dan kini dijaga test (lihat `test/plant_care_test.dart`):
+
+- **Tugas hilang setelah dicentang.** `POST /watering/complete` hanya membalas
+  log; tanaman yang dibaca ulang tidak memuat jadwal. Kalau tugas disimpan di
+  `Plant.tasks`, tugas itu lenyap padahal backend baru mencatatnya selesai.
+  Karena itu tugas **dihitung** dari `care-calendar` terakhir
+  (`PlantController.tasksFor`), bukan disimpan di `Plant`.
+- **Jadwal hilang setelah muat ulang.** Sama sebabnya: `GET /plants` tidak
+  membawa jadwal. Kalender yang sudah dibaca disimpan terpisah di controller
+  dan tidak ditimpa oleh muat ulang tanaman.
+
+Catatan jujur soal cakupan: `PATCH /plants/{id}` hanya menerima `status` dan
+`current_phase`, jadi nama/tempat/jenis tanah yang diubah lewat "Setelan
+Tanaman" **tidak** tersimpan di backend. Itu celah backend, bukan kelalaian
+aplikasi — dan sengaja tidak ditambal di sisi Flutter.
+
+### Kenapa pipeline tangkapan layar memakai mode contoh
 Frame Figma menggambar sebuah **foto** ruangan, sedangkan pratinjau kamera di
 emulator menampilkan ruangan virtual 3D yang tidak akan pernah sama. Membandingkan
 piksel layar kamera sungguhan karena itu tidak ada artinya. `CameraScope`

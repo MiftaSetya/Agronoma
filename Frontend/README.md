@@ -33,9 +33,14 @@ Prinsip yang dipegang kode ini:
   dari yang terlihat di Figma (mis. `leading-[normal]`), alasannya tertulis
   di tempat angka itu didefinisikan.
 - **Repositori sebagai antarmuka.** Data contoh bisa ditukar backend sungguhan
-  tanpa menyentuh widget. Login/Register dan wizard "Tambah Tanaman" sudah
-  memakai backend (`HttpAuthRepository`, `HttpAddPlantRepository`); sisanya
-  masih data contoh.
+  tanpa menyentuh widget. Login/Register, wizard "Tambah Tanaman", daftar
+  tanaman Beranda (`HttpPlantRepository`), dan cuaca (`HttpWeatherRepository`)
+  sudah memakai backend; sisanya masih data contoh.
+- **Cuaca mengikuti lokasi tanaman.** Tanaman pengguna boleh berada di beberapa
+  tempat, jadi Beranda menampilkan satu kartu cuaca **per kota unik** dan Detail
+  Tanaman memakai cuaca kotanya sendiri. Satu permintaan per kota, bukan per
+  tanaman (`GET /plants/{id}/weather` memakai tanaman pertama di kota itu
+  sebagai wakil, karena cache backend berkunci kota+provinsi+tanggal).
 
 ## Menjalankan
 
