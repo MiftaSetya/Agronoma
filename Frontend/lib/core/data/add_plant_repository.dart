@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:frontend/core/data/api/api_client.dart';
 import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/api/backend_codes.dart';
+import 'package:frontend/core/data/api/plant_mapper.dart';
 import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/data/plant_catalog.dart';
 import 'package:frontend/core/data/soil_catalog.dart';
@@ -255,51 +256,20 @@ class HttpAddPlantRepository implements AddPlantRepository {
   }
 
   /// `UserPlantResource` tidak memuat foto, deskripsi, ataupun jadwal
-  /// perawatan (jadwalnya dibaca dari `GET /plants/{id}/care-calendar` pada
-  /// slice berikutnya), jadi tiga hal itu diisi dari katalog dan teks yang
-  /// sudah dikumpulkan wizard.
+  /// perawatan, jadi ketiganya diisi dari katalog dan teks yang sudah
+  /// dikumpulkan wizard. Pemetaannya sendiri ada di `PlantMapper` supaya
+  /// tanaman yang baru disimpan tampil sama dengan hasil `GET /plants`.
   Plant _toPlant(
     Map<String, dynamic> json, {
     required String? scientificName,
     required String? description,
     required String locationLabel,
-  }) {
-    final name = (json['plant_name'] as String? ?? 'Tanaman').trim();
-    final visual = PlantCatalog.find(name);
-    final media = BackendCodes.plantingMediumFrom(json['planting_medium'] as String?);
-    final soil = SoilCatalog.byCode(json['soil_type'] as String? ?? '');
-    final plantingDate = DateTime.tryParse('${json['planting_date']}') ?? DateTime.now();
-
-    return Plant(
-      id: '${json['id']}',
-      name: name,
-      scientificName: scientificName,
-      photoAsset: visual?.photoAsset ?? PlantCatalog.fallbackPhoto,
-      location: (json['location'] as Map<String, dynamic>?)?['city'] as String? ??
-          locationLabel,
-      // Media tanam pilihan langkah 2 menentukan "MEDIA TANAM" di Detail.
-      place: media.label,
-      media: media,
-      status: BackendCodes.badgeStatus(json['badge_status'] as String?),
-      phase: BackendCodes.phaseFrom(json['current_phase'] as String?),
-      plantedAt: plantingDate,
-      careScore: 100,
-      description: (description ?? '').trim().isEmpty
-          // Tanaman yang ditambahkan manual tidak punya kalimat dari AI;
-          // kalimatnya disusun dari dua hal yang memang diketahui.
-          ? 'Ditanam di ${media.label.toLowerCase()} dengan ${soil.name.toLowerCase()}.'
-          : description!.trim(),
-      tags: visual?.tags ?? const [],
-      // Tanah paling kaya bahan organik pada katalog design; sejalan dengan
-      // data contoh supaya Detail Tanaman tidak tampak berbeda.
-      fertilizer: soil.code == 'fertile' ? 'NPK Organik' : 'NPK Daun',
-      soilName: soil.name,
-      // Tanaman baru selalu mulai dari nol: jadwal perawatan baru terbaca dari
-      // care-calendar, dan belum ada tonggak pertumbuhan yang terlewati.
-      tasks: const [],
-      timeline: const [],
-    );
-  }
+  }) => PlantMapper.fromBackend(
+    json,
+    scientificName: scientificName,
+    description: description,
+    fallbackCity: locationLabel,
+  );
 
   static String _dateOnly(DateTime value) {
     final month = value.month.toString().padLeft(2, '0');

@@ -10,6 +10,7 @@ class Weather {
     this.iconAsset,
     this.humidity,
     this.windSpeed,
+    this.forecast = const [],
   });
 
   /// Nama kota, mis. "Surabaya".
@@ -27,6 +28,14 @@ class Weather {
 
   final String? windSpeed;
 
+  /// Ramalan beberapa hari ke depan untuk kota ini.
+  ///
+  /// Disimpan di objek yang sama karena backend menyajikan cuaca **per
+  /// tanaman** dalam satu respons (`GET /plants/{id}/weather`): hari ini dan
+  /// ramalan datang bersama, jadi memisahkannya hanya akan membuat dua
+  /// permintaan untuk data yang sama.
+  final List<WeatherForecast> forecast;
+
   String get temperatureLabel => '$temperature°C';
 
   factory Weather.fromJson(Map<String, dynamic> json) => Weather(
@@ -36,6 +45,9 @@ class Weather {
     iconAsset: json['iconAsset'] as String?,
     humidity: (json['humidity'] as num?)?.toInt(),
     windSpeed: json['windSpeed'] as String?,
+    forecast: (json['forecast'] as List? ?? const [])
+        .map((e) => WeatherForecast.fromJson(e as Map<String, dynamic>))
+        .toList(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -45,6 +57,7 @@ class Weather {
     'iconAsset': iconAsset,
     'humidity': humidity,
     'windSpeed': windSpeed,
+    'forecast': forecast.map((e) => e.toJson()).toList(),
   };
 }
 
