@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'package:frontend/core/data/api/api_config.dart';
+
 @immutable
 class ScanRecord {
   const ScanRecord({
@@ -40,7 +42,15 @@ class ScanRecord {
           DateTime.tryParse(json['scanned_at'] as String? ?? '') ??
           DateTime.now(),
       action: (json['recommended_action'] as String? ?? '').trim(),
-      imageUrl: json['image_url'] as String? ?? '',
+      imageUrl: _normalizedUrl(json['image_url'] as String?),
     );
+  }
+
+  static String _normalizedUrl(String? raw) {
+    final trimmed = raw?.trim() ?? '';
+
+    if (trimmed.isEmpty) return '';
+
+    return ApiConfig.normalizeHost(trimmed);
   }
 }

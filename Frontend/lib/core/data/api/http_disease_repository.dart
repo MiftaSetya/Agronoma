@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:frontend/core/data/api/api_client.dart';
+import 'package:frontend/core/data/api/api_config.dart';
 import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/disease_repository.dart';
 import 'package:frontend/core/models/disease.dart';
@@ -101,8 +102,14 @@ class HttpDiseaseRepository implements DiseaseRepository {
       ],
       confidence: confidence,
       severity: _severityFor(pestName, confidence),
-      photoAsset: json['image_url'] as String?,
+      photoAsset: _normalizeUrl(json['image_url'] as String?),
     );
+  }
+
+  static String? _normalizeUrl(String? raw) {
+    final trimmed = raw?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return ApiConfig.normalizeHost(trimmed);
   }
 
   String _severityFor(String pestName, double confidence) {

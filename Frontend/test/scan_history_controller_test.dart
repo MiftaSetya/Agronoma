@@ -54,6 +54,33 @@ void main() {
     expect(record.confidence, 0);
   });
 
+  test('ScanRecord.fromJson mengganti host localhost ke host baseUrl', () {
+    final record = ScanRecord.fromJson({
+      'id': 9,
+      'detected_pest_name': 'Kutu Daun',
+      'ai_confidence': 80,
+      'scanned_at': '2026-10-18T09:30:00Z',
+      'image_url': 'http://localhost:8000/storage/scans/pest/9.jpg',
+    });
+
+    expect(
+      record.imageUrl,
+      startsWith('http://127.0.0.1:8000/storage/scans/pest/9.jpg'),
+    );
+  });
+
+  test('ScanRecord.fromJson mempertahankan host selain localhost', () {
+    final record = ScanRecord.fromJson({
+      'id': 10,
+      'detected_pest_name': 'Kutu Daun',
+      'ai_confidence': 80,
+      'scanned_at': '2026-10-18T09:30:00Z',
+      'image_url': 'https://api.agronoma.id/storage/scans/pest/10.jpg',
+    });
+
+    expect(record.imageUrl, 'https://api.agronoma.id/storage/scans/pest/10.jpg');
+  });
+
   test('load menyimpan riwayat per plantId dan meneruskan filter plant', () async {
     final source = _FakeScanHistoryRepository(const []);
     final controller = ScanHistoryController(source);
