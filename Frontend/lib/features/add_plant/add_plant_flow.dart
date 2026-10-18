@@ -1167,7 +1167,6 @@ class _RecommendationStepState extends State<_RecommendationStep> {
                           title: draft.manualName!,
                           subtitle: 'Ditambahkan manual',
                           selected: true,
-                          onTap: () {},
                         )
                       else if (add.recommendations.isEmpty)
                         _EmptyRecommendations(
@@ -1724,7 +1723,7 @@ class _OptionCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.selected,
-    required this.onTap,
+    this.onTap,
     this.iconWidth,
     this.iconHeight,
     this.gap = AppSpacing.lg,
@@ -1735,7 +1734,7 @@ class _OptionCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   final double? iconWidth;
   final double? iconHeight;
