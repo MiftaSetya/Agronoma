@@ -5,5 +5,5 @@ import 'package:frontend/core/models/disease.dart';
 abstract class DiseaseRepository {
   /// Menganalisis gambar tanaman. [imagePath] boleh null untuk mode contoh
   /// (dipakai saat berjalan di emulator tanpa kamera).
-  Future<Disease> detect({String? imagePath});
+  Future<Disease> detect({String? imagePath, String? plantId});
 }

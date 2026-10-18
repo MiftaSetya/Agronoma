@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
+import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/models/disease.dart';
 import 'package:frontend/core/state/chat_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
@@ -18,11 +19,14 @@ import 'package:frontend/core/widgets/agro_icon.dart';
 /// butuh model/backend — foto jepretan tetap dikirim sebagai `imagePath` supaya
 /// tinggal disambungkan saat backend tersedia.
 class DiseaseDetectionScreen extends StatefulWidget {
-  const DiseaseDetectionScreen({super.key, this.initialResult});
+  const DiseaseDetectionScreen({super.key, this.initialResult, this.plantId});
 
   /// Hasil yang langsung ditampilkan (mode kamera dilewati); dipakai preview
   /// pengembangan. Di aplikasi biasa biarkan `null`.
   final Disease? initialResult;
+
+  /// Tanaman yang difoto; dipakai backend untuk menyimpan riwayat pindai.
+  final String? plantId;
 
   @override
   State<DiseaseDetectionScreen> createState() => _DiseaseDetectionScreenState();
@@ -41,15 +45,25 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
   Future<void> _capture(String? imagePath) async {
     setState(() => _analyzing = true);
     final chat = context.read<ChatController>();
+    final messenger = ScaffoldMessenger.of(context);
+
     try {
-      final disease = await chat.diagnose(imagePath: imagePath);
+      final disease = await chat.diagnose(
+        imagePath: imagePath,
+        plantId: widget.plantId,
+      );
+
       if (!mounted) return;
+
       setState(() => _result = disease);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
     } catch (_) {
       if (!mounted) return;
-      // Kegagalan analisis tidak boleh muncul sebagai layar galat; pengguna
-      // diberi tahu dan bisa menekan rana lagi.
-      ScaffoldMessenger.of(context).showSnackBar(
+
+      messenger.showSnackBar(
         const SnackBar(content: Text('Gagal menganalisis gambar. Coba lagi.')),
       );
     } finally {
@@ -81,8 +95,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
             Positioned(
               left: 0,
               right: 0,
-              top: 341,
-              height: DiseaseResultDrawer.height,
+              bottom: 0,
               child: DiseaseResultDrawer(disease: _result!, onRetake: _reset),
             ),
         ],
@@ -108,8 +121,14 @@ class DiseaseResultDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: screenHeight * 0.86 > height
+            ? height
+            : screenHeight * 0.86,
+      ),
       child: DecoratedBox(
         decoration: const BoxDecoration(
           color: AppColors.surface,
@@ -117,7 +136,7 @@ class DiseaseResultDrawer extends StatelessWidget {
             top: Radius.circular(AppRadius.sheetLarge),
           ),
         ),
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.xxl,
             0,
@@ -142,11 +161,7 @@ class DiseaseResultDrawer extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.xxl),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: _TreatmentTimeline(steps: disease.steps),
-                ),
-              ),
+              _TreatmentTimeline(steps: disease.steps),
             ],
           ),
         ),

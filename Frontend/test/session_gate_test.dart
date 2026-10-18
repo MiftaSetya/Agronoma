@@ -92,4 +92,7 @@ class _RestoringAuthRepository implements AuthRepository {
 
   @override
   Future<void> logout() async {}
+
+  @override
+  Future<AppUser> refreshStats(AppUser user) async => user;
 }

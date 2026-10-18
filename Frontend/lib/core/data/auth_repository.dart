@@ -37,6 +37,9 @@ abstract class AuthRepository {
   /// Mengambil pengguna dari token tersimpan; `null` bila tidak ada/kedaluwarsa.
   Future<AppUser?> currentUser();
 
+  /// Statistik profil (`GET /profile`): jumlah tanaman, panen, skor perawatan.
+  Future<AppUser> refreshStats(AppUser user);
+
   /// Menandai apakah ada sesi yang perlu dipulihkan saat aplikasi dibuka.
   Future<bool> hasSession();
 }
@@ -86,8 +89,9 @@ class HttpAuthRepository implements AuthRepository {
   Future<void> logout() async {
     try {
       await _client.post('logout');
-    } on ApiException {
-      // Token mungkin sudah tidak valid di server; sesi lokal tetap dibersihkan.
+    } on ApiException catch (_) {
+      await _tokens.clear();
+      return;
     }
     await _tokens.clear();
   }
@@ -104,6 +108,21 @@ class HttpAuthRepository implements AuthRepository {
         return null;
       }
       rethrow;
+    }
+  }
+
+  @override
+  Future<AppUser> refreshStats(AppUser user) async {
+    try {
+      final body = await _client.get('profile');
+      if (body is! Map<String, dynamic>) return user;
+      return user.copyWith(
+        totalPlants: (body['total_plants'] as num?)?.toInt(),
+        harvestedThisSeason: (body['harvested_count'] as num?)?.toInt(),
+        careScore: (body['care_score_percent'] as num?)?.toDouble(),
+      );
+    } on ApiException {
+      return user;
     }
   }
 
@@ -206,4 +225,7 @@ class SampleAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser?> currentUser() async => _user;
+
+  @override
+  Future<AppUser> refreshStats(AppUser user) async => user;
 }

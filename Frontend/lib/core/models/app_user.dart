@@ -30,6 +30,21 @@ class AppUser {
 
   final DateTime? joinedAt;
 
+  AppUser copyWith({
+    int? totalPlants,
+    int? harvestedThisSeason,
+    double? careScore,
+  }) => AppUser(
+    id: id,
+    name: name,
+    email: email,
+    photoAsset: photoAsset,
+    totalPlants: totalPlants ?? this.totalPlants,
+    harvestedThisSeason: harvestedThisSeason ?? this.harvestedThisSeason,
+    careScore: careScore ?? this.careScore,
+    joinedAt: joinedAt,
+  );
+
   String get firstName => name.split(' ').first;
   String get careScoreLabel => '${careScore.round()}%';
   String get careScoreCaption => switch (careScore) {

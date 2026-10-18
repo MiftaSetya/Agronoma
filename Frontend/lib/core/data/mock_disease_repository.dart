@@ -8,7 +8,7 @@ class MockDiseaseRepository implements DiseaseRepository {
   const MockDiseaseRepository();
 
   @override
-  Future<Disease> detect({String? imagePath}) async {
+  Future<Disease> detect({String? imagePath, String? plantId}) async {
     await Future<void>.delayed(const Duration(milliseconds: 1600));
     return MockData.disease;
   }

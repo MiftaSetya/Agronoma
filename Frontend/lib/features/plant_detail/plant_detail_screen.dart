@@ -826,8 +826,9 @@ class _PerawatanTabState extends State<_PerawatanTab> {
         Text('Perawatan', style: AppTextStyles.sectionTitle),
         const SizedBox(height: AppSpacing.lg),
         _ScanCard(
-          onTap: () =>
-              Navigator.of(context).pushNamed(Routes.diseaseDetection),
+          onTap: () => Navigator.of(
+            context,
+          ).pushNamed(Routes.diseaseDetection, arguments: plant.id),
         ),
         const SizedBox(height: AppSpacing.lg),
         _CareCalendarCard(days: careDays),

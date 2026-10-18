@@ -106,6 +106,21 @@ class PlantController extends ChangeNotifier {
   /// tanaman hasil wizard akan hilang begitu Beranda dimuat ulang.
   List<Plant> _adopted = const [];
 
+  /// Mengosongkan seluruh data milik satu sesi.
+  ///
+  /// Dipanggil saat keluar akun. Tanpa ini data pengguna sebelumnya tetap
+  /// tertinggal di memori dan pengguna berikutnya melihat tanaman serta cuaca
+  /// milik orang lain sampai aplikasi ditutup paksa.
+  void reset() {
+    _plants = const [];
+    _weatherByCity = const {};
+    _careDays = const {};
+    _adopted = const [];
+    _error = null;
+    _loading = false;
+    notifyListeners();
+  }
+
   /// Memuat tanaman dan cuaca tiap lokasi. Aman dipanggil berkali-kali.
   Future<void> load({bool force = false}) async {
     if (_loading) return;
@@ -234,7 +249,6 @@ class PlantController extends ChangeNotifier {
     }
   }
 
-  /// Menyimpan hasil drawer "Setelan Tanaman".
   /// Menyimpan hasil drawer "Setelan Tanaman".
   ///
   /// Mengembalikan `true` bila berhasil. Pemanggil **harus** memeriksanya:

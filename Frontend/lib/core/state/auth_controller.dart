@@ -47,16 +47,30 @@ class AuthController extends ChangeNotifier {
   /// menolaknya dengan 401.
   Future<void> restoreSession() async {
     if (_user != null || !await _repository.hasSession()) return;
+    AppUser? restored;
     try {
-      final restored = await _repository.currentUser();
-      if (restored != null) {
-        _user = restored;
-        _status = AuthStatus.signedIn;
-        notifyListeners();
-      }
+      restored = await _repository.currentUser();
     } on ApiException {
-      // Biarkan status tetap signedOut; pengguna bisa mencoba lagi.
+      restored = null;
     }
+    if (restored != null) {
+      _user = restored;
+      _status = AuthStatus.signedIn;
+      notifyListeners();
+    }
+  }
+
+  /// Memuat statistik profil dari server dan memperbarui [user].
+  ///
+  /// Kegagalan tidak dikembalikan sebagai error: kartu statistik hanya
+  /// pelengkap, dan angka terakhir yang sudah tampil lebih berguna daripada
+  /// mengosongkannya.
+  Future<void> refreshStats() async {
+    final current = _user;
+    if (current == null) return;
+    final updated = await _repository.refreshStats(current);
+    _user = updated;
+    notifyListeners();
   }
 
   /// Masuk. Mengembalikan `true` kalau berhasil.
@@ -132,8 +146,19 @@ class AuthController extends ChangeNotifier {
   /// Keluar dari sesi.
   Future<void> signOut() async {
     await _repository.logout();
+    _clearUser();
+  }
+
+  /// Membersihkan sesi di perangkat tanpa memanggil server.
+  ///
+  /// Dipakai saat server sudah menolak token (401): meminta `POST /logout`
+  /// dengan token yang tidak sah hanya menghasilkan 401 kedua.
+  void clearLocalSession() => _clearUser();
+
+  void _clearUser() {
     _user = null;
     _status = AuthStatus.signedOut;
+    _errors = const {};
     notifyListeners();
   }
 

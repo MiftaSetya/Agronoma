@@ -72,16 +72,18 @@ Future<String> _setting(String define, String property) async {
     final result = await Process.run('getprop', [property]);
     final value = '${result.stdout}'.trim();
     if (value.isNotEmpty) return value;
-  } on ProcessException {
-    // Bukan Android — jatuh ke `--dart-define`.
+  } on ProcessException catch (_) {
+    return _dartDefine(define);
   }
-  return switch (define) {
-    'ROUTE' => const String.fromEnvironment('ROUTE'),
-    'STEP' => '${const int.fromEnvironment('STEP')}',
-    'KAMERA' => const String.fromEnvironment('KAMERA'),
-    _ => '',
-  };
+  return _dartDefine(define);
 }
+
+String _dartDefine(String define) => switch (define) {
+  'ROUTE' => const String.fromEnvironment('ROUTE'),
+  'STEP' => '${const int.fromEnvironment('STEP')}',
+  'KAMERA' => const String.fromEnvironment('KAMERA'),
+  _ => '',
+};
 
 /// Memetakan nama rute menjadi layar, lengkap dengan argumen contoh.
 Widget _previewFor(String route, int step) {

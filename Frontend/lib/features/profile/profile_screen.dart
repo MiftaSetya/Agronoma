@@ -15,8 +15,21 @@ import 'package:frontend/core/widgets/agro_icon.dart';
 /// semua dari komponen `profile content`. Nama pemilik diambil dari
 /// [AuthController] (bukan ditulis mati seperti `Username` di design) supaya
 /// selalu menampilkan pengguna yang sedang masuk.
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<AuthController>().refreshStats();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +43,7 @@ class ProfileScreen extends StatelessWidget {
         AppSpacing.xxl,
       ),
       children: [
-        _ProfileHeader(name: user?.name ?? 'Username', photo: user?.photoAsset),
-        const SizedBox(height: AppSpacing.xxxl),
+        _ProfileHeader(name: user?.name ?? 'Username', photo: user?.photoAsset),        const SizedBox(height: AppSpacing.xxxl),
         Row(
           children: [
             Expanded(

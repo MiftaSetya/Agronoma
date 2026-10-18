@@ -247,7 +247,7 @@ class _AgroCameraViewState extends State<AgroCameraView>
       if (!mounted) return;
       setState(() => _flash = next);
     } on CameraException {
-      // Kamera tanpa lampu: biarkan mode apa adanya tanpa mengganggu pengguna.
+      _flash = FlashMode.off;
     }
   }
 

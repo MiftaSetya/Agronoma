@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:frontend/core/data/api/api_config.dart';
 import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/api/token_store.dart';
+import 'package:frontend/core/state/session_expiry.dart';
 
 /// Klien HTTP tipis untuk backend Agronoma.
 ///
@@ -14,13 +15,20 @@ import 'package:frontend/core/data/api/token_store.dart';
 /// token, lalu mengubah kesalahan HTTP menjadi [ApiException] berbahasa
 /// Indonesia. Bentuk data tiap domain diurus repositori.
 class ApiClient {
-  ApiClient({http.Client? httpClient, TokenStore? tokenStore, String? baseUrl})
-    : _http = httpClient ?? http.Client(),
-      _tokens = tokenStore ?? const SecureTokenStore(),
-      baseUrl = baseUrl ?? ApiConfig.baseUrl;
+  ApiClient({
+    http.Client? httpClient,
+    TokenStore? tokenStore,
+    String? baseUrl,
+    SessionExpiry? sessionExpiry,
+  }) : _http = httpClient ?? http.Client(),
+       _tokens = tokenStore ?? const SecureTokenStore(),
+       baseUrl = baseUrl ?? ApiConfig.baseUrl {
+    _sessionExpiry = sessionExpiry;
+  }
 
   final http.Client _http;
   final TokenStore _tokens;
+  late final SessionExpiry? _sessionExpiry;
   final String baseUrl;
 
   /// Waktu tunggu standar; endpoint AI bisa lebih lama, jadi pemanggil boleh
@@ -75,10 +83,12 @@ class ApiClient {
     required String field,
     required List<int> bytes,
     required String filename,
+    Map<String, String>? fields,
     Duration? timeout,
   }) => _send(() async {
     final request = http.MultipartRequest('POST', _uri(path))
       ..headers.addAll(await _bearerHeaders())
+      ..fields.addAll(fields ?? const <String, String>{})
       ..files.add(
         http.MultipartFile.fromBytes(field, bytes, filename: filename),
       );
@@ -132,6 +142,12 @@ class ApiClient {
 
   ApiException _toException(int statusCode, Object? body) {
     final map = body is Map<String, dynamic> ? body : const <String, dynamic>{};
+
+    if (statusCode == 401) {
+      _sessionExpiry?.markExpired();
+      _tokens.clear();
+    }
+
     final message = switch (statusCode) {
       401 => 'Sesi Anda berakhir. Silakan masuk kembali.',
       403 => 'Anda tidak berhak mengakses data ini.',

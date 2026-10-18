@@ -529,20 +529,23 @@ class _LocationStep extends StatelessWidget {
           left: 0,
           right: 0,
           bottom: 0,
-          child: _LocationConfirmCard(
-            name: picked.name,
-            address: picked.address,
-            onConfirm: () {
-              context.read<AddPlantController>().setLocation(
-                picked.name,
-                picked.address,
-                position: center,
-                city: picked.city,
-                province: picked.province,
-              );
-              onNext();
-            },
-            onChange: () => _showLocationPicker(context, picked, center),
+          child: SingleChildScrollView(
+            reverse: true,
+            child: _LocationConfirmCard(
+              name: picked.name,
+              address: picked.address,
+              onConfirm: () {
+                context.read<AddPlantController>().setLocation(
+                  picked.name,
+                  picked.address,
+                  position: center,
+                  city: picked.city,
+                  province: picked.province,
+                );
+                onNext();
+              },
+              onChange: () => _showLocationPicker(context, picked, center),
+            ),
           ),
         ),
       ],
@@ -785,7 +788,7 @@ class _LocationConfirmCard extends StatelessWidget {
             trimAdjust: _capTrimAdjust(14, 16),
             maxLines: 2,
           ),
-          const Spacer(),
+          const SizedBox(height: AppSpacing.xxl),
           AgroButton(label: 'Konfirmasi Lokasi', onPressed: onConfirm),
           const SizedBox(height: AppSpacing.sm),
           AgroOutlineButton(label: 'Ubah Lokasi', onPressed: onChange),
@@ -1439,11 +1442,7 @@ class _RecommendationCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
-                // Slot centang design meluber 15px melewati tepi kanan area
-                // isi (255 + 12 + 32 = 299 > 284) — jadi digambar dengan
-                // Positioned, bukan diikutkan di Row, agar tanpa overflow.
-                SizedBox(
-                  width: 255,
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

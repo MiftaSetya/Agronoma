@@ -52,11 +52,14 @@ class ChatController extends ChangeNotifier {
   }
 
   /// Menjalankan diagnosis penyakit (dipakai layar deteksi).
-  Future<Disease> diagnose({String? imagePath}) async {
+  Future<Disease> diagnose({String? imagePath, String? plantId}) async {
     _diagnosing = true;
     notifyListeners();
     try {
-      _diagnosis = await _diseaseRepository.detect(imagePath: imagePath);
+      _diagnosis = await _diseaseRepository.detect(
+        imagePath: imagePath,
+        plantId: plantId,
+      );
       return _diagnosis!;
     } finally {
       _diagnosing = false;
@@ -75,6 +78,15 @@ class ChatController extends ChangeNotifier {
             'penanganannya?',
       ),
     );
+    notifyListeners();
+  }
+
+  /// Mengosongkan percakapan dan diagnosis milik sesi yang berakhir.
+  void reset() {
+    _messages.clear();
+    _diagnosis = null;
+    _diagnosing = false;
+    _typing = false;
     notifyListeners();
   }
 }

@@ -83,7 +83,13 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
       return _page(const SoilDetectionScreen(), settings);
 
     case Routes.diseaseDetection:
-      return _page(const DiseaseDetectionScreen(), settings);
+      final args = settings.arguments;
+      return _page(
+        DiseaseDetectionScreen(
+          plantId: args is String && args.isNotEmpty ? args : null,
+        ),
+        settings,
+      );
 
     default:
       return _page(const LoginScreen(), settings);
