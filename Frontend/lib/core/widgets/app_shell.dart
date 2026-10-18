@@ -6,13 +6,6 @@ import 'package:frontend/core/routing/app_router.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
-/// Kerangka halaman "dalam" aplikasi: top bar (wordmark/chat atau judul),
-/// daftar tab Beranda/Profil, dan FAB tambah di tengah bawah. Dipakai bersama
-/// supaya jarak, bayangan, dan tinggi navbar konsisten.
-///
-/// Struktur dari Figma `Bottom Navigation` (node `13:1497`) dan `Top Header`
-/// (node `24:884`): navbar 80, pil tab hijau `#6D9C25` radius 200, tombol
-/// tengah naik 24 di atas navbar (luar 60 + padding 6).
 class AppShell extends StatelessWidget {
   const AppShell({
     super.key,
@@ -21,19 +14,14 @@ class AppShell extends StatelessWidget {
     required this.child,
   });
 
-  /// 0 = Beranda, 1 = Profil (sesuai urutan tab di design).
   final int currentIndex;
 
-  /// Dipanggil saat tab ditekan. Pemanggil yang menggeser isinya, supaya
-  /// topbar & navbar di sini tidak ikut dibangun ulang.
   final ValueChanged<int> onTabSelected;
 
   final Widget child;
 
-  /// Tinggi navbar (tanpa area aman bawah).
   static const double navBarHeight = 80;
 
-  /// Tinggi total area bawah: navbar + 24 ruang FAB yang menonjol.
   static const double bottomInset = navBarHeight + 24;
 
   @override
@@ -54,15 +42,11 @@ class AppShell extends StatelessWidget {
   }
 }
 
-/// Top bar: wordmark "Agronoma" + tombol obrolan AI, atau panah + judul.
 class AgroTopBar extends StatelessWidget {
   const AgroTopBar({super.key, this.title, this.onBack});
 
-  /// Kalau null → tampilkan wordmark; kalau diisi → tampilkan judul + back.
   final String? title;
 
-  /// Aksi tombol panah. Bila null, panah menutup halaman lewat `maybePop` —
-  /// wizard tambah tanaman memakai ini untuk mundur satu langkah, bukan menutup.
   final VoidCallback? onBack;
 
   @override
@@ -88,7 +72,6 @@ class AgroTopBar extends StatelessWidget {
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Wordmark asli dari design: 146.221 x 28.
                     const SizedBox(height: 28, child: _Wordmark()),
                     _TopBarChatButton(),
                   ],
@@ -146,7 +129,6 @@ class _TopBarChatButton extends StatelessWidget {
 class _BackArrow extends StatelessWidget {
   const _BackArrow({this.onTap});
 
-  /// Aksi khusus; bila null, panah menutup halaman lewat `maybePop`.
   final VoidCallback? onTap;
 
   @override
@@ -162,7 +144,6 @@ class _BackArrow extends StatelessWidget {
   }
 }
 
-/// Navbar bawah: dua tab + tombol tambah melayang di tengah.
 class _AgroBottomNav extends StatelessWidget {
   const _AgroBottomNav({
     required this.currentIndex,
@@ -275,7 +256,6 @@ class _NavTab extends StatelessWidget {
   }
 }
 
-/// Tombol tambah melayang: lingkaran hijau dengan cincin, memunculkan menu.
 class _AddButton extends StatelessWidget {
   const _AddButton();
 
@@ -309,11 +289,6 @@ class _AddButton extends StatelessWidget {
   }
 }
 
-/// Menu yang muncul dari tombol tambah (FAB Menu Button, node `253:2576`).
-///
-/// Design punya baris ketiga "Tutup" di bawah dua aksi ini; baris itu dibuang
-/// karena sheet sudah bisa ditutup dengan menggeser gagang atau menekan area
-/// gelap di luarnya — tombol tutup hanya menambah satu ketukan.
 Future<void> showAgroFabMenu(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,

@@ -14,9 +14,6 @@ import 'package:frontend/core/widgets/agro_common.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 import 'package:frontend/features/plant_detail/plant_settings_sheet.dart';
 
-/// Layar Plant Detail — frame `Plant detail v3` (node `461:6012`): satu layar
-/// dua tab (Ringkasan/Perawatan); lembar putihnya menutupi 35px bagian bawah
-/// foto karena di kanvas Figma foto setinggi 287 dan lembar mulai baris 252.
 class PlantDetailScreen extends StatefulWidget {
   const PlantDetailScreen({
     super.key,
@@ -26,7 +23,6 @@ class PlantDetailScreen extends StatefulWidget {
 
   final String plantId;
 
-  /// 0 = Ringkasan, 1 = Perawatan.
   final int initialTab;
 
   @override
@@ -37,7 +33,6 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     with SingleTickerProviderStateMixin {
   static const double _photoHeight = 287;
 
-  /// Baris lembar putih di kanvas Figma; 287 (foto) − 252 = 35px tertutup.
   static const double _sheetTop = 252;
 
   late final TabController _tabs = TabController(
@@ -53,12 +48,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   @override
   void initState() {
     super.initState();
-    // Ditunda satu frame. `PlantController.load()` memberi tahu pendengarnya
-    // sebelum `await` pertama, dan memanggilnya dari `initState` berarti
-    // `notifyListeners()` terjadi saat fase build rute ini berjalan — melanggar
-    // "setState() called during build" bila daftar tanaman belum termuat
-    // (mis. deep link langsung ke Detail, atau kota tanpa cache cuaca sehingga
-    // `load()` tidak berhenti lebih awal).
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _load();
     });
@@ -67,32 +57,23 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   Future<void> _load() async {
     try {
       final controller = context.read<PlantController>();
-      // Kartu "Perkiraan Cuaca" di tab Ringkasan mengambil ramalan dari
-      // controller ini; `load()` tidak melakukan apa-apa jika sudah ada.
+
       await controller.load();
 
-      // Fallback tanaman pertama untuk deep link / preview tanpa argumen.
       var id = widget.plantId;
-      if (id.isEmpty) id = controller.plants.isEmpty ? '' : controller.plants.first.id;
+      if (id.isEmpty) {
+        id = controller.plants.isEmpty ? '' : controller.plants.first.id;
+      }
       if (id.isEmpty) return;
       final plant = await controller.fetch(id);
       if (mounted) setState(() => _plant = plant);
     } catch (e) {
-      // Tanpa ini, kegagalan fetch (mis. backend fase berikutnya) bocor sebagai
-      // layar galat; di sini ditangkap agar bisa ditawari "Coba lagi".
       if (mounted) setState(() => _error = e);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  /// Membuka "Setelan Tanaman" lalu menyegarkan salinan tanaman milik layar ini.
-  ///
-  /// Detail memegang `_plant` sendiri, sedangkan `PlantController` menyimpan
-  /// daftar tanaman yang sudah diperbarui. Tanpa memungut ulang di sini, header,
-  /// "Media Tanam", dan "Jenis Tanah" tetap menampilkan nilai sebelum disimpan
-  /// sampai halaman dibuka ulang — persis yang terjadi saat uji di emulator
-  /// meski `PATCH` sudah berhasil di backend.
   Future<void> _openSettings() async {
     final plant = _plant;
     if (plant == null) return;
@@ -147,7 +128,10 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                   left: 0,
                   right: 0,
                   height: _photoHeight,
-                  child: _PhotoHeader(plant: plant, onOpenSettings: _openSettings),
+                  child: _PhotoHeader(
+                    plant: plant,
+                    onOpenSettings: _openSettings,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: _sheetTop),
@@ -173,15 +157,11 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   }
 }
 
-/// Foto tanaman + gradasi gelap + bilah atas "Detail Tanaman".
 class _PhotoHeader extends StatelessWidget {
   const _PhotoHeader({required this.plant, required this.onOpenSettings});
 
   final Plant plant;
 
-  /// Membuka "Setelan Tanaman". Diteruskan dari layar karena hanya layar itu
-  /// yang boleh memperbarui salinan `_plant` miliknya setelah penyimpanan
-  /// berhasil — tanpa itu header tetap menampilkan nama/media lama.
   final VoidCallback onOpenSettings;
 
   @override
@@ -190,7 +170,7 @@ class _PhotoHeader extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         Image.asset(plant.photoAsset, fit: BoxFit.cover),
-        // Gradasi 152px: hitam 50% → 30% (pada 61%) → bening.
+
         DecoratedBox(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -223,8 +203,7 @@ class _PhotoHeader extends StatelessWidget {
                       style: AppTextStyles.headlineMediumOnDark,
                     ),
                   ),
-                  // Membuka panel "Setelan Tanaman" (frame `EditPlant drawer`,
-                  // node `291:2872`).
+
                   GestureDetector(
                     onTap: onOpenSettings,
                     child: SizedBox(
@@ -259,7 +238,6 @@ class _HeaderBackButton extends StatelessWidget {
   }
 }
 
-/// Lembar putih ber-radius 16 yang menutupi bagian bawah foto.
 class _SheetHeader extends StatelessWidget {
   const _SheetHeader({required this.plant, required this.tabs});
 
@@ -295,7 +273,6 @@ class _SheetHeader extends StatelessWidget {
   }
 }
 
-/// Nama, deskripsi, dan chip Indoor/Outdoor.
 class _SheetHeading extends StatelessWidget {
   const _SheetHeading({required this.plant});
 
@@ -317,7 +294,8 @@ class _SheetHeading extends StatelessWidget {
               children: [
                 for (final tag in plant.tags) ...[
                   _TagChip(label: tag),
-                  if (tag != plant.tags.last) const SizedBox(width: AppSpacing.sm),
+                  if (tag != plant.tags.last)
+                    const SizedBox(width: AppSpacing.sm),
                 ],
               ],
             ),
@@ -328,7 +306,6 @@ class _SheetHeading extends StatelessWidget {
   }
 }
 
-/// Chip kecil abu (`Indoor` / `Outdoor`), tinggi 21 di design.
 class _TagChip extends StatelessWidget {
   const _TagChip({required this.label});
 
@@ -349,17 +326,11 @@ class _TagChip extends StatelessWidget {
   }
 }
 
-/// Baris tab dengan garis bawah hijau pada tab aktif.
-///
-/// Di Figma `Line 3` adalah kotak setinggi 0 dengan gambar 2px yang meluber
-/// (`inset-[-1px]`), jadi garis digambar meluber 1px lewat [Transform] agar
-/// tidak menambah tinggi layout (garis 2px biasa akan menggeser isi tab 2px).
 class _TabRow extends StatelessWidget {
   const _TabRow({required this.tabs});
 
   final TabController tabs;
 
-  /// Lebar garis bawah di design (`Line 3`).
   static const double _underlineWidth = 55;
 
   @override
@@ -371,8 +342,6 @@ class _TabRow extends StatelessWidget {
       child: AnimatedBuilder(
         animation: tabs,
         builder: (context, _) {
-          // Bulatkan nilai animasi (bisa 0.4 saat transisi) agar hanya
-          // underline yang bergerak, bukan warnanya ikut pudar.
           final index = tabs.index;
           return Row(
             children: [
@@ -389,8 +358,7 @@ class _TabRow extends StatelessWidget {
                           child: Text(
                             i == 0 ? 'Ringkasan' : 'Perawatan',
                             textAlign: TextAlign.center,
-                            // `height: normal` di design, bukan default
-                            // [AppTextStyles.titleLarge].
+
                             style: AppTextStyles.titleLarge.copyWith(
                               height: AppTextStyles.leadingNormal,
                               color: index == i
@@ -405,9 +373,7 @@ class _TabRow extends StatelessWidget {
                           child: index == i
                               ? Align(
                                   alignment: Alignment.bottomCenter,
-                                  // Turun 1px supaya garis 2px-nya menutupi
-                                  // border 1px di bawah baris tab, bukan
-                                  // menambah tinggi baris.
+
                                   child: Transform.translate(
                                     offset: Offset(0, 1),
                                     child: SizedBox(
@@ -440,18 +406,16 @@ class _RingkasanTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ramalan mengikuti kota tanaman ini, bukan satu kota tetap: tanaman bisa
-    // berada di lokasi berbeda, dan cuaca yang ditampilkan harus cuaca tempat
-    // tanaman itu tumbuh.
-    final forecast = context.watch<PlantController>().forecastFor(plant.location);
+    final forecast = context.watch<PlantController>().forecastFor(
+      plant.location,
+    );
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.xxxl,
         AppSpacing.lg,
-        // Bukan `gutter`: daftar ini bergulir di belakang kolom tombol bulat,
-        // jadi ujungnya harus berhenti di atas tombol.
+
         AppShellBottom.gutterUnderFabs,
       ),
       children: [
@@ -469,7 +433,6 @@ class _RingkasanTab extends StatelessWidget {
   }
 }
 
-/// Kartu "Detail Tanam" — empat kotak berisi lokasi, media, pupuk, tanah.
 class _DetailTanamCard extends StatelessWidget {
   const _DetailTanamCard({required this.plant});
 
@@ -495,10 +458,7 @@ class _DetailTanamCard extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.lg),
               Expanded(
-                child: _OverviewTile(
-                  label: 'MEDIA TANAM',
-                  value: plant.place,
-                ),
+                child: _OverviewTile(label: 'MEDIA TANAM', value: plant.place),
               ),
             ],
           ),
@@ -554,14 +514,11 @@ class _OverviewTile extends StatelessWidget {
   }
 }
 
-/// Kartu "Fase Pertumbuhan" — garis waktu mendatar dengan empat titik.
 class _GrowthPhaseCard extends StatelessWidget {
   const _GrowthPhaseCard({required this.plant});
 
   final Plant plant;
 
-  /// Lebar tiap kolom = lebar labelnya di design, agar jarak antar-titik
-  /// (space-between) sama seperti frame aslinya.
   static const List<double> _columnWidths = [41, 73, 54, 48];
 
   @override
@@ -584,12 +541,7 @@ class _GrowthPhaseCard extends StatelessWidget {
               height: 64,
               child: Stack(
                 children: [
-                  const Positioned(
-                    left: 0,
-                    right: 0,
-                    top: 14,
-                    child: _Track(),
-                  ),
+                  const Positioned(left: 0, right: 0, top: 14, child: _Track()),
                   Positioned(
                     left: 0,
                     top: 14,
@@ -619,8 +571,6 @@ class _GrowthPhaseCard extends StatelessWidget {
     );
   }
 
-  /// Panjang garis hijau: berhenti tepat di tengah titik aktif, jadi titik
-  /// aktifnya sendiri tidak dihitung.
   static double _activeTrackWidth(int activeIndex, double trackWidth) {
     if (activeIndex <= 0) return trackWidth * 0.34;
     return trackWidth * (0.34 + 0.32 * (activeIndex - 1));
@@ -636,15 +586,11 @@ class _Track extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 4,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: AppRadius.chipAll,
-      ),
+      decoration: BoxDecoration(color: color, borderRadius: AppRadius.chipAll),
     );
   }
 }
 
-/// Satu titik pada garis waktu fase pertumbuhan.
 class _PhaseNode extends StatelessWidget {
   const _PhaseNode({
     required this.label,
@@ -663,7 +609,6 @@ class _PhaseNode extends StatelessWidget {
 
     return Column(
       children: [
-        // Titik sejajar walau diameternya berbeda (24 vs 32 saat aktif).
         SizedBox(
           height: 32,
           child: Center(
@@ -694,8 +639,7 @@ class _PhaseNode extends StatelessWidget {
                   ),
           ),
         ),
-        // 32px kotak titik + 4px + 28px label (dua baris) = 64px total,
-        // sesuai design.
+
         const SizedBox(height: AppSpacing.xs),
         Text(
           label,
@@ -711,7 +655,6 @@ class _PhaseNode extends StatelessWidget {
   }
 }
 
-/// Kartu "Perkiraan Cuaca" — tile pertama ditandai hijau (terpilih).
 class _WeatherForecastCard extends StatelessWidget {
   const _WeatherForecastCard({required this.forecast});
 
@@ -732,10 +675,8 @@ class _WeatherForecastCard extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               itemCount: forecast.length,
               separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-              itemBuilder: (_, i) => _ForecastTile(
-                forecast: forecast[i],
-                selected: i == 0,
-              ),
+              itemBuilder: (_, i) =>
+                  _ForecastTile(forecast: forecast[i], selected: i == 0),
             ),
           ),
         ],
@@ -773,7 +714,10 @@ class _ForecastTile extends StatelessWidget {
               color: selected ? AppColors.primary : AppColors.darkGrey,
             ),
           ),
-          AgroIcon(forecast.iconAsset ?? AppAssets.weatherPartlyCloudy, size: 24),
+          AgroIcon(
+            forecast.iconAsset ?? AppAssets.weatherPartlyCloudy,
+            size: 24,
+          ),
           Text('${forecast.high}°C', style: AppTextStyles.forecastTemp),
         ],
       ),
@@ -794,9 +738,7 @@ class _PerawatanTabState extends State<_PerawatanTab> {
   @override
   void initState() {
     super.initState();
-    // Jadwal perawatan butuh satu permintaan sendiri (`care-calendar`), jadi
-    // baru diambil saat tab ini benar-benar dibuka — Beranda tidak ikut
-    // menunggunya, dan tanaman yang tidak pernah dibuka tidak memakan request.
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<PlantController>().loadTasks(widget.plant.id);
@@ -808,8 +750,7 @@ class _PerawatanTabState extends State<_PerawatanTab> {
   Widget build(BuildContext context) {
     final plant = widget.plant;
     final controller = context.watch<PlantController>();
-    // Dihitung dari kalender bulan berjalan, bukan dari `Plant.tasks`: resource
-    // tanaman dari backend tidak memuat jadwal.
+
     final tasks = controller.tasksFor(plant.id);
     final careDays = controller.careDaysFor(plant.id);
 
@@ -818,17 +759,16 @@ class _PerawatanTabState extends State<_PerawatanTab> {
         AppSpacing.lg,
         AppSpacing.xxxl,
         AppSpacing.lg,
-        // Sama seperti tab Ringkasan: sisakan tinggi kolom tombol bulat supaya
-        // baris tugas terakhir bisa digulir keluar dari baliknya.
+
         AppShellBottom.gutterUnderFabs,
       ),
       children: [
         Text('Perawatan', style: AppTextStyles.sectionTitle),
         const SizedBox(height: AppSpacing.lg),
         _ScanCard(
-          onTap: () => Navigator.of(
-            context,
-          ).pushNamed(Routes.diseaseDetection, arguments: plant.id),
+          onTap: () =>
+              Navigator.of(context)
+                  .pushNamed(Routes.diseaseDetection, arguments: plant.id),
         ),
         const SizedBox(height: AppSpacing.lg),
         _CareCalendarCard(days: careDays),
@@ -839,7 +779,6 @@ class _PerawatanTabState extends State<_PerawatanTab> {
   }
 }
 
-/// Kartu hijau "Pindai Kesehatan" — pintasan ke Deteksi Penyakit.
 class _ScanCard extends StatelessWidget {
   const _ScanCard({required this.onTap});
 
@@ -856,11 +795,9 @@ class _ScanCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            // Warna wajib ada; kalau tidak, bayangan hijau di bawah ini ikut
-            // melukis seluruh badan kartu.
             color: AppColors.primary,
             borderRadius: AppRadius.lgAll,
-            // Bayangan hijau (bukan hitam) sesuai design.
+
             boxShadow: const [
               BoxShadow(
                 color: Color(0x1A416600),
@@ -881,7 +818,6 @@ class _ScanCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  // Kaca buram: putih 30% di atas hijau.
                   color: const Color(0x4DFFFFFF),
                   borderRadius: AppRadius.mdAll,
                 ),
@@ -894,8 +830,7 @@ class _ScanCard extends StatelessWidget {
                   children: [
                     Text('Pindai Kesehatan', style: AppTextStyles.scanTitle),
                     SizedBox(height: AppSpacing.xs),
-                    // Di design caption ini dipotong dua baris (dua simpul
-                    // `<p>` terpisah), bukan membungkus sendiri.
+
                     Text(
                       'Deteksi dini hama & penyakit\ndengan AI',
                       style: AppTextStyles.scanCaption,
@@ -917,11 +852,6 @@ class _ScanCard extends StatelessWidget {
   }
 }
 
-/// Kartu "Kalender Perawatan" — tujuh kolom tanggal + legenda ikon.
-///
-/// Datanya dari `GET /plants/{id}/care-calendar` (bulan berjalan), bukan lagi
-/// daftar contoh: kartu ini menampilkan **hari ini dan enam hari berikutnya**,
-/// dengan ikon siram/pupuk hanya pada hari yang memang punya jadwal.
 class _CareCalendarCard extends StatelessWidget {
   const _CareCalendarCard({required this.days});
 
@@ -980,7 +910,8 @@ class _CareCalendarCard extends StatelessWidget {
                             ),
                           ],
                           if (d.fertilizer) ...[
-                            if (d.watering) const SizedBox(width: AppSpacing.xs),
+                            if (d.watering)
+                              const SizedBox(width: AppSpacing.xs),
                             const AgroIcon(
                               AppAssets.calendarFertilizer,
                               size: 12,
@@ -997,15 +928,9 @@ class _CareCalendarCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           const Row(
             children: [
-              _Legend(
-                icon: AppAssets.calendarWatering,
-                label: 'Siram',
-              ),
+              _Legend(icon: AppAssets.calendarWatering, label: 'Siram'),
               SizedBox(width: AppSpacing.lg),
-              _Legend(
-                icon: AppAssets.calendarFertilizer,
-                label: 'Pupuk',
-              ),
+              _Legend(icon: AppAssets.calendarFertilizer, label: 'Pupuk'),
             ],
           ),
         ],
@@ -1013,12 +938,6 @@ class _CareCalendarCard extends StatelessWidget {
     );
   }
 
-  /// Tujuh hari mulai hari ini → data tampilan kartu.
-  ///
-  /// Backend mengirim sebulan penuh; kartu ini hanya selebar tujuh kolom dan
-  /// design-nya menandai satu hari sebagai "aktif" (hari ini), jadi yang
-  /// ditampilkan adalah pekan berjalan. Hari tanpa baris kalender tetap muncul
-  /// sebagai kolom kosong supaya tanggalnya tidak melompat.
   static List<
     ({String day, String date, bool active, bool watering, bool fertilizer})
   >
@@ -1037,9 +956,7 @@ class _CareCalendarCard extends StatelessWidget {
             active: offset == 0,
             watering:
                 entry != null &&
-                (entry.needsWater ||
-                    entry.waitsForRain ||
-                    entry.watered),
+                (entry.needsWater || entry.waitsForRain || entry.watered),
             fertilizer: entry != null && entry.fertilized,
           );
         }(),
@@ -1065,7 +982,6 @@ class _Legend extends StatelessWidget {
   }
 }
 
-/// Kartu "Perawatan Hari Ini" — daftar tugas yang bisa dicentang.
 class _CareListCard extends StatelessWidget {
   const _CareListCard({required this.plant, required this.tasks});
 
@@ -1090,9 +1006,11 @@ class _CareListCard extends StatelessWidget {
             for (final task in tasks) ...[
               _TaskRow(
                 task: task,
-                onToggle: () => context
-                    .read<PlantController>()
-                    .toggleTask(plant.id, task.kind, !task.done),
+                onToggle: () => context.read<PlantController>().toggleTask(
+                  plant.id,
+                  task.kind,
+                  !task.done,
+                ),
               ),
               if (task != tasks.last) const SizedBox(height: AppSpacing.sm),
             ],
@@ -1171,7 +1089,9 @@ class _TaskRow extends StatelessWidget {
                 width: 24,
                 height: 24,
                 child: AgroIcon(
-                  task.done ? AppAssets.taskCheckDone : AppAssets.taskCheckEmpty,
+                  task.done
+                      ? AppAssets.taskCheckDone
+                      : AppAssets.taskCheckEmpty,
                   size: 24,
                 ),
               ),
@@ -1183,7 +1103,6 @@ class _TaskRow extends StatelessWidget {
   }
 }
 
-/// Kartu putih ber-border dengan bayangan `shadow` (bukan `shadow1`).
 class _DetailCard extends StatelessWidget {
   const _DetailCard({required this.child, required this.padding});
 
@@ -1206,19 +1125,9 @@ class _DetailCard extends StatelessWidget {
   }
 }
 
-/// Kunci dua tombol bulat di layar Detail.
-///
-/// Dipakai tes untuk mengukur geometrinya: kolom tombol tidak boleh menutupi
-/// isi daftar dan tidak boleh keluar layar.
 const Key plantDetailChatFabKey = Key('plant-detail-chat-fab');
 const Key plantDetailRainFabKey = Key('plant-detail-rain-fab');
 
-/// Dua tombol bulat di kanan bawah: peringatan hujan dan obrolan AI.
-///
-/// Di design kolomnya berada di `top: 764` pada kanvas 956 — yaitu berakhir
-/// 64px di atas dasar. Yang dipakai di sini `bottom`, bukan `top`: pada layar
-/// yang tidak setinggi kanvas (ponsel pendek, tablet), `top` membuat kolom
-/// tombol melayang di tengah atau keluar dari layar.
 class _DetailFabs extends StatelessWidget {
   const _DetailFabs({required this.plant});
 
@@ -1235,7 +1144,9 @@ class _DetailFabs extends StatelessWidget {
           Material(
             key: plantDetailRainFabKey,
             color: AppColors.surface,
-            shape: const CircleBorder(side: BorderSide(color: AppColors.border)),
+            shape: const CircleBorder(
+              side: BorderSide(color: AppColors.border),
+            ),
             child: InkWell(
               onTap: () {},
               customBorder: const CircleBorder(),
@@ -1276,25 +1187,14 @@ class _DetailFabs extends StatelessWidget {
   }
 }
 
-/// Jarak bawah standar untuk halaman tanpa navbar.
 class AppShellBottom {
   AppShellBottom._();
   static const double gutter = 32;
 
-  /// Tinggi kolom dua tombol bulat di layar Detail: 2×56 + 16 jarak antar.
   static const double fabStackHeight = AppSizes.fabSize * 2 + AppSpacing.lg;
 
-  /// Jarak dasar kolom tombol dari tepi bawah layar.
-  ///
-  /// Diukur dari design: kolom mulai `top: 764` pada kanvas 956 dan berakhir
-  /// 64px di atas dasar. Dipakai sebagai `bottom` — bukan `top` — supaya kolom
-  /// tetap di tempatnya di layar yang lebih pendek/tinggi dari kanvas.
   static const double fabInset = 64;
 
-  /// Ruang bawah untuk daftar yang **digulir di bawah** kolom tombol.
-  ///
-  /// Tanpa ini, kartu terakhir berhenti tepat di belakang tombol: isinya
-  /// tertutup dan area centangnya tidak bisa disentuh.
   static const double gutterUnderFabs =
       fabInset + fabStackHeight + AppSpacing.sm;
 }

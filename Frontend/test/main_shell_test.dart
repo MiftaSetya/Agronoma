@@ -15,7 +15,6 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/app_shell.dart';
 import 'package:frontend/core/widgets/main_shell.dart';
 
-/// Repository tiruan: Beranda memuat daftar tanaman lewat antarmuka ini.
 class _FakePlantRepository implements PlantRepository {
   @override
   Future<List<Plant>> getPlants() async => MockData.plants;
@@ -43,7 +42,6 @@ class _FakeWeatherRepository implements WeatherRepository {
 
 void main() {
   Future<void> pumpShell(WidgetTester tester, {int initialIndex = 0}) async {
-    // Kanvas 440x956 seperti design; layar uji bawaan membuat tombol keluar.
     tester.view.physicalSize = const Size(440, 956);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -98,8 +96,6 @@ void main() {
     await tester.tap(find.text('Beranda'));
     await tester.pumpAndSettle();
 
-    // Isi Profil masih ada di tree (offstage) — kalau `PageView` membuangnya,
-    // sakelar dan posisi gulirnya akan tereset tiap kali berpindah.
     expect(find.text('PREFERENSI', skipOffstage: false), findsOneWidget);
     expect(find.text('Tanaman Saya'), findsOneWidget);
   });
@@ -116,9 +112,6 @@ void main() {
   testWidgets('menu FAB hanya berisi dua aksi, tanpa baris "Tutup"', (
     tester,
   ) async {
-    // Kanvas bawaan (800x600) dipakai apa adanya: font uji Ahem membuat teks
-    // jauh lebih lebar dari aslinya, sehingga kanvas 440 akan melaporkan
-    // overflow palsu pada label "Diagnosis penyakit tanaman".
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light,
@@ -139,8 +132,7 @@ void main() {
 
     expect(find.text('Tambah tanaman'), findsOneWidget);
     expect(find.text('Diagnosis penyakit tanaman'), findsOneWidget);
-    // Sheet sudah bisa ditutup lewat gagang geser / ketukan di luar; baris
-    // "Tutup" dari design sengaja dibuang supaya tidak ada aksi mubazir.
+
     expect(find.text('Tutup'), findsNothing);
   });
 }

@@ -22,19 +22,13 @@ Plant _plant({CareStatus status = CareStatus.safe}) => Plant(
   description: 'Cabai rawit di pot.',
 );
 
-/// Meniru backend: `GET /plants` **tidak** memuat jadwal, dan
-/// `POST /watering/complete` hanya mengubah status di care-calendar. Objek
-/// `Plant` yang dikembalikan sesudah aksi karena itu selalu bertugas kosong.
 class _ScheduleFakeRepository implements PlantRepository {
   _ScheduleFakeRepository(this._plant, {this.fixedDays});
 
   final Plant _plant;
 
-  /// Kalau diisi, `careDays` mengembalikan daftar ini apa adanya — dipakai
-  /// untuk meniru mode contoh yang memang tidak punya kalender (`const []`).
   final List<CareDay>? fixedDays;
 
-  /// Tanggal hari ini dalam bentuk ISO, sama seperti yang dikirim backend.
   final String today = PlantSchedule.isoDate(DateTime.now());
 
   bool watered = false;
@@ -47,10 +41,7 @@ class _ScheduleFakeRepository implements PlantRepository {
   Future<Plant> getPlant(String id) async => _plant;
 
   @override
-  Future<List<CareDay>> careDays(
-    Plant plant, {
-    required DateTime today,
-  }) async {
+  Future<List<CareDay>> careDays(Plant plant, {required DateTime today}) async {
     careDaysCalls++;
     final fixed = fixedDays;
     if (fixed != null) return fixed;
@@ -64,10 +55,13 @@ class _ScheduleFakeRepository implements PlantRepository {
   }
 
   @override
-  Future<Plant> setTaskDone(String plantId, CareTaskKind kind, bool done) async {
+  Future<Plant> setTaskDone(
+    String plantId,
+    CareTaskKind kind,
+    bool done,
+  ) async {
     watered = done;
-    // Persis seperti `HttpPlantRepository`: tanaman dibaca ulang lewat
-    // `GET /plants/{id}`, yang tidak membawa jadwal.
+
     return _plant;
   }
 
@@ -118,9 +112,6 @@ void main() {
 
     await controller.toggleTask('6', CareTaskKind.watering, true);
 
-    // Regresi yang dijaga: `setTaskDone` mengembalikan `Plant` tanpa jadwal,
-    // jadi menyimpan tugas di `Plant.tasks` akan membuat tugas ini lenyap
-    // padahal backend baru saja mencatatnya sebagai selesai.
     final tasks = controller.tasksFor('6');
     expect(tasks, hasLength(1));
     expect(tasks.single.done, isTrue);
@@ -134,8 +125,6 @@ void main() {
     await controller.loadTasks('6');
     expect(controller.tasksFor('6'), hasLength(1));
 
-    // Menekan tarik-untuk-menyegarkan: `GET /plants` mengembalikan tanaman
-    // baru tanpa jadwal, dan jadwal yang sudah dibaca tidak boleh ikut hilang.
     await controller.load(force: true);
 
     expect(controller.tasksFor('6'), hasLength(1));
@@ -172,8 +161,6 @@ void main() {
   testWidgets('tanaman contoh tanpa kalender tetap memakai Plant.tasks', (
     tester,
   ) async {
-    // Mode `useSampleData`: `careDays` mengembalikan daftar kosong, jadi tugas
-    // contoh yang sudah ditulis di `Plant.tasks` tidak boleh dihapus.
     final sample = _plant().copyWith(
       tasks: const [
         CareTask(
@@ -193,7 +180,7 @@ void main() {
 
     final tasks = controller.tasksFor('6');
     expect(tasks, hasLength(1));
-    // Teksnya milik data contoh, bukan versi generik dari PlantSchedule.
+
     expect(tasks.single.description, 'Siram hingga tanah lembap.');
   });
 }

@@ -48,7 +48,11 @@ class _FakePlantRepository implements PlantRepository {
   ];
 
   @override
-  Future<Plant> setTaskDone(String plantId, CareTaskKind kind, bool done) async {
+  Future<Plant> setTaskDone(
+    String plantId,
+    CareTaskKind kind,
+    bool done,
+  ) async {
     completed++;
     return _plant();
   }
@@ -69,8 +73,6 @@ class _FakeWeatherRepository implements WeatherRepository {
 }
 
 void main() {
-  /// Membuka Detail Tanaman langsung di tab Perawatan (tempat kolom tombol
-  /// bulat dan daftar tugas bertemu).
   Future<_FakePlantRepository> pumpDetail(
     WidgetTester tester, {
     required Size screen,
@@ -104,46 +106,42 @@ void main() {
     (w) => w is ListView && w.scrollDirection == Axis.vertical,
   );
 
-  testWidgets('baris tugas terakhir bisa digulir keluar dari balik tombol bulat', (
-    tester,
-  ) async {
-    await pumpDetail(tester, screen: const Size(440, 740));
+  testWidgets(
+    'baris tugas terakhir bisa digulir keluar dari balik tombol bulat',
+    (tester) async {
+      await pumpDetail(tester, screen: const Size(440, 740));
 
-    final list = verticalList();
-    expect(list, findsOne);
-    // Gulir sampai ujung: di sinilah bug lama muncul — baris terakhir berhenti
-    // di belakang tombol obrolan dan area centangnya tidak bisa disentuh.
-    for (var i = 0; i < 6; i++) {
-      await tester.drag(list, const Offset(0, -400));
-      await tester.pumpAndSettle();
-    }
+      final list = verticalList();
+      expect(list, findsOne);
 
-    final fab = tester.getRect(find.byKey(plantDetailChatFabKey));
-    final row = tester.getRect(
-      find
-          .ancestor(
-            of: find.text(CareTaskKind.watering.actionLabel),
-            matching: find.byType(InkWell),
-          )
-          .first,
-    );
+      for (var i = 0; i < 6; i++) {
+        await tester.drag(list, const Offset(0, -400));
+        await tester.pumpAndSettle();
+      }
 
-    // Baris tugas harus berada **seluruhnya** di atas tombol, bukan sekadar
-    // sebagian terlihat.
-    expect(
-      row.bottom,
-      lessThanOrEqualTo(fab.top),
-      reason:
-          'baris tugas (bawah ${row.bottom}) tertutup tombol obrolan '
-          '(atas ${fab.top})',
-    );
-  });
+      final fab = tester.getRect(find.byKey(plantDetailChatFabKey));
+      final row = tester.getRect(
+        find
+            .ancestor(
+              of: find.text(CareTaskKind.watering.actionLabel),
+              matching: find.byType(InkWell),
+            )
+            .first,
+      );
+
+      expect(
+        row.bottom,
+        lessThanOrEqualTo(fab.top),
+        reason:
+            'baris tugas (bawah ${row.bottom}) tertutup tombol obrolan '
+            '(atas ${fab.top})',
+      );
+    },
+  );
 
   testWidgets('tombol bulat tetap di dalam layar pada layar pendek', (
     tester,
   ) async {
-    // Posisi lama memakai `top: 764` dari kanvas 956; di layar 600 tinggi
-    // tombolnya jatuh di luar layar.
     await pumpDetail(tester, screen: const Size(440, 600));
 
     final screenHeight = tester.view.physicalSize.height;
@@ -155,30 +153,29 @@ void main() {
     expect(rain.top, greaterThan(0));
   });
 
-  testWidgets('mengetuk baris tugas mencatat penyiraman, bukan membuka obrolan', (
-    tester,
-  ) async {
-    final repo = await pumpDetail(tester, screen: const Size(440, 740));
+  testWidgets(
+    'mengetuk baris tugas mencatat penyiraman, bukan membuka obrolan',
+    (tester) async {
+      final repo = await pumpDetail(tester, screen: const Size(440, 740));
 
-    final list = verticalList();
-    for (var i = 0; i < 6; i++) {
-      await tester.drag(list, const Offset(0, -400));
+      final list = verticalList();
+      for (var i = 0; i < 6; i++) {
+        await tester.drag(list, const Offset(0, -400));
+        await tester.pumpAndSettle();
+      }
+
+      final row = tester.getRect(
+        find
+            .ancestor(
+              of: find.text(CareTaskKind.watering.actionLabel),
+              matching: find.byType(InkWell),
+            )
+            .first,
+      );
+      await tester.tapAt(Offset(row.right - 24, row.center.dy));
       await tester.pumpAndSettle();
-    }
 
-    // Ketuk di sisi kanan baris (tempat ikon centang), titik yang dulu tertutup
-    // tombol obrolan.
-    final row = tester.getRect(
-      find
-          .ancestor(
-            of: find.text(CareTaskKind.watering.actionLabel),
-            matching: find.byType(InkWell),
-          )
-          .first,
-    );
-    await tester.tapAt(Offset(row.right - 24, row.center.dy));
-    await tester.pumpAndSettle();
-
-    expect(repo.completed, 1);
-  });
+      expect(repo.completed, 1);
+    },
+  );
 }

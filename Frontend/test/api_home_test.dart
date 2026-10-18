@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -13,7 +14,6 @@ import 'package:frontend/core/data/api/token_store.dart';
 import 'package:frontend/core/data/api/weather_codes.dart';
 import 'package:frontend/core/models/plant.dart';
 
-/// Token palsu: `ApiClient` selalu meminta token sebelum mengirim permintaan.
 class _StubTokenStore implements TokenStore {
   @override
   Future<String?> read() async => 'token-uji';
@@ -25,7 +25,6 @@ class _StubTokenStore implements TokenStore {
   Future<void> clear() async {}
 }
 
-/// Membangun `ApiClient` yang menjawab lewat [handler], tanpa server.
 ApiClient _client(Future<http.Response> Function(http.Request) handler) =>
     ApiClient(
       httpClient: MockClient(handler),
@@ -33,7 +32,6 @@ ApiClient _client(Future<http.Response> Function(http.Request) handler) =>
       baseUrl: 'http://127.0.0.1:8000/api',
     );
 
-/// Satu baris `UserPlantResource` seperti balasan backend sungguhan.
 Map<String, dynamic> _plantJson({
   required int id,
   required String name,
@@ -76,7 +74,7 @@ void main() {
       expect(plants, hasLength(1));
       expect(plants.single.id, '6');
       expect(plants.single.name, 'Cabai Rawit');
-      // Kota dipakai sebagai kunci cuaca, jadi harus benar-benar terbaca.
+
       expect(plants.single.location, 'Surabaya');
       expect(plants.single.media, PlantingMedia.pot);
     });
@@ -86,7 +84,9 @@ void main() {
         apiClient: _client(
           (request) async => http.Response(
             jsonEncode({
-              'data': [_plantJson(id: 7, name: 'Tomat', badge: 'perlu_disiram')],
+              'data': [
+                _plantJson(id: 7, name: 'Tomat', badge: 'perlu_disiram'),
+              ],
             }),
             200,
             headers: {'content-type': 'application/json'},
@@ -98,49 +98,45 @@ void main() {
       expect(plants.single.status, CareStatus.needsWater);
     });
 
-    test(
-      'care-calendar hari ini menjadi tugas "Perawatan Hari Ini"',
-      () async {
-        final repo = HttpPlantRepository(
-          apiClient: _client((request) async {
-            expect(request.url.path, '/api/plants/6/care-calendar');
-            return http.Response(
-              '{"days":[{"date":"2026-10-17","watering_status":"need_water",'
-              '"fertilizing_status":"none"}]}',
-              200,
-              headers: {'content-type': 'application/json'},
-            );
-          }),
-        );
+    test('care-calendar hari ini menjadi tugas "Perawatan Hari Ini"', () async {
+      final repo = HttpPlantRepository(
+        apiClient: _client((request) async {
+          expect(request.url.path, '/api/plants/6/care-calendar');
+          return http.Response(
+            '{"days":[{"date":"2026-10-17","watering_status":"need_water",'
+            '"fertilizing_status":"none"}]}',
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
 
-        final plant = Plant(
-          id: '6',
-          name: 'Cabai Rawit',
-          photoAsset: AppAssets.photoPotSoil,
-          location: 'Surabaya',
-          place: 'Pot tanaman',
-          media: PlantingMedia.pot,
-          status: CareStatus.safe,
-          phase: GrowthPhase.seedling,
-          plantedAt: DateTime(2026, 10, 17),
-          careScore: 100,
-          description: '',
-        );
+      final plant = Plant(
+        id: '6',
+        name: 'Cabai Rawit',
+        photoAsset: AppAssets.photoPotSoil,
+        location: 'Surabaya',
+        place: 'Pot tanaman',
+        media: PlantingMedia.pot,
+        status: CareStatus.safe,
+        phase: GrowthPhase.seedling,
+        plantedAt: DateTime(2026, 10, 17),
+        careScore: 100,
+        description: '',
+      );
 
-        final days = await repo.careDays(plant, today: DateTime(2026, 10, 17));
-        expect(days, hasLength(1));
-        expect(days.single.wateringStatus, 'need_water');
-        // Tugas hari ini diturunkan dari hari kalender yang sama, jadi tidak
-        // ada dua permintaan untuk data yang sama.
-        final tasks = PlantSchedule.tasksForToday(
-          days,
-          today: DateTime(2026, 10, 17),
-        );
-        expect(tasks, hasLength(1));
-        expect(tasks.single.kind, CareTaskKind.watering);
-        expect(tasks.single.done, isFalse);
-      },
-    );
+      final days = await repo.careDays(plant, today: DateTime(2026, 10, 17));
+      expect(days, hasLength(1));
+      expect(days.single.wateringStatus, 'need_water');
+
+      final tasks = PlantSchedule.tasksForToday(
+        days,
+        today: DateTime(2026, 10, 17),
+      );
+      expect(tasks, hasLength(1));
+      expect(tasks.single.kind, CareTaskKind.watering);
+      expect(tasks.single.done, isFalse);
+    });
 
     test('menandai tugas selesai memanggil endpoint penyiraman', () async {
       final paths = <String>[];
@@ -196,7 +192,7 @@ void main() {
       );
 
       await repo.setTaskDone('6', CareTaskKind.watering, false);
-      // Backend tidak punya endpoint batal; yang tersisa hanya GET tanaman.
+
       expect(requests, 1);
     });
   });
@@ -221,7 +217,7 @@ void main() {
       expect(weather, isNotNull);
       expect(weather!.city, 'Surabaya');
       expect(weather.condition, 'Sebagian Berawan');
-      // Titik tengah 25.4–35.2 = 30.3 → 30.
+
       expect(weather.temperature, 30);
       expect(weather.forecast, hasLength(2));
       expect(weather.forecast.first.day, 'Sab');
@@ -244,8 +240,7 @@ void main() {
 
       await repo.forPlant(plantId: '6', city: 'Surabaya');
       await repo.forPlant(plantId: '7', city: 'Surabaya');
-      // Inti penghematan: kartu per kota tidak boleh menambah permintaan per
-      // tanaman.
+
       expect(requests, 1);
     });
 
@@ -254,7 +249,9 @@ void main() {
       final repo = HttpWeatherRepository(
         apiClient: _client((request) async {
           requestedPlantIds.add(request.url.pathSegments[2]);
-          final city = request.url.pathSegments[2] == '6' ? 'sunny' : 'heavy_rain';
+          final city = request.url.pathSegments[2] == '6'
+              ? 'sunny'
+              : 'heavy_rain';
           return http.Response(
             '{"forecast":[{"date":"2026-10-17","condition":"$city",'
             '"temp_min":25.0,"temp_max":35.0,"rainfall_mm":0}]}',
@@ -286,16 +283,13 @@ void main() {
 
   group('PlantSchedule', () {
     test('hujan diperkirakan menahan penyiraman tapi tetap jadi tugas', () {
-      final tasks = PlantSchedule.tasksForToday(
-        const [
-          CareDay(
-            date: '2026-10-17',
-            wateringStatus: 'skip_rain',
-            fertilizingStatus: 'none',
-          ),
-        ],
-        today: DateTime(2026, 10, 17),
-      );
+      final tasks = PlantSchedule.tasksForToday(const [
+        CareDay(
+          date: '2026-10-17',
+          wateringStatus: 'skip_rain',
+          fertilizingStatus: 'none',
+        ),
+      ], today: DateTime(2026, 10, 17));
 
       expect(tasks, hasLength(1));
       expect(tasks.single.kind, CareTaskKind.watering);
@@ -303,16 +297,13 @@ void main() {
     });
 
     test('penundaan karena hujan tidak membuat tugas hari ini', () {
-      final tasks = PlantSchedule.tasksForToday(
-        const [
-          CareDay(
-            date: '2026-10-17',
-            wateringStatus: 'delayed_rain_expected',
-            fertilizingStatus: 'none',
-          ),
-        ],
-        today: DateTime(2026, 10, 17),
-      );
+      final tasks = PlantSchedule.tasksForToday(const [
+        CareDay(
+          date: '2026-10-17',
+          wateringStatus: 'delayed_rain_expected',
+          fertilizingStatus: 'none',
+        ),
+      ], today: DateTime(2026, 10, 17));
 
       expect(tasks, isEmpty);
     });
@@ -339,16 +330,13 @@ void main() {
     });
 
     test('hari tanpa jadwal tidak menghasilkan tugas', () {
-      final tasks = PlantSchedule.tasksForToday(
-        const [
-          CareDay(
-            date: '2026-10-18',
-            wateringStatus: 'need_water',
-            fertilizingStatus: 'none',
-          ),
-        ],
-        today: DateTime(2026, 10, 17),
-      );
+      final tasks = PlantSchedule.tasksForToday(const [
+        CareDay(
+          date: '2026-10-18',
+          wateringStatus: 'need_water',
+          fertilizingStatus: 'none',
+        ),
+      ], today: DateTime(2026, 10, 17));
 
       expect(tasks, isEmpty);
     });
@@ -375,7 +363,6 @@ void main() {
     });
 
     test('tanggal ISO menjadi nama hari Indonesia', () {
-      // 2026-10-17 adalah Sabtu.
       expect(WeatherCodes.dayLabel('2026-10-17'), 'Sab');
       expect(WeatherCodes.dayLabel('2026-10-19'), 'Sen');
     });

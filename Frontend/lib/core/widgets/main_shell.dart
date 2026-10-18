@@ -4,18 +4,9 @@ import 'package:frontend/core/widgets/app_shell.dart';
 import 'package:frontend/features/home/home_screen.dart';
 import 'package:frontend/features/profile/profile_screen.dart';
 
-/// Host tab "dalam" aplikasi: Beranda dan Profil hidup berdampingan di dalam
-/// satu `PageView`, sedangkan topbar dan navbar dimiliki [AppShell] di luar
-/// `PageView`.
-///
-/// Kenapa begitu: kalau tiap tab adalah rute sendiri (`pushReplacementNamed`),
-/// seluruh `Scaffold` — termasuk navbar — dibangun ulang setiap kali berpindah,
-/// sehingga pil hijau berkedip dan isi tab kehilangan posisi gulirnya. Dengan
-/// satu host, hanya isi tab yang bergeser.
 class MainShell extends StatefulWidget {
   const MainShell({super.key, this.initialIndex = 0});
 
-  /// 0 = Beranda, 1 = Profil.
   final int initialIndex;
 
   @override
@@ -54,9 +45,7 @@ class _MainShellState extends State<MainShell> {
       child: PageView(
         controller: _controller,
         onPageChanged: (index) => setState(() => _index = index),
-        // Halaman dibungkus keep-alive: `PageView` membuang isi tab yang di
-        // luar layar, dan itu akan mereset posisi gulir Beranda serta sakelar
-        // di Profil setiap kali berpindah.
+
         children: const [
           _KeepAlivePage(child: HomeScreen()),
           _KeepAlivePage(child: ProfileScreen()),
@@ -66,7 +55,6 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
-/// Menjaga isi tab tetap hidup saat berada di luar layar `PageView`.
 class _KeepAlivePage extends StatefulWidget {
   const _KeepAlivePage({required this.child});
 

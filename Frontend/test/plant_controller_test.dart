@@ -8,12 +8,9 @@ import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/weather.dart';
 import 'package:frontend/core/state/plant_controller.dart';
 
-/// Repositori tiruan yang bisa diubah hasilnya antar-panggilan, supaya muat
-/// ulang bisa dibedakan dari muat pertama (tanaman contoh vs daftar kosong).
 class _FakePlantRepository implements PlantRepository {
   _FakePlantRepository(this._batches);
 
-  /// Daftar balasan berurutan; panggilan terakhir dipakai terus sesudahnya.
   final List<List<Plant>> _batches;
   int calls = 0;
 
@@ -37,7 +34,6 @@ class _FakePlantRepository implements PlantRepository {
 class _FakeWeatherRepository implements WeatherRepository {
   _FakeWeatherRepository({this.failing = const {}});
 
-  /// Kota yang sengaja gagal (mis. cache backend belum terisi).
   final Set<String> failing;
   final List<String> requested = [];
 
@@ -62,7 +58,6 @@ class _FakeWeatherRepository implements WeatherRepository {
   noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
-/// Tanaman contoh seadanya — hanya `id`/`name` yang dibedakan uji ini.
 Plant _plant(String id, String name, {String city = 'Surabaya'}) => Plant(
   id: id,
   name: name,
@@ -82,9 +77,6 @@ void main() {
     testWidgets('tanaman yang baru disimpan tetap ada setelah muat ulang', (
       tester,
     ) async {
-      // Muat pertama mengembalikan satu tanaman contoh; muat ulang (force)
-      // mengembalikan daftar kosong — meniru repositori Home yang belum tahu
-      // tentang tanaman hasil `POST /plants`.
       final repo = _FakePlantRepository([
         [_plant('1', 'Cabai Rawit')],
         const [],
@@ -100,8 +92,6 @@ void main() {
       await controller.adopt(_plant('99', 'Kangkung'));
       expect(controller.plants.map((p) => p.id), ['1', '99']);
 
-      // Inti perbaikan: muat ulang tidak boleh menghapus tanaman yang sudah
-      // benar-benar tersimpan di backend.
       await controller.load(force: true);
       expect(controller.plants.map((p) => p.id), ['99']);
       expect(controller.findById('99')?.name, 'Kangkung');
@@ -129,7 +119,9 @@ void main() {
     testWidgets('adopt dua kali untuk id yang sama tidak menggandakan', (
       tester,
     ) async {
-      final repo = _FakePlantRepository([[_plant('1', 'Cabai Rawit')]]);
+      final repo = _FakePlantRepository([
+        [_plant('1', 'Cabai Rawit')],
+      ]);
       final controller = PlantController(
         plantRepository: repo,
         weatherSource: _FakeWeatherRepository(),
@@ -158,8 +150,6 @@ void main() {
 
       await controller.load();
 
-      // Dua kota → dua kartu, dan hanya dua permintaan cuaca walau ada tiga
-      // tanaman. Inilah penghematan yang dimaksud "per lokasi".
       expect(controller.cityWeather.map((w) => w.city), ['Surabaya', 'Malang']);
       expect(weather.requested, ['1@Surabaya', '3@Malang']);
     });
@@ -178,8 +168,6 @@ void main() {
       await controller.load();
       expect(controller.cityWeather.map((w) => w.city), ['Surabaya']);
 
-      // Tanaman hasil wizard disimpan di kota lain: Beranda harus ikut
-      // menampilkan cuaca kota itu, bukan memakai kartu Surabaya.
       await controller.adopt(_plant('9', 'Selada', city: 'Batu'));
       expect(controller.cityWeather.map((w) => w.city), ['Surabaya', 'Batu']);
       expect(controller.weatherForCity('Batu')?.city, 'Batu');
@@ -219,7 +207,6 @@ void main() {
 
       await controller.load();
 
-      // Tanaman Malang tidak boleh menampilkan ramalan Surabaya.
       expect(controller.forecastFor('Malang'), isNotEmpty);
       expect(controller.forecastFor('Malang').first.condition, 'Cerah');
       expect(controller.forecastFor('Jakarta'), isEmpty);

@@ -9,23 +9,11 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_camera_view.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
-/// Layar Plant Disease Detection (node `106:1124`) dengan panel hasil (frame
-/// `176:1219`, drawer `253:2575`) yang digabung dalam satu layar. Tata letak
-/// memakai koordinat design pada kanvas 440x956 supaya angka Figma bisa
-/// dipakai apa adanya.
-///
-/// Bingkai kameranya adalah kamera sungguhan lewat [AgroCameraView]. Yang masih
-/// contoh adalah **hasil diagnosisnya**, karena mengenali penyakit dari foto
-/// butuh model/backend — foto jepretan tetap dikirim sebagai `imagePath` supaya
-/// tinggal disambungkan saat backend tersedia.
 class DiseaseDetectionScreen extends StatefulWidget {
   const DiseaseDetectionScreen({super.key, this.initialResult, this.plantId});
 
-  /// Hasil yang langsung ditampilkan (mode kamera dilewati); dipakai preview
-  /// pengembangan. Di aplikasi biasa biarkan `null`.
   final Disease? initialResult;
 
-  /// Tanaman yang difoto; dipakai backend untuk menyimpan riwayat pindai.
   final String? plantId;
 
   @override
@@ -80,8 +68,6 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Bingkai kamera selalu ada di belakang; panel hasil hanya menutupi
-          // bagian bawahnya, sama seperti design.
           AgroCameraView(
             title: 'Deteksi Penyakit',
             instruction: 'Arahkan kamera ke tanaman atau daun',
@@ -104,16 +90,9 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
   }
 }
 
-/// Panel hasil diagnosis — `Disease Drawer` (node `253:2575`), tinggi 623px di
-/// baris 341 dengan radius atas 32. Dibuat publik agar bisa dipakai ulang.
 class DiseaseResultDrawer extends StatelessWidget {
-  const DiseaseResultDrawer({
-    super.key,
-    required this.disease,
-    this.onRetake,
-  });
+  const DiseaseResultDrawer({super.key, required this.disease, this.onRetake});
 
-  /// Tinggi panel pada design.
   static const double height = 623;
 
   final Disease disease;
@@ -125,9 +104,7 @@ class DiseaseResultDrawer extends StatelessWidget {
 
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxHeight: screenHeight * 0.86 > height
-            ? height
-            : screenHeight * 0.86,
+        maxHeight: screenHeight * 0.86 > height ? height : screenHeight * 0.86,
       ),
       child: DecoratedBox(
         decoration: const BoxDecoration(
@@ -170,9 +147,6 @@ class DiseaseResultDrawer extends StatelessWidget {
   }
 }
 
-/// Gagang panel — garis abu 32x4 di tengah kanvas. Ini **satu-satunya** cara
-/// menutup panel (di design tidak ada tombol tutup); menambahkan tombol akan
-/// menggeser seluruh isi panel dari design.
 class _DrawerHandle extends StatefulWidget {
   const _DrawerHandle({this.onDismiss});
 
@@ -183,7 +157,6 @@ class _DrawerHandle extends StatefulWidget {
 }
 
 class _DrawerHandleState extends State<_DrawerHandle> {
-  /// Jarak tarikan minimal agar dianggap "sengaja" (px).
   static const double _threshold = 24;
 
   double _dragged = 0;
@@ -202,8 +175,7 @@ class _DrawerHandleState extends State<_DrawerHandle> {
       },
       child: const SizedBox(
         height: 24,
-        // Di design garisnya di baris 16..20, bukan di tengah kotak —
-        // memusatkannya membuat gagang naik 6px.
+
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
@@ -225,7 +197,6 @@ class _DrawerHandleState extends State<_DrawerHandle> {
   }
 }
 
-/// Nama penyakit + pil akurasi.
 class _DrawerHeader extends StatelessWidget {
   const _DrawerHeader({required this.disease});
 
@@ -271,7 +242,6 @@ class _DrawerHeader extends StatelessWidget {
   }
 }
 
-/// Pil akurasi hijau di kanan nama penyakit.
 class _AccuracyPill extends StatelessWidget {
   const _AccuracyPill({required this.label});
 
@@ -280,7 +250,10 @@ class _AccuracyPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 6,
+      ),
       decoration: const BoxDecoration(
         color: AppColors.primary,
         borderRadius: AppRadius.chipAll,
@@ -307,8 +280,6 @@ class _AccuracyPill extends StatelessWidget {
   }
 }
 
-/// Garis waktu langkah penanganan: nomor bulat 32px di kiri, kartu di kanan,
-/// dengan satu garis penghubung di belakang nomornya.
 class _TreatmentTimeline extends StatelessWidget {
   const _TreatmentTimeline({required this.steps});
 
@@ -318,7 +289,6 @@ class _TreatmentTimeline extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Garis penghubung tepat di tengah nomor bulat (16 = 32/2).
         Positioned(
           left: 16,
           top: 24,
@@ -370,8 +340,6 @@ class _TreatmentStep extends StatelessWidget {
         const SizedBox(width: AppSpacing.lg),
         Expanded(
           child: Container(
-            // Padding dikurangi 1px dari design (p-[17px]) karena border
-            // Flutter dihitung di luar padding.
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.surface,

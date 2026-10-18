@@ -2,34 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
-/// Tipografi Agronoma — seluruh nilai diukur dari Figma, bukan diperkirakan.
-///
-/// Dua keputusan penting: (1) `height` selalu ditulis eksplisit karena Flutter
-/// memakai metrik `usWin` Inter (1,43 em) sementara Figma memakai `hhea`
-/// (1,21 em) — `height: null` membuat kotak baris 18% lebih tinggi; (2)
-/// `letterSpacing` juga selalu eksplisit (0 kecuali yang di Figma punya
-/// `tracking`) karena bila dibiarkan null Material menambah +0,3px dari
-/// `Typography.englishLike2021`, membuat teks ~2% lebih lebar hingga ada yang
-/// membungkus lebih awal dari design.
-///
-/// Poppins hanya dipakai [greetingLarge]; sisanya Inter. SF Pro tidak
-/// di-bundle (lisensi Apple) karena pemakaiannya hanya di status bar yang di
-/// Flutter digantikan sistem operasi.
 class AppTextStyles {
   AppTextStyles._();
 
   static const String fontInter = 'Inter';
   static const String fontPoppins = 'Poppins';
 
-  /// Tinggi baris untuk semua teks yang di Figma ditulis `leading-[normal]`;
-  /// 1,21 em dari metrik `hhea` Inter — alasan lengkapnya di doc kelas.
   static const double leadingNormal = 1.21;
 
-  // Judul
-
-  /// Satu-satunya teks yang memakai Poppins (design pakai ExtraBold, tapi repo
-  /// hanya punya Poppins-Bold.ttf — bobot w700 dipakai apa adanya).
-  /// Satu-satunya letter-spacing negatif besar: -0.64px.
   static const TextStyle greetingLarge = TextStyle(
     fontFamily: fontPoppins,
     fontSize: 32,
@@ -75,8 +55,6 @@ class AppTextStyles {
     color: AppColors.ink,
   );
 
-  /// Tinggi barisnya sengaja `leadingNormal` (bukan 28 seperti [headlineLarge])
-  /// agar isi lembar Detail Tanaman tidak tergeser.
   static const TextStyle sheetTitle = TextStyle(
     fontFamily: fontInter,
     fontSize: 20,
@@ -104,7 +82,6 @@ class AppTextStyles {
     color: AppColors.ink,
   );
 
-  /// Varian putih [headlineMedium] untuk top bar di atas foto gelap.
   static const TextStyle headlineMediumOnDark = TextStyle(
     fontFamily: fontInter,
     fontSize: 20,
@@ -312,7 +289,6 @@ class AppTextStyles {
     color: AppColors.ink,
   );
 
-  /// Warnanya `Dark Grey` sesuai design, bukan hitam.
   static const TextStyle titleMedium = TextStyle(
     fontFamily: fontInter,
     fontSize: 14,
@@ -321,8 +297,6 @@ class AppTextStyles {
     letterSpacing: 0,
     color: AppColors.darkGrey,
   );
-
-  // Isi
 
   static const TextStyle bodyLarge = TextStyle(
     fontFamily: fontInter,
@@ -359,8 +333,6 @@ class AppTextStyles {
     letterSpacing: 0,
     color: AppColors.grey,
   );
-
-  // Label & kontrol
 
   static const TextStyle labelLarge = TextStyle(
     fontFamily: fontInter,

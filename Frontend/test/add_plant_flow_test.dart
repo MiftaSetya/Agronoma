@@ -12,8 +12,6 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/add_plant/add_plant_flow.dart';
 import 'package:frontend/features/add_plant/soil_detection_screen.dart';
 
-/// Uji logika [AddPlantController] dan alur langkah wizard (bukan piksel) —
-/// kesetiaan visual dijaga pipeline tangkapan layar di `docs/testing.md`.
 class _FakeRepository implements AddPlantRepository {
   @override
   Future<List<SoilType>> getSoilTypes() async => MockData.soilTypes;
@@ -26,7 +24,6 @@ class _FakeRepository implements AddPlantRepository {
     required String province,
   }) async => MockData.recommendations;
 
-  // Sisanya tidak dipakai uji ini.
   @override
   noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
@@ -47,11 +44,8 @@ void main() {
       final c = AddPlantController(dataSource: _FakeRepository());
       c.setMedia(PlantingMedia.pot.name);
       expect(c.draft.media, 'pot');
-      // Nama media memang key enum, bukan teks bebas.
-      expect(
-        PlantingMedia.values.map((m) => m.name),
-        contains(c.draft.media),
-      );
+
+      expect(PlantingMedia.values.map((m) => m.name), contains(c.draft.media));
     });
 
     test('markSoilDetected tanpa argumen memakai jenis tanah pertama', () {
@@ -77,8 +71,6 @@ void main() {
       c.selectRecommendation(MockData.recommendations.first);
       expect(c.draft.hasPlant, isTrue);
 
-      // Tanpa membuang pilihan AI, kartu manual tidak akan pernah tampil di
-      // langkah 4 (cabang `recommendation != null` yang menang).
       c.setManualPlant('Daun Bawang', null);
       expect(c.draft.recommendation, isNull);
       expect(c.draft.manualName, 'Daun Bawang');
@@ -107,19 +99,16 @@ void main() {
         phase: GrowthPhase.seedling,
       );
 
-      // Dulu media pilihan langkah 2 dibuang dan selalu jadi `pot`.
       expect(plant.media, PlantingMedia.openField);
       expect(plant.place, PlantingMedia.openField.label);
-      // Tanaman baru selalu mulai dari nol: jadwal perawatan menyusul dari
-      // care-calendar, tonggak pertumbuhan belum ada yang terlewati.
+
       expect(plant.tasks, isEmpty);
       expect(plant.timeline, isEmpty);
     });
 
     test('kota dan provinsi contoh dipakai bila lokasi belum dipilih', () {
       final c = AddPlantController(dataSource: _FakeRepository());
-      // Wizard bisa dibuka langsung di langkah 4 (pratinjau design), jadi
-      // endpoint AI tidak boleh kehilangan kota/provinsi.
+
       expect(c.city, AddPlantController.fallbackCity);
       expect(c.province, AddPlantController.fallbackProvince);
     });
@@ -129,8 +118,6 @@ void main() {
     testWidgets('langkah 1: konfirmasi lokasi pindah ke langkah media tanam', (
       tester,
     ) async {
-      // Kanvas design 440x956; layar uji bawaan lebih kecil sehingga tombol
-      // di bawah kartu konfirmasi keluar dari layar.
       tester.view.physicalSize = const Size(440, 956);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -163,7 +150,7 @@ void main() {
       await tester.tap(find.text('Lanjut'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Saya Tahu Jenis Tanah'));
-      // Daftar tanah dimuat asinkron (~400 ms) setelah langkah terpasang.
+
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pumpAndSettle();
 
@@ -190,8 +177,6 @@ void main() {
       await tester.tap(find.text('Bantu Saya Scan Tanah'));
       await tester.pumpAndSettle();
 
-      // Dulu ini membuka bottom sheet _DetectSoilSheet; sekarang layar
-      // penuh frame `101:701` yang memakai kamera sungguhan.
       expect(find.byType(SoilDetectionScreen), findsOneWidget);
       expect(find.text('Deteksi Jenis Tanah'), findsOneWidget);
     });
@@ -212,7 +197,7 @@ void main() {
       await tester.tap(find.text('Lanjut'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Saya Tahu Jenis Tanah'));
-      // Daftar tanah dimuat asinkron (~400 ms) setelah langkah terpasang.
+
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pumpAndSettle();
 
@@ -261,7 +246,6 @@ void main() {
       await tester.tap(find.text(MockData.soilTypes.first.name).first);
       await tester.pumpAndSettle();
 
-      // Langkah 4 memuat rekomendasi AI sendiri; tunggu sampai terisi.
       await tester.tap(find.text('Lanjut'));
       await tester.pumpAndSettle();
       expect(find.text(MockData.recommendations.first.name), findsWidgets);
@@ -272,11 +256,9 @@ void main() {
       await tester.tap(find.text('Tambah Tanaman'));
       await tester.pumpAndSettle();
 
-      // Bug lama: kartu manual tersembunyi selama daftar AI tidak kosong.
       expect(find.text('Ditambahkan manual'), findsOneWidget);
       expect(find.text('Daun Bawang'), findsOneWidget);
-      // Daftar AI tetap tersedia supaya rekomendasi yang sudah dimuat tidak
-      // terbuang — mengetuknya membatalkan pilihan manual.
+
       expect(find.text(MockData.recommendations.first.name), findsWidgets);
     });
   });

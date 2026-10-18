@@ -1,4 +1,3 @@
-/// Barrel untuk lapisan theme.
 library;
 
 export 'app_colors.dart';

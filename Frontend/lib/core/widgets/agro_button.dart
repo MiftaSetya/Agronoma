@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:frontend/core/theme/theme.dart';
 
-/// Tombol utama (hijau penuh, node `66:678`) — tingginya 54 bukan 50, radius 16, teks putih SemiBold.
 class AgroButton extends StatelessWidget {
   const AgroButton({
     super.key,
@@ -16,13 +15,10 @@ class AgroButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
 
-  /// Widget ikon opsional di kiri label.
   final Widget? icon;
 
-  /// Menampilkan pemintal dan mematikan tombol.
   final bool loading;
 
-  /// Memenuhi lebar induk (default) atau hanya selebar isinya.
   final bool expand;
 
   @override
@@ -40,7 +36,10 @@ class AgroButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (icon != null) ...[icon!, const SizedBox(width: AppSpacing.sm)],
+              if (icon != null) ...[
+                icon!,
+                const SizedBox(width: AppSpacing.sm),
+              ],
               Text(label, style: AppTextStyles.buttonLarge),
             ],
           );
@@ -50,8 +49,7 @@ class AgroButton extends StatelessWidget {
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.primary,
         disabledBackgroundColor: AppColors.disabledFill,
-        // Teks tombol nonaktif tetap putih penuh seperti design: di Figma
-        // opacity-40 dipasang pada tombolnya, bukan pada teksnya.
+
         disabledForegroundColor: AppColors.onPrimary,
         minimumSize: const Size(0, 54),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
@@ -64,7 +62,6 @@ class AgroButton extends StatelessWidget {
   }
 }
 
-/// Tombol sekunder (garis hijau).
 class AgroOutlineButton extends StatelessWidget {
   const AgroOutlineButton({
     super.key,

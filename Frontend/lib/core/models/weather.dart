@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Cuaca hari ini, ditampilkan di kartu cuaca pada Home dan langkah wizard.
 @immutable
 class Weather {
   const Weather({
@@ -13,13 +12,10 @@ class Weather {
     this.forecast = const [],
   });
 
-  /// Nama kota, mis. "Surabaya".
   final String city;
 
-  /// Kondisi singkat, mis. "Sebagian Berawan".
   final String condition;
 
-  /// Suhu dalam derajat Celsius.
   final int temperature;
 
   final String? iconAsset;
@@ -28,12 +24,6 @@ class Weather {
 
   final String? windSpeed;
 
-  /// Ramalan beberapa hari ke depan untuk kota ini.
-  ///
-  /// Disimpan di objek yang sama karena backend menyajikan cuaca **per
-  /// tanaman** dalam satu respons (`GET /plants/{id}/weather`): hari ini dan
-  /// ramalan datang bersama, jadi memisahkannya hanya akan membuat dua
-  /// permintaan untuk data yang sama.
   final List<WeatherForecast> forecast;
 
   String get temperatureLabel => '$temperature°C';
@@ -61,7 +51,6 @@ class Weather {
   };
 }
 
-/// Satu hari pada ramalan cuaca.
 @immutable
 class WeatherForecast {
   const WeatherForecast({
@@ -72,7 +61,6 @@ class WeatherForecast {
     this.iconAsset,
   });
 
-  /// Nama hari, mis. "Sen".
   final String day;
 
   final String condition;

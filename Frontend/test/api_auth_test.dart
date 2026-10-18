@@ -10,8 +10,6 @@ import 'package:frontend/core/data/api/token_store.dart';
 import 'package:frontend/core/data/auth_repository.dart';
 import 'package:frontend/core/state/auth_controller.dart';
 
-/// Uji lapisan API autentikasi tanpa server: `http.Client` diganti klien
-/// tiruan, dan token disimpan di memori.
 void main() {
   const baseUrl = 'http://uji.test/api';
 
@@ -38,7 +36,6 @@ void main() {
 
   group('ApiClient', () {
     test('selalu mengirim Accept: application/json', () async {
-      // Tanpa header ini Laravel membalas 500, bukan 401 — lihat docs/testing.
       final ctx = build((_) async => http.Response('{"data":[]}', 200));
       await ctx.client.get('plants');
 
@@ -97,7 +94,7 @@ void main() {
       } on ApiException catch (e) {
         expect(e.isValidationFailure, isTrue);
         expect(e.fieldErrors['email'], 'Email sudah dipakai.');
-        // Hanya pesan pertama yang dipakai.
+
         expect(e.fieldErrors['password'], 'Minimal 8 karakter.');
       }
     });
@@ -145,7 +142,7 @@ void main() {
       expect(result.user!.name, 'Siti Aminah');
       expect(result.user!.joinedAt, DateTime.utc(2026, 1, 2, 3, 4, 5));
       expect(await ctx.tokens.read(), '1|TOKENRAHASIA');
-      // Payload dikirim sebagai JSON ke endpoint login.
+
       expect(ctx.calls.single.url.path, '/api/login');
     });
 
@@ -282,8 +279,7 @@ void main() {
 
       expect(ok, isFalse);
       expect(auth.status, AuthStatus.signedOut);
-      // Kunci `credentials` tidak punya kolom di layar, jadi harus muncul di
-      // banner umum — bukan hilang tanpa jejak.
+
       final errors = auth.consumeErrors();
       expect(errors['general'], 'Email atau password tidak cocok.');
       expect(errors.containsKey('credentials'), isFalse);
@@ -370,7 +366,7 @@ void main() {
         initialUser: null,
       );
       await auth.restoreSession();
-      expect(auth.status, AuthStatus.signedOut); // tidak ada `user` di balasan
+      expect(auth.status, AuthStatus.signedOut);
 
       await auth.signOut();
 

@@ -11,26 +11,11 @@ import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/models/soil_type.dart';
 
-/// Sumber data **khusus wizard "Tambah Tanaman"** (langkah 3–5).
-///
-/// Dipisahkan dari [PlantRepository] yang mengurus daftar tanaman: keempat
-/// operasi di sini memerlukan backend AI (`/soil-scan`, `/plant-recommendations`,
-/// `/locations`, `/plants`) sedangkan daftar tanaman masih dibaca dari
-/// [MockPlantRepository] sampai slice berikutnya menggantinya. Pemisahan ini
-/// membuat wizard bisa tersambung penuh tanpa memaksa Home/Detail pindah sekaligus.
-///
-/// [PlantRepository]: ../plant_repository.dart
 abstract class AddPlantRepository {
-  /// Tujuh jenis tanah design; lihat [SoilCatalog] — endpoint daftar tanah
-  /// tidak ada di backend karena itu memang katalog tampilan, bukan data.
   Future<List<SoilType>> getSoilTypes();
 
-  /// `POST /soil-scan`. [imagePath] adalah berkas hasil jepretan kamera
-  /// (`null` hanya pada mode contoh, karena pratinjau design tidak menyentuh
-  /// kamera).
   Future<SoilScanResult> scanSoil({String? imagePath});
 
-  /// `POST /plant-recommendations` — dijalankan saat langkah 4 dibuka.
   Future<List<PlantRecommendation>> getRecommendations({
     required PlantingMedia media,
     required SoilType soil,
@@ -38,9 +23,6 @@ abstract class AddPlantRepository {
     required String province,
   });
 
-  /// Menyimpan tanaman lewat `POST /plants` (lokasinya dibuat lebih dulu bila
-  /// belum ada). [description] diisi teks `reasoning` rekomendasi AI supaya
-  /// Detail Tanaman menampilkan kalimat sungguhan, bukan isian hampa.
   Future<Plant> createPlant({
     required String name,
     String? scientificName,
@@ -55,22 +37,13 @@ abstract class AddPlantRepository {
   });
 }
 
-/// Implementasi sungguhan di atas [ApiClient].
 class HttpAddPlantRepository implements AddPlantRepository {
   HttpAddPlantRepository({required ApiClient apiClient}) : _client = apiClient;
 
   final ApiClient _client;
 
-  /// Tiga endpoint di repositori ini memanggil model bahasa (dua di antaranya
-  /// dengan *grounding* Google Search) sehingga bisa memakan puluhan detik.
-  /// Waktu tunggu bawaan [ApiClient] (30 detik) terlalu pendek dan akan
-  /// memunculkan "Server tidak merespons" padahal permintaannya sedang diproses.
   static const Duration aiTimeout = Duration(seconds: 120);
 
-  /// Lokasi terakhir yang dibuat **untuk instance ini**, dipakai ulang bila
-  /// kota/provinsinya sama. Semua lokasi contoh design berada di Surabaya,
-  /// jadi tanpa cache ini setiap tanaman baru akan menumpuk baris lokasi yang
-  /// sama di backend.
   int? _locationId;
   String? _locationKey;
 
@@ -102,7 +75,7 @@ class HttpAddPlantRepository implements AddPlantRepository {
     final raw = body['ai_confidence'];
     return SoilScanResult(
       soil: SoilCatalog.byCode(code),
-      // Backend mengirim keyakinan 0–100; UI memakainya sebagai 0..1.
+
       confidence: raw is num ? (raw / 100).clamp(0, 1).toDouble() : 0,
     );
   }
@@ -123,8 +96,7 @@ class HttpAddPlantRepository implements AddPlantRepository {
 
     final items = (body['recommendations'] as List?) ?? const [];
     return [
-      for (final (index, raw) in items.indexed)
-        _toRecommendation(raw, index),
+      for (final (index, raw) in items.indexed) _toRecommendation(raw, index),
     ];
   }
 
@@ -148,22 +120,21 @@ class HttpAddPlantRepository implements AddPlantRepository {
     );
 
     final planting = plantingDate ?? DateTime.now();
-    final body = await _json(
-      'plants',
-      {
-        'location_id': locationId,
-        'plant_name': name,
-        'planting_medium': BackendCodes.plantingMedium(media),
-        'soil_type': BackendCodes.soilType(soil),
-        'current_phase': BackendCodes.phase(phase),
-        'planting_date': _dateOnly(planting),
-      },
-      timeout: aiTimeout,
-    );
+    final body = await _json('plants', {
+      'location_id': locationId,
+      'plant_name': name,
+      'planting_medium': BackendCodes.plantingMedium(media),
+      'soil_type': BackendCodes.soilType(soil),
+      'current_phase': BackendCodes.phase(phase),
+      'planting_date': _dateOnly(planting),
+    }, timeout: aiTimeout);
 
     final plant = body['plant'];
     if (plant is! Map<String, dynamic>) {
-      throw const ApiException(message: 'Tanaman tersimpan, tetapi balasannya tidak dikenali.', statusCode: 500);
+      throw const ApiException(
+        message: 'Tanaman tersimpan, tetapi balasannya tidak dikenali.',
+        statusCode: 500,
+      );
     }
 
     return _toPlant(
@@ -174,8 +145,6 @@ class HttpAddPlantRepository implements AddPlantRepository {
     );
   }
 
-  /// Membuat lokasi sekali per (kota, provinsi); `POST /plants` menuntut
-  /// `location_id` milik pengguna, sedangkan wizard hanya menyimpan nama tempat.
   Future<int> _ensureLocation({
     required String label,
     required String city,
@@ -194,7 +163,10 @@ class HttpAddPlantRepository implements AddPlantRepository {
     final location = body['location'];
     final id = location is Map<String, dynamic> ? location['id'] : null;
     if (id is! int) {
-      throw const ApiException(message: 'Lokasi tanam gagal disimpan.', statusCode: 500);
+      throw const ApiException(
+        message: 'Lokasi tanam gagal disimpan.',
+        statusCode: 500,
+      );
     }
 
     _locationId = id;
@@ -207,9 +179,16 @@ class HttpAddPlantRepository implements AddPlantRepository {
     Object body, {
     Duration? timeout,
   }) async {
-    final raw = await _client.post(path, body: body, timeout: timeout ?? aiTimeout);
+    final raw = await _client.post(
+      path,
+      body: body,
+      timeout: timeout ?? aiTimeout,
+    );
     if (raw is! Map<String, dynamic>) {
-      throw const ApiException(message: 'Balasan server tidak dikenali.', statusCode: 500);
+      throw const ApiException(
+        message: 'Balasan server tidak dikenali.',
+        statusCode: 500,
+      );
     }
     return raw;
   }
@@ -227,15 +206,14 @@ class HttpAddPlantRepository implements AddPlantRepository {
       timeout: aiTimeout,
     );
     if (raw is! Map<String, dynamic>) {
-      throw const ApiException(message: 'Balasan server tidak dikenali.', statusCode: 500);
+      throw const ApiException(
+        message: 'Balasan server tidak dikenali.',
+        statusCode: 500,
+      );
     }
     return raw;
   }
 
-  /// `plant_name`, `scores`, `reasoning`, `rank` — foto dan chip ruang tidak
-  /// dikirim backend, jadi diambil dari [PlantCatalog]. Kartu bernilai `rank` 1
-  /// saja yang diberi chip "Pilihan Terbaik": pada data contoh chip itu memang
-  /// menandai kartu paling sesuai.
   PlantRecommendation _toRecommendation(Object? raw, int index) {
     final json = raw is Map<String, dynamic> ? raw : const <String, dynamic>{};
     final name = (json['plant_name'] as String? ?? 'Tanaman').trim();
@@ -243,22 +221,14 @@ class HttpAddPlantRepository implements AddPlantRepository {
     final rank = json['rank'] is int ? json['rank'] as int : index + 1;
 
     return PlantRecommendation(
-      // Dipakai untuk mencocokkan kartu terpilih, jadi harus stabil antar-build.
       id: 'ai-$rank-${name.toLowerCase()}',
       name: name,
       photoAsset: visual?.photoAsset ?? PlantCatalog.fallbackPhoto,
       description: (json['reasoning'] as String? ?? '').trim(),
-      tags: [
-        if (rank == 1) PlantRecommendation.bestForTag,
-        ...?visual?.tags,
-      ],
+      tags: [if (rank == 1) PlantRecommendation.bestForTag, ...?visual?.tags],
     );
   }
 
-  /// `UserPlantResource` tidak memuat foto, deskripsi, ataupun jadwal
-  /// perawatan, jadi ketiganya diisi dari katalog dan teks yang sudah
-  /// dikumpulkan wizard. Pemetaannya sendiri ada di `PlantMapper` supaya
-  /// tanaman yang baru disimpan tampil sama dengan hasil `GET /plants`.
   Plant _toPlant(
     Map<String, dynamic> json, {
     required String? scientificName,
@@ -278,13 +248,9 @@ class HttpAddPlantRepository implements AddPlantRepository {
   }
 }
 
-/// Implementasi contoh (tanpa server) yang dipakai pratinjau design dan widget
-/// test. Perilakunya sengaja dibuat sama dengan [MockPlantRepository] supaya
-/// wizard tetap bisa ditelusuri sampai langkah 5 tanpa backend.
 class SampleAddPlantRepository implements AddPlantRepository {
   SampleAddPlantRepository();
 
-  /// Jeda buatan supaya indikator loading benar-benar terlihat.
   static const Duration _latency = Duration(milliseconds: 900);
 
   @override
@@ -296,7 +262,7 @@ class SampleAddPlantRepository implements AddPlantRepository {
   @override
   Future<SoilScanResult> scanSoil({String? imagePath}) async {
     await Future<void>.delayed(_latency);
-    // Hasil contoh: tanah gembur — jenis yang paling umum dipakai di design.
+
     return SoilScanResult(soil: SoilCatalog.types[1], confidence: 0.92);
   }
 
@@ -337,8 +303,7 @@ class SampleAddPlantRepository implements AddPlantRepository {
       scientificName: scientificName,
       photoAsset: visual?.photoAsset ?? source.photoAsset,
       location: city,
-      // Media tanam pilihan langkah 2 menentukan "MEDIA TANAM" di Detail
-      // Tanaman; labelnya dipakai langsung supaya kartu dan wizard seragam.
+
       place: media.label,
       media: media,
       status: CareStatus.safe,
@@ -351,8 +316,7 @@ class SampleAddPlantRepository implements AddPlantRepository {
       tags: visual?.tags ?? source.tags,
       fertilizer: soil.code == 'fertile' ? 'NPK Organik' : 'NPK Daun',
       soilName: soil.name,
-      // Tanaman baru selalu mulai dari nol: belum ada jadwal perawatan dan
-      // belum ada tonggak pertumbuhan yang terlewati.
+
       tasks: const [],
       timeline: const [],
     );

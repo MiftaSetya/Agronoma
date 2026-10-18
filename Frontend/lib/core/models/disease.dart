@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Penanganan dimodelkan sebagai pasangan judul+paragraf karena di design
-/// (`Disease Drawer`, node `253:2575`) langkahnya digambar sebagai garis
-/// waktu bernomor, bukan daftar teks biasa.
 @immutable
 class DiseaseStep {
   const DiseaseStep({required this.title, required this.detail});
@@ -18,7 +15,6 @@ class DiseaseStep {
   Map<String, dynamic> toJson() => {'title': title, 'detail': detail};
 }
 
-/// Hasil deteksi penyakit tanaman.
 @immutable
 class Disease {
   const Disease({
@@ -36,24 +32,16 @@ class Disease {
   final String name;
   final String scientificName;
 
-  /// Jenis, mis. "Jamur" / "Bakteri" / "Hama".
   final String diseaseType;
 
-  /// Penyebab penyakit; belum tampil di layar mana pun, tetap disimpan
-  /// sebagai bagian wajar dari satu hasil diagnosis untuk backend/detail
-  /// penyakit nanti.
   final String cause;
 
-  /// Daftar gejala; juga belum ditampilkan (lihat [cause]).
   final List<String> symptoms;
 
-  /// Digambar sebagai garis waktu di drawer hasil.
   final List<DiseaseStep> steps;
 
-  /// Tingkat keyakinan 0–1.
   final double confidence;
 
-  /// Tingkat keparahan, mis. "Ringan" / "Sedang" / "Berat".
   final String severity;
 
   final String? photoAsset;

@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_text_styles.dart';
 
-/// Skala jarak, kelipatan 4. Design digambar pada kanvas 440px dengan
-/// padding halaman **16px** (diukur dari `Home`, `Profile`, dan
-/// `Plant detail`).
 class AppSpacing {
   AppSpacing._();
   static const double xs = 4;
@@ -16,15 +13,11 @@ class AppSpacing {
   static const double xxl = 24;
   static const double xxxl = 32;
 
-  /// Padding horizontal standar halaman. Isi kartu kadang memakai 20, tetapi
-  /// kerangka halaman selalu 16 (lebar kartu 408 dari kanvas 440).
   static const double page = 16;
 
-  /// Jarak aman dari tepi bawah untuk konten di atas home indicator.
   static const double bottomGutter = 24;
 }
 
-/// Radius sudut, diukur dari bentuk kartu, field, dan tombol pada design.
 class AppRadius {
   AppRadius._();
   static const double chip = 999;
@@ -35,8 +28,6 @@ class AppRadius {
   static const double xl = 20;
   static const double sheet = 24;
 
-  /// `Disease Drawer` memakai 32 — lebih besar dari sheet biasa supaya
-  /// terlihat seperti panel yang bisa ditarik naik.
   static const double sheetLarge = 32;
 
   static const BorderRadius chipAll = BorderRadius.all(Radius.circular(chip));
@@ -50,7 +41,6 @@ class AppRadius {
   );
 }
 
-/// Tinggi komponen yang berulang di banyak screen.
 class AppSizes {
   AppSizes._();
   static const double buttonHeight = 50;
@@ -61,20 +51,11 @@ class AppSizes {
   static const double listImage = 64;
   static const double hitTarget = 48;
 
-  /// Semua jarak di design diukur pada kanvas Figma 440x956
-  /// (iPhone 16 Pro Max).
   static const double designWidth = 440;
   static const double designHeight = 956;
 
-  /// Status bar iPhone 16 Pro Max. Design menggambar seluruh isi layar mulai
-  /// dari baris 64, sedangkan status bar Android rata-rata hanya ~32px — tanpa
-  /// normalisasi, tiap layar meleset 32px ke atas. Inset atas diseragamkan
-  /// sekali lewat [normalizeTopInset], bukan ditambal per layar.
   static const double designStatusBar = 64;
 
-  /// Menyamakan inset atas dengan area status bar pada design dengan mengambil
-  /// nilai terbesar antara inset sistem dan [designStatusBar] — inset sengaja
-  /// tidak pernah dikecilkan agar konten tetap aman di perangkat berponi.
   static double normalizeTopInset(BuildContext context) {
     final systemInset = MediaQuery.of(context).padding.top;
     return systemInset < designStatusBar ? designStatusBar : systemInset;

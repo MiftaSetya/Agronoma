@@ -11,14 +11,9 @@ import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/models/soil_type.dart';
 import 'package:frontend/core/models/weather.dart';
 
-/// Data contoh untuk seluruh alur aplikasi. Isinya diambil dari teks asli
-/// design Figma (nama tanaman, kota, angka statistik) supaya hasil render
-/// bisa dibandingkan langsung dengan frame aslinya.
 class MockData {
   MockData._();
 
-  /// Titik acuan waktu supaya umur tanaman di data contoh stabil untuk
-  /// screenshot (bukan berubah tiap hari).
   static DateTime _daysAgo(int days) =>
       DateTime.now().subtract(Duration(days: days));
 
@@ -66,7 +61,6 @@ class MockData {
     ),
   ];
 
-  /// Empat titik pada "Fase Pertumbuhan", berurutan seperti [GrowthPhase].
   static const List<String> growthPhaseSteps = [
     'Semai Biji',
     'Vegetatif Awal',
@@ -202,9 +196,6 @@ class MockData {
     ),
   ];
 
-  /// Tiga lokasi contoh di sekitar Surabaya. Nama dan alamatnya disalin dari
-  /// design; koordinat diambil dari alamat aslinya supaya peta sungguhan
-  /// ([AgroMap]) menunjuk tempat yang benar-benar ada.
   static const List<MapLocation> locations = [
     MapLocation(
       name: 'Politeknik Elektronika Negeri Surabaya',
@@ -231,18 +222,8 @@ class MockData {
     ),
   ];
 
-  /// Tujuh jenis tanah pada daftar "Saya Tahu Jenis Tanah" (frame `113:765`).
-  ///
-  /// Katalognya sendiri ada di [SoilCatalog] karena jenis tanah bukan data
-  /// contoh: backend tidak menyediakan endpoint daftarnya, jadi daftar yang
-  /// sama dipakai mode contoh maupun mode sungguhan.
   static const List<SoilType> soilTypes = SoilCatalog.types;
 
-  /// Teks kartu rekomendasi diambil persis dari frame
-  /// `Add Plant 4 - AI Recommendation` (`336:2882`) untuk perbandingan
-  /// render. Chip "Pilihan Terbaik" di design tampil pada dua kartu pertama,
-  /// dan spasi nyasar di awal nama `' Lidah Mertua (Sansevieria)'` sengaja
-  /// tidak disalin (kecelakaan pengetikan, bukan maksud design).
   static final List<PlantRecommendation> recommendations = [
     PlantRecommendation(
       id: 'r1',
@@ -275,8 +256,6 @@ class MockData {
     ),
   ];
 
-  /// Isi hasil diagnosa persis mengikuti frame `Disease Drawer` (`253:2575`)
-  /// supaya render bisa dibandingkan langsung dengan design.
   static const Disease disease = Disease(
     name: 'Karat Daun',
     scientificName: 'Infeksi Jamur (Pucciniomycetes)',
@@ -318,7 +297,8 @@ class MockData {
 
   static const ChatMessage greeting = ChatMessage(
     author: ChatAuthor.bot,
-    text: 'Halo! Ada yang bisa saya bantu terkait perawatan tanamanmu hari ini?',
+    text:
+        'Halo! Ada yang bisa saya bantu terkait perawatan tanamanmu hari ini?',
   );
 
   static const List<String> chatSuggestions = [
@@ -327,8 +307,6 @@ class MockData {
     'Kapan waktu terbaik memupuk tanaman?',
   ];
 
-  /// Jawaban dicocokkan dengan kata kunci sederhana supaya pertanyaan
-  /// lanjutan tetap masuk akal tanpa backend.
   static String chatReply(String question) {
     final q = question.toLowerCase();
     if (q.contains('menggulung')) {

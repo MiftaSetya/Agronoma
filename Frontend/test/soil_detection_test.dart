@@ -11,15 +11,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_camera_view.dart';
 import 'package:frontend/features/add_plant/soil_detection_screen.dart';
 
-/// Uji layar kamera "Deteksi Jenis Tanah" (frame `101:701`).
-///
-/// Kamera platform tidak tersedia di widget test, jadi yang diuji di sini
-/// adalah **mode contoh** ([CameraScope.sampleOnly]): foto design dipakai dan
-/// plugin tidak pernah disentuh. Perilaku kamera sungguhan diverifikasi di
-/// emulator (lihat `docs/testing.md`).
 class _FakeRepository implements AddPlantRepository {
-  /// Dipanggil saat rana ditekan; disimpan supaya uji bisa memastikan foto
-  /// jepretan memang diteruskan ke repositori (mode contoh: null).
   String? lastImagePath;
 
   @override
@@ -33,15 +25,12 @@ class _FakeRepository implements AddPlantRepository {
 }
 
 void main() {
-  /// Kanvas design 440x956 supaya koordinat rana bisa dipakai apa adanya.
   void useDesignSize(WidgetTester tester) {
     tester.view.physicalSize = const Size(440, 956);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
   }
 
-  /// Transisi rute diselesaikan dengan `pump` berdurasi tetap supaya tidak
-  /// bergantung pada ada/tidaknya animasi berulang di layar kamera.
   Future<void> settleRoute(WidgetTester tester) async {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -64,9 +53,10 @@ void main() {
     await tester.pumpWidget(wrap(const SoilDetectionScreen()));
     await tester.pump();
 
-    // Tanpa implementasi plugin, memanggil kamera akan melempar
-    // MissingPluginException — kalau foto ini muncul, plugin memang dilewati.
-    expect(find.image(const AssetImage(AppAssets.photoPotSoil)), findsOneWidget);
+    expect(
+      find.image(const AssetImage(AppAssets.photoPotSoil)),
+      findsOneWidget,
+    );
     expect(find.text('Deteksi Jenis Tanah'), findsOneWidget);
     expect(find.text('Arahkan kamera ke permukaan tanah'), findsOneWidget);
   });
@@ -75,8 +65,7 @@ void main() {
     tester,
   ) async {
     useDesignSize(tester);
-    // Tanpa CameraScope: plugin tidak ada di widget test, jadi AgroCameraView
-    // mencatat kegagalannya dan tetap menggambar foto contoh.
+
     await tester.pumpWidget(
       ChangeNotifierProvider<AddPlantController>(
         create: (_) => AddPlantController(dataSource: _FakeRepository()),
@@ -87,7 +76,10 @@ void main() {
 
     expect(find.byType(AgroCameraView), findsOneWidget);
     expect(find.text('Deteksi Jenis Tanah'), findsOneWidget);
-    expect(find.image(const AssetImage(AppAssets.photoPotSoil)), findsOneWidget);
+    expect(
+      find.image(const AssetImage(AppAssets.photoPotSoil)),
+      findsOneWidget,
+    );
   });
 
   testWidgets('menekan rana menandai tanah terdeteksi lalu menutup layar', (
@@ -121,19 +113,16 @@ void main() {
     await settleRoute(tester);
     expect(controller.draft.soilDetected, isFalse);
 
-    // Rana bundar 80px di tengah baris kontrol (baris 734, tinggi 223).
     await tester.tapAt(const Offset(220, 845.5));
-    await tester.pump(); // ganti ke keadaan "menganalisis"
-    await settleRoute(tester); // analisis selesai → jenis tanah tersimpan → pop
+    await tester.pump();
+    await settleRoute(tester);
 
     expect(controller.draft.soilDetected, isTrue);
     expect(controller.draft.soil, SoilCatalog.types[1]);
-    // Mode contoh tidak punya berkas jepretan, jadi jalurnya null — tetapi
-    // jalurnya tetap diteruskan supaya backend bisa dikirimi foto saat kamera
-    // sungguhan yang menjepret.
+
     expect(repository.lastImagePath, isNull);
     expect(controller.draft.soilPhotoPath, isNull);
-    // Layar sudah ditutup, kembali ke tombol pembuka.
+
     expect(find.text('buka'), findsOneWidget);
   });
 }

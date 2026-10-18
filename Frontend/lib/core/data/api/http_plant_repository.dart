@@ -6,24 +6,11 @@ import 'package:frontend/core/data/plant_repository.dart';
 import 'package:frontend/core/data/soil_catalog.dart';
 import 'package:frontend/core/models/plant.dart';
 
-/// Sumber data tanaman yang berbicara ke backend sungguhan.
-///
-/// Dua keputusan bentuk:
-///
-/// 1. **Tugas perawatan dibaca per tanaman.** `GET /plants` tidak memuat
-///    jadwal; `care-calendar` butuh satu permintaan per tanaman. Beranda hanya
-///    butuh `badge_status` (sudah ada di daftar), jadi kalender baru dibaca saat
-///    layar Detail Tanaman diminta — lihat [tasksFor].
-/// 2. **Pemetaan dipakai bersama wizard.** [PlantMapper] dipakai di sini dan di
-///    `HttpAddPlantRepository` supaya tanaman yang baru disimpan tidak "berubah
-///    wujud" setelah Beranda memuat ulang dari `GET /plants`.
 class HttpPlantRepository implements PlantRepository {
   HttpPlantRepository({required ApiClient apiClient}) : _api = apiClient;
 
   final ApiClient _api;
 
-  /// Aksi perawatan yang boleh memakan waktu lebih lama dari permintaan biasa
-  /// (backend menghitung ulang jadwal setelah log ditulis).
   static const Duration _actionTimeout = Duration(seconds: 20);
 
   @override
@@ -48,24 +35,8 @@ class HttpPlantRepository implements PlantRepository {
     return PlantMapper.fromBackend(raw);
   }
 
-  /// Tugas "Perawatan Hari Ini" dari `GET /plants/{id}/care-calendar`.
-  ///
-  /// [dueFertilizer] diisi pemanggil dari `badge_status` tanaman (`Perlu Pupuk`),
-  /// karena jadwal pupuk yang belum dikerjakan tidak muncul sebagai baris
-  /// kalender — lihat catatan di [PlantSchedule.tasksForToday].
-  /// Entri care-calendar bulan berjalan dari
-  /// `GET /plants/{id}/care-calendar`.
-  ///
-  /// Seluruh bulan diminta sekali, lalu dipakai dua-duanya: tugas hari ini
-  /// (lewat `PlantSchedule.tasksForToday` di controller) dan kartu "Kalender
-  /// Perawatan". Status `need_water`/`watered` adalah satu-satunya cara
-  /// mengetahui apa yang harus dikerjakan hari ini; `badge_status` pada
-  /// `GET /plants` hanya ringkasannya.
   @override
-  Future<List<CareDay>> careDays(
-    Plant plant, {
-    required DateTime today,
-  }) async {
+  Future<List<CareDay>> careDays(Plant plant, {required DateTime today}) async {
     final month = '${today.year}-${today.month.toString().padLeft(2, '0')}';
     final body = await _api.get(
       'plants/${plant.id}/care-calendar',
@@ -80,21 +51,6 @@ class HttpPlantRepository implements PlantRepository {
     ];
   }
 
-  /// Menandai satu jenis tugas selesai.
-  ///
-  /// Backend tidak punya endpoint "centang tugas": penyiraman dan pemupukan
-  /// masing-masing punya endpoint sendiri yang mencatat log **hari ini**, jadi
-  /// jenis tugas dipakai untuk memilih endpoint yang tepat.
-  ///
-  /// Yang dikirim adalah [CareTaskKind], bukan judul tugas: judul adalah teks
-  /// tampilan yang boleh berubah kapan saja, dan menebak endpoint dari
-  /// `title.contains('pupuk')` akan mengirim aksi pemupukan setiap kali sebuah
-  /// tugas penyiraman kebetulan memuat kata itu.
-  ///
-  /// Membatalkan centang tidak punya padanan di API (log yang sudah tercatat
-  /// tidak bisa dihapus lewat endpoint ini), jadi hanya "selesai" yang dikirim.
-  /// Tanaman hasil muat ulang akan tetap menunjukkan tugas itu tercentang —
-  /// jujur, karena backend memang mencatatnya.
   @override
   Future<Plant> setTaskDone(
     String plantId,
@@ -112,12 +68,6 @@ class HttpPlantRepository implements PlantRepository {
     return getPlant(plantId);
   }
 
-  /// Menyimpan hasil drawer "Setelan Tanaman".
-  ///
-  /// `PATCH /plants/{id}` menerima `current_phase`, `plant_name`,
-  /// `planting_medium`, dan `soil_type` (ketiganya kolom asli di `user_plants`).
-  /// Lokasi tidak dikirim: memindahkan tanaman berarti membuat/memilih
-  /// `location_id` lain, dan itu alur tersendiri.
   @override
   Future<Plant> updatePlant(
     String plantId, {

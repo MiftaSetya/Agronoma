@@ -7,20 +7,12 @@ import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/models/soil_type.dart';
 
-/// Menyimpan isian wizard "Tambah Tanaman" yang terbagi atas lima langkah
-/// dengan rute masing-masing, sehingga tiap langkah bisa membaca hasil
-/// langkah sebelumnya dari satu controller yang sama.
 class AddPlantController extends ChangeNotifier {
-  /// Nama parameter dibedakan dari field agar lint
-  /// `prefer_initializing_formals` tidak menyarankan `this._repository`.
   AddPlantController({required AddPlantRepository dataSource})
     : _repository = dataSource;
 
   final AddPlantRepository _repository;
 
-  /// Dipakai saat wizard dibuka langsung di langkah 3/4 (pratinjau design dan
-  /// widget test) sehingga kota/provinsi belum pernah dipilih: lokasi contoh
-  /// design semuanya berada di Surabaya.
   static const String fallbackCity = 'Surabaya';
   static const String fallbackProvince = 'Jawa Timur';
 
@@ -36,14 +28,10 @@ class AddPlantController extends ChangeNotifier {
   bool get isLoading => _loading;
   Object? get error => _error;
 
-  /// Media tanam pilihan langkah 2; `pot` dipakai bila langkah itu dilewati.
-  PlantingMedia get media =>
-      _draft.media == null
-          ? PlantingMedia.pot
-          : PlantingMedia.values.byName(_draft.media!);
+  PlantingMedia get media => _draft.media == null
+      ? PlantingMedia.pot
+      : PlantingMedia.values.byName(_draft.media!);
 
-  /// Jenis tanah pilihan langkah 3; "Tanah gembur" dipakai bila dilewati
-  /// (langkah 3 bisa dilompati lewat tautan langsung ke langkah 4).
   SoilType get soil => _draft.soil ?? SoilCatalog.types[1];
 
   String get city => _draft.locationCity ?? fallbackCity;
@@ -96,9 +84,6 @@ class AddPlantController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Menganalisis foto tanah lewat `POST /soil-scan`, lalu menyimpan jenis
-  /// tanahnya ke draft. Mengembalikan `null` bila gagal — pesannya bisa dibaca
-  /// dari [error] dan layar kamera menampilkannya tanpa ikut ditutup.
   Future<SoilScanResult?> scanSoil({String? imagePath}) async {
     _loading = true;
     _error = null;
@@ -120,8 +105,6 @@ class AddPlantController extends ChangeNotifier {
     }
   }
 
-  /// Dipakai pratinjau design yang menyemai keadaan hasil analisis tanpa
-  /// memanggil kamera; [soil] boleh kosong (memakai jenis tanah pertama).
   void markSoilDetected({SoilType? soil, String? photoPath}) {
     _draft = _draft.copyWith(
       soilDetected: true,
@@ -150,8 +133,6 @@ class AddPlantController extends ChangeNotifier {
     }
   }
 
-  /// Memilih kartu rekomendasi AI; kartu manual dibuang karena hanya satu
-  /// tanaman yang bisa dipilih.
   void selectRecommendation(PlantRecommendation recommendation) {
     _draft = _draft.copyWith(
       recommendation: recommendation,
@@ -160,9 +141,6 @@ class AddPlantController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Mengisi tanaman secara manual (sheet "Tambah manual tanaman"). Pilihan
-  /// kartu rekomendasi dibuang supaya kartu manual menggantikan pilihan AI,
-  /// bukan tersembunyi di belakangnya.
   void setManualPlant(String name, String? scientificName) {
     _draft = _draft.copyWith(
       manualName: name.trim(),
@@ -177,9 +155,6 @@ class AddPlantController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Menyimpan tanaman ke backend (`POST /plants`), termasuk membuat lokasi
-  /// bila belum ada dan meminta jadwal perawatan dari AI. Deskripsi diambil
-  /// dari kalimat `reasoning` rekomendasi supaya Detail Tanaman tidak kosong.
   Future<Plant> savePlant({DateTime? plantingDate}) {
     return _repository.createPlant(
       name: _draft.resolvedName,
@@ -197,7 +172,6 @@ class AddPlantController extends ChangeNotifier {
     );
   }
 
-  /// Mengosongkan seluruh draft, dipakai saat memulai wizard dari awal.
   void reset() {
     _draft = const AddPlantDraft();
     _recommendations = const [];

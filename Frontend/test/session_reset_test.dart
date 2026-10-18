@@ -134,22 +134,23 @@ void main() {
     expect(auth.user!.careScore, 67);
   });
 
-  testWidgets('clearLocalSession mengosongkan pengguna tanpa memanggil server', (
-    tester,
-  ) async {
-    final repo = _StatsAuthRepository();
-    final auth = AuthController(
-      authSource: repo,
-      initialUser: _user(totalPlants: 0, harvested: 0, score: 0),
-    );
+  testWidgets(
+    'clearLocalSession mengosongkan pengguna tanpa memanggil server',
+    (tester) async {
+      final repo = _StatsAuthRepository();
+      final auth = AuthController(
+        authSource: repo,
+        initialUser: _user(totalPlants: 0, harvested: 0, score: 0),
+      );
 
-    expect(auth.isSignedIn, isTrue);
+      expect(auth.isSignedIn, isTrue);
 
-    auth.clearLocalSession();
+      auth.clearLocalSession();
 
-    expect(auth.isSignedIn, isFalse);
-    expect(repo.logoutCalls, 0);
-  });
+      expect(auth.isSignedIn, isFalse);
+      expect(repo.logoutCalls, 0);
+    },
+  );
 }
 
 AppUser _user({
@@ -173,11 +174,8 @@ class _StatsAuthRepository implements AuthRepository {
   Future<bool> hasSession() async => true;
 
   @override
-  Future<AppUser?> currentUser() async => _user(
-    totalPlants: 0,
-    harvested: 0,
-    score: 0,
-  );
+  Future<AppUser?> currentUser() async =>
+      _user(totalPlants: 0, harvested: 0, score: 0);
 
   @override
   Future<AppUser> refreshStats(AppUser user) async =>

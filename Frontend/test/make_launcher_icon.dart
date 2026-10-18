@@ -4,12 +4,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Membuat ikon launcher Agronoma dari logo SVG (jalankan:
-/// `flutter test test/make_launcher_icon.dart`, lalu salin hasilnya ke
-/// `android/app/src/main/res/mipmap-*/ic_launcher.png`).
-///
-/// Latar putih polos: ikon adaptif Android memotong lingkaran di tengah, jadi
-/// logo diberi margin supaya tidak tersentuh potongan.
 void main() {
   test('membuat ikon launcher', () async {
     const size = 1024;
@@ -28,7 +22,6 @@ void main() {
   });
 }
 
-/// Menggambar logo Agronoma (SVG asli 48x60) di tengah kanvas persegi.
 class _LogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, ui.Size size) {
@@ -36,10 +29,10 @@ class _LogoPainter extends CustomPainter {
 
     const marginRatio = 0.22;
     final margin = size.width * marginRatio;
-    final dst = Offset(margin, margin) &
+    final dst =
+        Offset(margin, margin) &
         ui.Size(size.width - margin * 2, size.height - margin * 2);
 
-    // Rasio asli logo 48:60.
     const srcRatio = 48 / 60;
     var w = dst.width;
     var h = w / srcRatio;
@@ -57,7 +50,6 @@ class _LogoPainter extends CustomPainter {
     canvas.restore();
   }
 
-  /// Menggambar ulang bentuk logo (path asli dari SVG `0984935e…`).
   void _drawLogo(ui.Canvas canvas) {
     final green = ui.Paint()..color = const Color(0xFF6D9C25);
     final brown = ui.Paint()..color = const Color(0xFF89582B);

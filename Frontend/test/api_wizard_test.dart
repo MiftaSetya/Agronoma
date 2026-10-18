@@ -16,9 +16,6 @@ import 'package:frontend/core/data/soil_catalog.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 
-/// Uji lapisan HTTP wizard "Tambah Tanaman" tanpa server: `http.Client`
-/// diganti klien tiruan sehingga bentuk permintaan dan pemetaan balasan bisa
-/// dipastikan. Kontraknya diambil dari `PlantWizardController` di backend.
 void main() {
   const baseUrl = 'http://uji.test/api';
 
@@ -47,13 +44,18 @@ void main() {
       expect(BackendCodes.plantingMedium(PlantingMedia.pot), 'pot');
       expect(BackendCodes.plantingMedium(PlantingMedia.ground), 'home_yard');
       expect(BackendCodes.plantingMedium(PlantingMedia.openField), 'open_land');
-      // Nama enum design tidak sama dengan kontrak backend, jadi pemetaannya
-      // wajib; kalau tidak, `planting_medium` akan ditolak validasi 422.
-      expect(BackendCodes.plantingMedium(PlantingMedia.ground), isNot('ground'));
+
+      expect(
+        BackendCodes.plantingMedium(PlantingMedia.ground),
+        isNot('ground'),
+      );
     });
 
     test('fase pertumbuhan diterjemahkan bolak-balik', () {
-      expect(BackendCodes.phase(GrowthPhase.vegetativeEarly), 'early_vegetative');
+      expect(
+        BackendCodes.phase(GrowthPhase.vegetativeEarly),
+        'early_vegetative',
+      );
       expect(
         BackendCodes.phaseFrom('early_vegetative'),
         GrowthPhase.vegetativeEarly,
@@ -66,13 +68,16 @@ void main() {
 
     test('badge backend dipetakan ke kondisi kartu Home', () {
       expect(BackendCodes.badgeStatus('perlu_disiram'), CareStatus.needsWater);
-      expect(BackendCodes.badgeStatus('perlu_pupuk'), CareStatus.needsFertilizer);
+      expect(
+        BackendCodes.badgeStatus('perlu_pupuk'),
+        CareStatus.needsFertilizer,
+      );
       expect(BackendCodes.badgeStatus('kondisi_aman'), CareStatus.safe);
     });
 
     test('kode tanah tak dikenal jatuh ke jenis paling umum', () {
       expect(BackendCodes.soilTypeFrom('volcanic').code, 'volcanic');
-      // Enum backend bisa bertambah tanpa aplikasi ikut diubah.
+
       expect(BackendCodes.soilTypeFrom('entah_apa'), SoilCatalog.types[1]);
     });
   });
@@ -95,63 +100,67 @@ void main() {
   });
 
   group('HttpAddPlantRepository.getRecommendations', () {
-    test('mengirim media, tanah, kota, dan provinsi lalu memetakan balasan', () async {
-      final ctx = build(
-        (_) async => http.Response(
-          jsonEncode({
-            'recommendations': [
-              {
-                'rank': 1,
-                'plant_name': 'Cabai Rawit',
-                'scores': {
-                  'location_climate_fit': 9,
-                  'productivity': 8,
-                  'ease_of_care': 7,
+    test(
+      'mengirim media, tanah, kota, dan provinsi lalu memetakan balasan',
+      () async {
+        final ctx = build(
+          (_) async => http.Response(
+            jsonEncode({
+              'recommendations': [
+                {
+                  'rank': 1,
+                  'plant_name': 'Cabai Rawit',
+                  'scores': {
+                    'location_climate_fit': 9,
+                    'productivity': 8,
+                    'ease_of_care': 7,
+                  },
+                  'reasoning': 'Suhu terik Surabaya cocok untuk cabai rawit.',
+                  'estimated_harvest_days': 90,
                 },
-                'reasoning': 'Suhu terik Surabaya cocok untuk cabai rawit.',
-                'estimated_harvest_days': 90,
-              },
-              {
-                'rank': 2,
-                'plant_name': 'Lidah Mertua (Sansevieria)',
-                'scores': {
-                  'location_climate_fit': 8,
-                  'productivity': 6,
-                  'ease_of_care': 9,
+                {
+                  'rank': 2,
+                  'plant_name': 'Lidah Mertua (Sansevieria)',
+                  'scores': {
+                    'location_climate_fit': 8,
+                    'productivity': 6,
+                    'ease_of_care': 9,
+                  },
+                  'reasoning': 'Minim perawatan.',
+                  'estimated_harvest_days': null,
                 },
-                'reasoning': 'Minim perawatan.',
-                'estimated_harvest_days': null,
-              },
-            ],
-          }),
-          200,
-        ),
-      );
+              ],
+            }),
+            200,
+          ),
+        );
 
-      final result = await ctx.repo.getRecommendations(
-        media: PlantingMedia.ground,
-        soil: SoilCatalog.types[1],
-        city: 'Surabaya',
-        province: 'Jawa Timur',
-      );
+        final result = await ctx.repo.getRecommendations(
+          media: PlantingMedia.ground,
+          soil: SoilCatalog.types[1],
+          city: 'Surabaya',
+          province: 'Jawa Timur',
+        );
 
-      // Permintaan benar-benar memakai kode enum backend.
-      final sent = bodyOf(ctx.calls.single);
-      expect(sent['planting_medium'], 'home_yard');
-      expect(sent['soil_type'], 'fertile');
-      expect(sent['city'], 'Surabaya');
-      expect(sent['province'], 'Jawa Timur');
+        final sent = bodyOf(ctx.calls.single);
+        expect(sent['planting_medium'], 'home_yard');
+        expect(sent['soil_type'], 'fertile');
+        expect(sent['city'], 'Surabaya');
+        expect(sent['province'], 'Jawa Timur');
 
-      // `reasoning` jadi deskripsi kartu; backend tidak mengirim foto.
-      expect(result.first.name, 'Cabai Rawit');
-      expect(result.first.description, contains('Surabaya'));
-      expect(result.first.photoAsset, AppAssets.photoCabaiRawit);
-      // Chip "Pilihan Terbaik" hanya untuk kartu peringkat 1.
-      expect(result.first.tags, contains(PlantRecommendation.bestForTag));
-      expect(result.last.tags, isNot(contains(PlantRecommendation.bestForTag)));
-      // Id kartu harus stabil agar pilihan bisa dipertahankan antar-build.
-      expect(result.first.id, 'ai-1-cabai rawit');
-    });
+        expect(result.first.name, 'Cabai Rawit');
+        expect(result.first.description, contains('Surabaya'));
+        expect(result.first.photoAsset, AppAssets.photoCabaiRawit);
+
+        expect(result.first.tags, contains(PlantRecommendation.bestForTag));
+        expect(
+          result.last.tags,
+          isNot(contains(PlantRecommendation.bestForTag)),
+        );
+
+        expect(result.first.id, 'ai-1-cabai rawit');
+      },
+    );
 
     test('balasan tanpa rekomendasi menghasilkan daftar kosong', () async {
       final ctx = build(
@@ -174,23 +183,16 @@ void main() {
     test('mengunggah foto dan memetakan jenis tanah + keyakinan', () async {
       final ctx = build(
         (_) async => http.Response(
-          jsonEncode({
-            'detected_soil_type': 'volcanic',
-            'ai_confidence': 95,
-          }),
+          jsonEncode({'detected_soil_type': 'volcanic', 'ai_confidence': 95}),
           200,
         ),
       );
 
-      // Berkas nyata tidak diperlukan: berkas sementara dengan isi apa pun.
       final file = _tempImage();
       addTearDown(() => file.deleteSync());
 
       final result = await ctx.repo.scanSoil(imagePath: file.path);
 
-      // Multipart: nama field wajib `image` (divalidasi `image` di backend).
-      // Isi body memuat byte gambar mentah, jadi dibaca sebagai latin1 —
-      // decoding UTF-8 akan melempar FormatException.
       final request = ctx.calls.single;
       expect(request.method, 'POST');
       expect(request.url.path, '/api/soil-scan');
@@ -202,7 +204,7 @@ void main() {
       expect(request.headers['Authorization'], 'Bearer token-abc');
 
       expect(result.soil, SoilCatalog.byCode('volcanic'));
-      // Backend mengirim 0–100; UI memakai 0..1.
+
       expect(result.confidence, closeTo(0.95, 0.0001));
       expect(result.confidencePercent, 95);
     });
@@ -275,7 +277,7 @@ void main() {
 
       final sent = bodyOf(ctx.calls.last);
       expect(ctx.calls.last.url.path, '/api/plants');
-      // `POST /plants` menuntut location_id milik pengguna.
+
       expect(sent['location_id'], 7);
       expect(sent['plant_name'], 'Cabai Rawit');
       expect(sent['planting_medium'], 'home_yard');
@@ -283,7 +285,6 @@ void main() {
       expect(sent['current_phase'], 'seedling');
       expect(sent['planting_date'], '2026-10-16');
 
-      // Balasan backend dipetakan ke model Plant milik aplikasi.
       expect(plant.id, '12');
       expect(plant.name, 'Cabai Rawit');
       expect(plant.media, PlantingMedia.ground);
@@ -340,7 +341,6 @@ void main() {
         );
       }
 
-      // Tanpa cache ini setiap tanaman baru menumpuk baris lokasi yang sama.
       final locationCalls = ctx.calls
           .where((c) => c.url.path.endsWith('/locations'))
           .length;
@@ -348,56 +348,56 @@ void main() {
       expect(ctx.calls, hasLength(3));
     });
 
-    test('tanpa deskripsi AI, deskripsi disusun dari media dan tanah', () async {
-      final ctx = build((request) async {
-        if (request.url.path.endsWith('/locations')) {
+    test(
+      'tanpa deskripsi AI, deskripsi disusun dari media dan tanah',
+      () async {
+        final ctx = build((request) async {
+          if (request.url.path.endsWith('/locations')) {
+            return http.Response(
+              jsonEncode({
+                'location': {'id': 7, 'city': 'Surabaya'},
+              }),
+              201,
+            );
+          }
           return http.Response(
             jsonEncode({
-              'location': {'id': 7, 'city': 'Surabaya'},
+              'plant': {
+                'id': 12,
+                'plant_name': 'Tanaman Baru',
+                'planting_medium': 'pot',
+                'soil_type': 'clay',
+                'current_phase': 'seedling',
+                'planting_date': '2026-10-16',
+                'badge_status': 'kondisi_aman',
+              },
             }),
             201,
           );
-        }
-        return http.Response(
-          jsonEncode({
-            'plant': {
-              'id': 12,
-              'plant_name': 'Tanaman Baru',
-              'planting_medium': 'pot',
-              'soil_type': 'clay',
-              'current_phase': 'seedling',
-              'planting_date': '2026-10-16',
-              'badge_status': 'kondisi_aman',
-            },
-          }),
-          201,
+        });
+
+        final plant = await ctx.repo.createPlant(
+          name: 'Tanaman Baru',
+          media: PlantingMedia.pot,
+          soil: SoilCatalog.byCode('clay'),
+          city: 'Surabaya',
+          province: 'Jawa Timur',
+          locationLabel: 'Rumah Kaca Sukolilo',
+          phase: GrowthPhase.seedling,
         );
-      });
 
-      final plant = await ctx.repo.createPlant(
-        name: 'Tanaman Baru',
-        media: PlantingMedia.pot,
-        soil: SoilCatalog.byCode('clay'),
-        city: 'Surabaya',
-        province: 'Jawa Timur',
-        locationLabel: 'Rumah Kaca Sukolilo',
-        phase: GrowthPhase.seedling,
-      );
+        expect(plant.description, isNotEmpty);
+        expect(
+          plant.description,
+          contains(PlantingMedia.pot.label.toLowerCase()),
+        );
 
-      expect(plant.description, isNotEmpty);
-      expect(
-        plant.description,
-        contains(PlantingMedia.pot.label.toLowerCase()),
-      );
-      // Nama dari AI tidak ada di katalog tampilan → foto netral, bukan foto
-      // tanaman yang salah.
-      expect(plant.photoAsset, PlantCatalog.fallbackPhoto);
-    });
+        expect(plant.photoAsset, PlantCatalog.fallbackPhoto);
+      },
+    );
   });
 }
 
-/// Berkas gambar sementara untuk uji unggah multipart: berisi byte mentah
-/// seperti hasil jepretan kamera.
 File _tempImage() {
   final file = File(
     '${Directory.systemTemp.path}/agro-soil-${DateTime.now().microsecondsSinceEpoch}.jpg',

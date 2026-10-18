@@ -4,18 +4,9 @@ import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/auth_repository.dart';
 import 'package:frontend/core/models/app_user.dart';
 
-/// Status sesi pengguna.
 enum AuthStatus { signedOut, signingIn, signedIn }
 
-/// Menyimpan sesi login.
-///
-/// Seluruh UI hanya berbicara ke kelas ini; asal datanya (backend atau mode
-/// contoh) ditentukan oleh [AuthRepository] yang disuntikkan dari `app.dart`.
 class AuthController extends ChangeNotifier {
-  /// [authSource] dan [initialUser] sengaja berbeda nama dari field-nya karena
-  /// Dart tidak mengizinkan *named initializing formal* untuk field privat
-  /// (`prefer_initializing_formals`). [initialUser] dipakai test untuk memulai
-  /// dalam keadaan sudah masuk.
   AuthController({required AuthRepository authSource, AppUser? initialUser})
     : _repository = authSource,
       _user = initialUser {
@@ -32,19 +23,12 @@ class AuthController extends ChangeNotifier {
   AuthStatus get status => _status;
   bool get isSignedIn => _user != null;
 
-  /// Pesan kesalahan terakhir per field (`'email'`, `'password'`, dst.),
-  /// lalu dihapus supaya tidak menempel di layar.
   Map<String, String> consumeErrors() {
     final e = _errors;
     _errors = const {};
     return e;
   }
 
-  /// Memulihkan sesi dari token tersimpan saat aplikasi dibuka.
-  ///
-  /// Dipanggil sekali dari splash; kegagalan jaringan tidak mengeluarkan
-  /// pengguna yang sudah punya token — token hanya dibuang bila server
-  /// menolaknya dengan 401.
   Future<void> restoreSession() async {
     if (_user != null || !await _repository.hasSession()) return;
     AppUser? restored;
@@ -60,11 +44,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// Memuat statistik profil dari server dan memperbarui [user].
-  ///
-  /// Kegagalan tidak dikembalikan sebagai error: kartu statistik hanya
-  /// pelengkap, dan angka terakhir yang sudah tampil lebih berguna daripada
-  /// mengosongkannya.
   Future<void> refreshStats() async {
     final current = _user;
     if (current == null) return;
@@ -73,7 +52,6 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Masuk. Mengembalikan `true` kalau berhasil.
   Future<bool> signIn({required String email, required String password}) async {
     _status = AuthStatus.signingIn;
     _errors = const {};
@@ -102,7 +80,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// Mendaftar akun baru. Mengembalikan `true` kalau berhasil.
   Future<bool> signUp({
     required String name,
     required String email,
@@ -143,16 +120,11 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// Keluar dari sesi.
   Future<void> signOut() async {
     await _repository.logout();
     _clearUser();
   }
 
-  /// Membersihkan sesi di perangkat tanpa memanggil server.
-  ///
-  /// Dipakai saat server sudah menolak token (401): meminta `POST /logout`
-  /// dengan token yang tidak sah hanya menghasilkan 401 kedua.
   void clearLocalSession() => _clearUser();
 
   void _clearUser() {
@@ -175,9 +147,6 @@ class AuthController extends ChangeNotifier {
     );
   }
 
-  /// Nama field yang benar-benar ada di layar Login/Register. Kunci lain dari
-  /// backend — mis. `credentials` saat kredensial salah — tidak punya kolom,
-  /// jadi dialihkan ke banner umum supaya tetap terlihat pengguna.
   static const Set<String> _fieldKeysOnScreen = {
     'name',
     'email',

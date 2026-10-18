@@ -2,8 +2,6 @@ import 'package:frontend/core/data/disease_repository.dart';
 import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/models/disease.dart';
 
-/// Diagnosis contoh dari [MockData], dengan jeda buatan supaya layar
-/// "menganalisis" benar-benar terlihat.
 class MockDiseaseRepository implements DiseaseRepository {
   const MockDiseaseRepository();
 

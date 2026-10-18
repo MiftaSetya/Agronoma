@@ -8,11 +8,6 @@ import 'package:frontend/core/state/chat_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
-/// Layar AI Chatbot — frame `Plant Detail - AI Chatbot` (node `176:1493`).
-///
-/// Percakapan tanya-jawab seputar perawatan tanaman. Balasan masih contoh dari
-/// [MockData.chatReply]; yang penting alurnya (kirim → indikator menulis →
-/// balasan) sudah benar sehingga tinggal diarahkan ke API sungguhan.
 class PlantChatScreen extends StatefulWidget {
   const PlantChatScreen({super.key, this.plantId});
 
@@ -47,8 +42,7 @@ class _PlantChatScreenState extends State<PlantChatScreen> {
     _input.clear();
     await context.read<ChatController>().send(text, reply: MockData.chatReply);
     if (!mounted) return;
-    // Jeda sejenak agar layout pesan baru selesai dibangun sebelum mengukur
-    // `maxScrollExtent`.
+
     await Future<void>.delayed(const Duration(milliseconds: 50));
     if (_scroll.hasClients) {
       await _scroll.animateTo(

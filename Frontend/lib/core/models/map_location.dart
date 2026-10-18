@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
-/// Lokasi penanaman (langkah 1 wizard tambah tanaman).
-///
-/// Koordinatnya dipakai peta sungguhan ([AgroMap]) sehingga pilihan di daftar
-/// dan titik di peta selalu sama — dulu daftarnya hanya nama + alamat tanpa
-/// koordinat, jadi peta tak bisa mengikuti pilihan pengguna.
 @immutable
 class MapLocation {
   const MapLocation({
@@ -20,10 +15,6 @@ class MapLocation {
   final String address;
   final LatLng position;
 
-  /// Kota dan provinsi terpisah dari [address]: endpoint AI
-  /// (`/plant-recommendations`, `/plant-suitability`) dan `POST /plants`
-  /// menuntut keduanya sebagai field sendiri, sedangkan design hanya
-  /// menggambar satu blok alamat.
   final String city;
   final String province;
 

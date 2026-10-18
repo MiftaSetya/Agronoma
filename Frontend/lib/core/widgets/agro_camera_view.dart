@@ -6,13 +6,6 @@ import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
-/// Saklar mode kamera yang diwariskan ke seluruh pohon widget.
-///
-/// `sampleOnly` memaksa setiap [AgroCameraView] menampilkan foto contoh alih-alih
-/// pratinjau kamera. Dipakai pipeline tangkapan layar (`lib/dev_preview.dart`
-/// dipanggil `tool/shots-all.ps1`): frame Figma menggambar sebuah foto, sedangkan
-/// pratinjau kamera sungguhan tidak akan pernah sama dengan foto itu — tanpa
-/// saklar ini perbandingan piksel layar kamera jadi tidak ada artinya.
 class CameraScope extends InheritedWidget {
   const CameraScope({
     super.key,
@@ -31,22 +24,6 @@ class CameraScope extends InheritedWidget {
       oldWidget.sampleOnly != sampleOnly;
 }
 
-/// Bingkai kamera layar penuh, dipakai dua layar: "Plant Disease Detection"
-/// (frame `106:1124`) dan "Add Plant 3 - Detect Soil" (frame `101:701`).
-///
-/// Kedua frame memakai **kerangka yang sama** — pil petunjuk di baris 587,
-/// kontrol di baris 734, top bar di baris 64 — jadi seluruh tata letaknya hidup
-/// di sini dan tiap layar cukup mengirim judul, teks petunjuk, serta geometri
-/// fotonya ([photoBox]) karena kedua design menggambar foto dengan ukuran
-/// berbeda.
-///
-/// Bingkai bidik tengah (siku `92,299 256x256` + garis pemindai) dari design
-/// **sengaja tidak digambar** — pemilik proyek memintanya dihilangkan.
-///
-/// Yang ditampilkan adalah **kamera sungguhan** (`camera`). Bila perangkat tidak
-/// punya kamera, izinnya ditolak, atau [CameraScope.sampleOnly] aktif, bingkai
-/// jatuh ke [fallbackAsset] supaya layar tetap berguna dan pipeline tangkapan
-/// layar tetap deterministik.
 class AgroCameraView extends StatefulWidget {
   const AgroCameraView({
     super.key,
@@ -59,40 +36,22 @@ class AgroCameraView extends StatefulWidget {
     this.photoBox,
   });
 
-  /// Judul di top bar.
   final String title;
 
-  /// Teks pil petunjuk di bawah tengah bingkai.
   final String instruction;
 
-  /// Teks pil selagi [analyzing].
   final String analyzingLabel;
 
-  /// Foto latar saat kamera tidak dipakai.
   final String fallbackAsset;
 
-  /// Geometri kotak foto latar **di luar kanvas 440x956** (boleh di luar tepi,
-  /// seperti design yang menaruh fotonya lebih lebar dari frame). `null` berarti
-  /// [_defaultPhotoBox].
-  ///
-  /// Perlu berbeda per layar: frame `101:701` (tanah) menggambar foto tepat pada
-  /// simpulnya (`-50,0 539x958`, terukur selisih 1.9), sedangkan `106:1124`
-  /// (penyakit) memperbesar fotonya ke `-113,0 620x958` (terukur selisih 3.5).
   final Rect? photoBox;
 
-  /// Analisis sedang berjalan (dikendalikan layar pemilik).
   final bool analyzing;
 
-  /// Dipanggil saat rana ditekan. [imagePath] berisi berkas hasil jepretan,
-  /// atau `null` bila kamera tidak tersedia sehingga mode contoh yang dipakai.
   final ValueChanged<String?> onCapture;
 
-  /// Geometri bawaan = geometri frame `101:701` (Deteksi Tanah): foto tepat
-  /// pada simpul `left-[-50px] w-[539px] h-[958px]`.
   static const Rect _defaultPhotoBox = Rect.fromLTWH(-50, 0, 539, 958);
 
-  /// Geometri frame `106:1124` (Deteksi Penyakit): simpulnya tetap `-50,0
-  /// 539x958` tetapi gambarnya digambar 115,08% dengan `left-[-11,69%]`.
   static const Rect photoBoxDisease = Rect.fromLTWH(
     -50 + 539 * -0.1169,
     0,
@@ -108,16 +67,12 @@ class _AgroCameraViewState extends State<AgroCameraView>
     with WidgetsBindingObserver {
   CameraController? _controller;
 
-  /// Pengaturan awal sudah dibaca (kamera mulai / mode contoh ditetapkan).
   bool _settled = false;
 
-  /// Rana sedang menjepret (sebelum layar memulai analisisnya).
   bool _capturing = false;
 
   FlashMode _flash = FlashMode.off;
 
-  /// Alasan kamera tidak dipakai; `null` berarti pratinjau langsung tampil.
-  /// Diisi hanya untuk kegagalan sungguhan (bukan mode contoh).
   String? _problem;
 
   bool get _busy => _capturing || widget.analyzing;
@@ -134,8 +89,7 @@ class _AgroCameraViewState extends State<AgroCameraView>
     super.didChangeDependencies();
     if (_settled) return;
     _settled = true;
-    // Mode contoh sengaja tidak menyentuh plugin sama sekali supaya tangkapan
-    // layar tidak bergantung pada ada/tidaknya kamera di perangkat itu.
+
     if (CameraScope.sampleOnlyOf(context)) {
       _problem = null;
       return;
@@ -152,9 +106,6 @@ class _AgroCameraViewState extends State<AgroCameraView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Sejak camera 0.5.0 plugin tidak lagi mengurus siklus hidup sendiri; kalau
-    // kamera dibiarkan hidup saat aplikasi ke latar, banyak perangkat gagal
-    // melanjutkan pratinjau ketika kembali.
     if (!_live) return;
     if (state == AppLifecycleState.inactive) {
       _release();
@@ -186,8 +137,7 @@ class _AgroCameraViewState extends State<AgroCameraView>
       final controller = CameraController(
         back,
         ResolutionPreset.high,
-        // Tidak ada rekaman video di sini, dan meminta izin mikrofon hanya
-        // menambah dialog izin yang tidak perlu dipakai.
+
         enableAudio: false,
       );
       await controller.initialize();
@@ -210,7 +160,6 @@ class _AgroCameraViewState extends State<AgroCameraView>
         };
       });
     } on MissingPluginException {
-      // Terjadi di widget test: tidak ada implementasi platform.
       if (!mounted) return;
       setState(() => _problem = 'Kamera tidak tersedia.');
     }
@@ -258,8 +207,6 @@ class _AgroCameraViewState extends State<AgroCameraView>
       children: [
         if (_live) _livePreview(_controller!) else _samplePhoto(),
 
-        // Gradasi atas: arahnya dibalik oleh design (`-rotate-180
-        // -scale-x-100`), jadi bagian paling gelap ada di atas.
         const Positioned(
           left: 0,
           right: 0,
@@ -281,7 +228,6 @@ class _AgroCameraViewState extends State<AgroCameraView>
           ),
         ),
 
-        // Gradasi bawah.
         const Positioned(
           left: 0,
           right: 0,
@@ -311,15 +257,6 @@ class _AgroCameraViewState extends State<AgroCameraView>
           child: _TopBar(title: widget.title),
         ),
 
-        // Pil petunjuk/analisis diletakkan tepat di atas tombol rana, bukan di
-        // baris 587 seperti design — atas permintaan pemilik proyek supaya
-        // petunjuknya lebih dekat ke tombol. Tombol rana atasnya di baris 805,5
-        // (`top:734` + tinggi 223/2 dikurangi 80/2), sedangkan tepi bawah pil
-        // ditaruh di baris 790 (sisa jarak ~16px).
-        //
-        // Dijangkarkan dari **bawah** (166 = tinggi kanvas 956 - 790), bukan dari
-        // atas, supaya pil pemberitahuan yang tingginya bisa berubah (teksnya
-        // bisa membungkus) tetap menempel di atas pil petunjuk tanpa menabrak.
         Positioned(
           left: 0,
           right: 0,
@@ -364,10 +301,6 @@ class _AgroCameraViewState extends State<AgroCameraView>
     );
   }
 
-  /// Pratinjau langsung diperbesar sampai menutup seluruh layar (cover).
-  ///
-  /// `previewSize` dilaporkan dalam orientasi lanskap di Android, jadi lebarnya
-  /// ditukar dengan tinggi dulu; tanpa itu pratinjau tampil membujur ke samping.
   Widget _livePreview(CameraController controller) {
     final size = controller.value.previewSize;
     if (size == null) return const SizedBox.shrink();
@@ -383,7 +316,6 @@ class _AgroCameraViewState extends State<AgroCameraView>
     );
   }
 
-  /// Latar pengganti: foto contoh dengan geometri design layar pemilik.
   Widget _samplePhoto() {
     final box = widget.photoBox ?? AgroCameraView._defaultPhotoBox;
     return Positioned(
@@ -396,8 +328,6 @@ class _AgroCameraViewState extends State<AgroCameraView>
   }
 }
 
-/// Top bar kamera: silang di kiri, judul di tengah. Sisi kanan memang kosong
-/// di design — simpul `arrow container` ada tetapi gambarnya `opacity="0"`.
 class _TopBar extends StatelessWidget {
   const _TopBar({required this.title});
 
@@ -418,9 +348,7 @@ class _TopBar extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             child: const _CloseGlyph(),
           ),
-          // `Flexible` tidak mengubah posisi selama teks muat (lebar
-          // intrinsiknya dipakai apa adanya); gunanya supaya judul panjang atau
-          // skala huruf besar tidak membuat baris meluber.
+
           Flexible(
             child: Text(
               title,
@@ -436,9 +364,6 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-/// Silang `close-line` pada ukuran aslinya. SVG-nya hanya 14,7x19,2 sedangkan
-/// simpul di design 24x24; kalau SVG dipasang di kotak 24 utuh, isinya ikut
-/// membesar — makanya ukurannya ditulis eksplisit dengan inset.
 class _CloseGlyph extends StatelessWidget {
   const _CloseGlyph();
 
@@ -465,7 +390,6 @@ class _CloseGlyph extends StatelessWidget {
   }
 }
 
-/// Pil petunjuk di bawah tengah bingkai.
 class _InstructionPill extends StatelessWidget {
   const _InstructionPill({required this.text});
 
@@ -491,7 +415,6 @@ class _InstructionPill extends StatelessWidget {
   }
 }
 
-/// Pil yang muncul saat analisis berjalan.
 class _AnalyzingPill extends StatelessWidget {
   const _AnalyzingPill({required this.label});
 
@@ -524,8 +447,6 @@ class _AnalyzingPill extends StatelessWidget {
   }
 }
 
-/// Pemberitahuan kenapa kamera tidak dipakai (izin ditolak / tanpa kamera).
-/// Tidak pernah tampil di mode contoh, jadi tidak mengganggu tangkapan layar.
 class _NoticePill extends StatelessWidget {
   const _NoticePill({required this.text});
 
@@ -551,7 +472,6 @@ class _NoticePill extends StatelessWidget {
   }
 }
 
-/// Kotak pil kaca: latar hitam 60%, border putih 10%, radius penuh.
 class _Pill extends StatelessWidget {
   const _Pill({required this.child});
 
@@ -560,8 +480,6 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Padding dikurangi 1px dari design (p-[17px]/p-[9px] + border 1px)
-      // karena border Flutter dihitung di luar padding, design di dalam.
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0x99000000),
@@ -573,14 +491,12 @@ class _Pill extends StatelessWidget {
   }
 }
 
-/// Tombol bulat kecil di kiri/kanan rana (48x48, radius 12, kaca buram).
 class _RoundButton extends StatelessWidget {
   const _RoundButton({required this.asset, this.onTap, this.active = false});
 
   final String asset;
   final VoidCallback? onTap;
 
-  /// Keadaan "menyala" (mis. lampu kilat sedang hidup).
   final bool active;
 
   @override
@@ -611,7 +527,6 @@ class _RoundButton extends StatelessWidget {
   }
 }
 
-/// Tombol rana: cincin 80px dengan isi putih 70px.
 class _ShutterButton extends StatelessWidget {
   const _ShutterButton({required this.busy, required this.onTap});
 

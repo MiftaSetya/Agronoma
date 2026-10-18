@@ -4,10 +4,6 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Memastikan aset Fase 0 ter-bundle: manifest dikunci sebagai kontrak
-/// anti-duplikat/anti-usang (aset lepas dari daftar langsung ketahuan), dan
-/// isinya diverifikasi sesuai jenisnya — pernah ada file error HTML tersimpan
-/// berekstensi gambar saat mengunduh dari server aset Figma.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

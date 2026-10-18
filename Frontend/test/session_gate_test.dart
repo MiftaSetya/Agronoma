@@ -10,11 +10,6 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/auth/login_screen.dart';
 import 'package:frontend/features/auth/session_gate.dart';
 
-/// Gerbang sesi harus mengarahkan ke Beranda bila token masih sah dan ke Login
-/// bila belum ada token — perilaku yang tidak terlihat pada uji unit.
-///
-/// Rute Beranda sengaja diganti layar penanda: `MainShell` butuh provider lain
-/// (repositori tanaman) yang tidak relevan untuk uji pengarahan ini.
 void main() {
   Widget wrap(AuthController auth) =>
       ChangeNotifierProvider<AuthController>.value(
@@ -23,8 +18,6 @@ void main() {
           theme: AppTheme.light,
           home: const SessionGate(),
           onGenerateRoute: (settings) {
-            // Hanya Beranda yang diganti; rute lain (Login) memakai router
-            // sungguhan supaya pengarahan ke sana bisa diperiksa.
             if (settings.name == Routes.home) {
               return MaterialPageRoute<void>(
                 settings: settings,
@@ -37,7 +30,6 @@ void main() {
       );
 
   testWidgets('tanpa token tersimpan mengarah ke Login', (tester) async {
-    // `SampleAuthRepository.hasSession()` selalu `false`.
     final auth = AuthController(authSource: SampleAuthRepository());
 
     await tester.pumpWidget(wrap(auth));
@@ -61,7 +53,6 @@ void main() {
   });
 }
 
-/// Meniru backend yang menerima token tersimpan dan mengembalikan pengguna.
 class _RestoringAuthRepository implements AuthRepository {
   @override
   Future<bool> hasSession() async => true;

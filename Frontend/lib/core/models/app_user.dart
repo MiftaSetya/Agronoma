@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Data pengguna yang sedang masuk. Sesi masih mock, tapi bentuknya data
-/// nyata supaya penggantian ke autentikasi sungguhan tidak menyentuh UI.
 @immutable
 class AppUser {
   const AppUser({
@@ -19,13 +17,11 @@ class AppUser {
   final String name;
   final String email;
 
-  /// Path aset lokal foto profil.
   final String photoAsset;
 
   final int totalPlants;
   final int harvestedThisSeason;
 
-  /// Skor perawatan 0–100.
   final double careScore;
 
   final DateTime? joinedAt;

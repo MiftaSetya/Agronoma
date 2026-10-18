@@ -34,8 +34,6 @@ void main() {
   });
 
   test('AppTextStyles memakai ukuran yang ada di design', () {
-    // Ukuran px yang benar-benar muncul di 210 simpul teks design:
-    // 10, 12, 14, 16, 18, 20, 24, 32.
     expect(AppTextStyles.labelSmall.fontSize, 10);
     expect(AppTextStyles.bodySmall.fontSize, 12);
     expect(AppTextStyles.labelMedium.fontSize, 12);
@@ -52,8 +50,6 @@ void main() {
   });
 
   test('tinggi baris AppTextStyles sama dengan leading di Figma', () {
-    // Figma menulis tinggi baris dalam px (dari `leading-[Npx]`), bukan rasio;
-    // rumusnya height = leading / size.
     expect(AppTextStyles.labelSmall.height, 15 / 10);
     expect(AppTextStyles.bodySmall.height, 16 / 12);
     expect(AppTextStyles.labelMedium.height, AppTextStyles.leadingNormal);
@@ -67,9 +63,6 @@ void main() {
   });
 
   test('token leading-normal memakai tinggi baris metrik hhea Inter', () {
-    // Simpul `leading-[normal]` tidak boleh height: null — Flutter lalu memakai
-    // metrik usWin Inter (1,4302 em) sedangkan Figma memakai hhea/typo
-    // (1,21 em), dan selisih 0,22 em itu menumpuk di seluruh layar.
     const normal = AppTextStyles.leadingNormal;
     expect(normal, 1.21);
 
@@ -89,10 +82,6 @@ void main() {
   });
 
   test('setiap token AppTextStyles menuliskan letterSpacing sendiri', () {
-    // letterSpacing kosong tetap mewarisi jarak dari Typography.englishLike2021
-    // (+0,3px @14px) saat digabung textTheme Material, padahal Figma memakai 0 —
-    // teks jadi ~2% lebih lebar dan bisa membungkus baris lebih awal. Daftar ini
-    // ditulis manual agar token baru tanpa letterSpacing langsung ketahuan.
     final tokens = <String, TextStyle>{
       'greetingLarge': AppTextStyles.greetingLarge,
       'headlineSmall': AppTextStyles.headlineSmall,
@@ -141,12 +130,12 @@ void main() {
       expect(
         style.letterSpacing,
         isNotNull,
-        reason: '$name harus menuliskan letterSpacing (0 bila design tidak '
+        reason:
+            '$name harus menuliskan letterSpacing (0 bila design tidak '
             'menentukan tracking)',
       );
     });
 
-    // Nilai tracking yang memang ada di design, sebagai anti-regresi.
     expect(AppTextStyles.bodyLarge.letterSpacing, 0);
     expect(AppTextStyles.titleLarge.letterSpacing, 0);
     expect(AppTextStyles.overlineValue.letterSpacing, 0.14);
@@ -175,9 +164,7 @@ void main() {
       MaterialApp(
         theme: AppTheme.light,
         home: Scaffold(
-          body: Center(
-            child: SvgPicture.asset(AppAssets.arrowLeftWhite),
-          ),
+          body: Center(child: SvgPicture.asset(AppAssets.arrowLeftWhite)),
         ),
       ),
     );

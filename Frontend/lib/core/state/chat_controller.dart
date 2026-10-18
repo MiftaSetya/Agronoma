@@ -4,12 +4,7 @@ import 'package:frontend/core/data/disease_repository.dart';
 import 'package:frontend/core/models/chat_message.dart';
 import 'package:frontend/core/models/disease.dart';
 
-/// Menangani chatbot AI dan diagnosis penyakit. Keduanya digabung karena
-/// berbagi layar yang sama (Plant Detail), dan diagnosis bisa langsung
-/// "dibicarakan" di chat.
 class ChatController extends ChangeNotifier {
-  /// Nama parameter dibedakan dari nama field (lihat [PlantController])
-  /// supaya tidak memicu `prefer_initializing_formals`.
   ChatController({required DiseaseRepository detector})
     : _diseaseRepository = detector;
 
@@ -24,10 +19,8 @@ class ChatController extends ChangeNotifier {
   Disease? get diagnosis => _diagnosis;
   bool get isDiagnosing => _diagnosing;
 
-  /// Sedang "menulis" balasan, dipakai untuk menampilkan indikator.
   bool get isTyping => _typing;
 
-  /// Menambahkan pesan pembuka bot sekali saja.
   void ensureGreeting(ChatMessage greeting) {
     if (_messages.isEmpty) {
       _messages.add(greeting);
@@ -35,8 +28,10 @@ class ChatController extends ChangeNotifier {
     }
   }
 
-  /// Mengirim pesan pengguna lalu menambahkan balasan contoh.
-  Future<void> send(String text, {required String Function(String) reply}) async {
+  Future<void> send(
+    String text, {
+    required String Function(String) reply,
+  }) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return;
 
@@ -51,7 +46,6 @@ class ChatController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Menjalankan diagnosis penyakit (dipakai layar deteksi).
   Future<Disease> diagnose({String? imagePath, String? plantId}) async {
     _diagnosing = true;
     notifyListeners();
@@ -67,13 +61,12 @@ class ChatController extends ChangeNotifier {
     }
   }
 
-  /// Memasukkan hasil diagnosis ke dalam percakapan supaya pengguna bisa
-  /// langsung menanyakan tindak lanjutnya.
   void discussDiagnosis(Disease disease) {
     _messages.add(
       ChatMessage(
         author: ChatAuthor.bot,
-        text: 'Hasil pemindaian terakhir: ${disease.name} '
+        text:
+            'Hasil pemindaian terakhir: ${disease.name} '
             '(${disease.confidenceLabel} yakin). Mau saya jelaskan cara '
             'penanganannya?',
       ),
@@ -81,7 +74,6 @@ class ChatController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Mengosongkan percakapan dan diagnosis milik sesi yang berakhir.
   void reset() {
     _messages.clear();
     _diagnosis = null;

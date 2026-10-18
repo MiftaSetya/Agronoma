@@ -8,13 +8,6 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_common.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
-/// Layar Profil — frame `Profile` (node `28:1409`) pada Figma.
-///
-/// Ini isi tab saja; topbar & navbar disediakan `MainShell`/`AppShell`.
-/// Jarak antar-seksi 32px (16px di dalam blok statistik), padding atas 24px —
-/// semua dari komponen `profile content`. Nama pemilik diambil dari
-/// [AuthController] (bukan ditulis mati seperti `Username` di design) supaya
-/// selalu menampilkan pengguna yang sedang masuk.
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -43,7 +36,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         AppSpacing.xxl,
       ),
       children: [
-        _ProfileHeader(name: user?.name ?? 'Username', photo: user?.photoAsset),        const SizedBox(height: AppSpacing.xxxl),
+        _ProfileHeader(name: user?.name ?? 'Username', photo: user?.photoAsset),
+        const SizedBox(height: AppSpacing.xxxl),
         Row(
           children: [
             Expanded(
@@ -89,7 +83,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-/// Foto profil 80px + nama, di tengah, berjarak 8px.
 class _ProfileHeader extends StatelessWidget {
   const _ProfileHeader({required this.name, this.photo});
 
@@ -120,8 +113,6 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-/// Kartu hijau "Skor perawatan" — garis tepinya `#659022`, hijau yang sedikit
-/// lebih gelap dari latarnya (bukan abu).
 class _CareScoreCard extends StatelessWidget {
   const _CareScoreCard({required this.score, required this.caption});
 
@@ -171,8 +162,6 @@ class _CareScoreCard extends StatelessWidget {
   }
 }
 
-/// Grup "Preferensi" + tombol "Keluar", digabung karena di design keduanya
-/// berjarak sama dari blok sebelumnya.
 class _SettingsGroup extends StatelessWidget {
   const _SettingsGroup({required this.onArchiveTap, required this.logout});
 
@@ -181,8 +170,6 @@ class _SettingsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Design memakai `p-px` + `gap-[4px]` + `overflow-clip`, jadi latar abu
-    // judulnya tidak "bocor" keluar radius.
     return Column(
       children: [
         Container(
@@ -310,8 +297,6 @@ class _PreferenceRow extends StatelessWidget {
   }
 }
 
-/// Sakelar pengingat penyiraman, digambar sendiri (48x24, kenop 16px) karena
-/// sakelar bawaan Material lebih besar. Keadaannya masih lokal, belum disimpan.
 class _WaterReminderSwitch extends StatefulWidget {
   const _WaterReminderSwitch();
 
@@ -349,7 +334,6 @@ class _WaterReminderSwitchState extends State<_WaterReminderSwitch> {
   }
 }
 
-/// Tombol "Keluar": ikon pintu dalam lingkaran merah muda + teks merah.
 class _LogoutCard extends StatelessWidget {
   const _LogoutCard({required this.onTap});
 
@@ -366,8 +350,6 @@ class _LogoutCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            // Wajib: tanpa `color`, bayangan di bawah ini menutupi seluruh
-            // badan kartu sehingga tampak abu, bukan putih.
             color: AppColors.surface,
             borderRadius: AppRadius.lgAll,
             border: Border.all(color: AppColors.border),

@@ -5,12 +5,6 @@ import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
-/// Judul seksi, mis. "Tanaman Saya".
-///
-/// "Lihat Semua" di Home tersembunyi di design (node `Frame 24:1101`,
-/// `hidden="true"`), jadi hanya judul yang tampak — [actionLabel] tetap ada
-/// karena komponen yang sama dipakai di layar lain dengan tautan aktif.
-/// Baris tinggi 28 jadi acuan jarak ke kartu di bawahnya.
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,
@@ -55,8 +49,6 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-/// Kartu tanaman — `Plant card` di design (node `56:670`); foto 80x80 radius 8,
-/// lencana bulat 32px di kanan.
 class PlantCard extends StatelessWidget {
   const PlantCard({
     super.key,
@@ -80,15 +72,8 @@ class PlantCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: AppRadius.lgAll,
           child: Container(
-            // Tailwind menghitung border di dalam padding, Flutter di luar.
-            // Supaya kotak kartu tetap 114px seperti design (80 foto + 17
-            // padding + 1 border per sisi), padding dipakai 16 — kalau 17,
-            // tiap kartu 2px lebih tinggi dan selisihnya menumpuk ke bawah.
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              // Warna ini wajib: tanpa `color`, bayangan di bawah ini ikut
-              // terlukis di seluruh badan kartu (kartunya jadi abu #F2F2F2,
-              // bukan putih seperti design).
               color: AppColors.surface,
               borderRadius: AppRadius.lgAll,
               border: Border.all(color: AppColors.border),
@@ -121,11 +106,7 @@ class PlantCard extends StatelessWidget {
                       const SizedBox(height: AppSpacing.xs),
                       _LocationLine(plant: plant),
                       const SizedBox(height: 6),
-                      // Design bisa menampilkan dua chip sekaligus (kartu pertama
-                      // di frame Home memasang "PERLU DISIRAM" + "PERLU PUPUK").
-                      // `Wrap`, bukan `Row`: pada lebar kartu design keduanya
-                      // memang sebaris, tetapi dengan teks diperbesar (atau di
-                      // layar sempit) dua chip itu meluber keluar kartu.
+
                       Wrap(
                         spacing: AppSpacing.sm,
                         runSpacing: AppSpacing.xs,
@@ -149,8 +130,6 @@ class PlantCard extends StatelessWidget {
   }
 }
 
-/// Lencana kondisi di kanan kartu; dua kondisi ditumpuk ke bawah dengan
-/// jarak 8px persis seperti varian kartu di design.
 class _CardBadges extends StatelessWidget {
   const _CardBadges({required this.plant});
 
@@ -184,8 +163,7 @@ class _LocationLine extends StatelessWidget {
       children: [
         const AgroIcon(AppAssets.locationFill, size: 16),
         const SizedBox(width: AppSpacing.xs),
-        // Lokasi bisa berupa nama tempat panjang (hasil wizard), jadi diberi
-        // batas + elipsis supaya baris ini tidak melimpah keluar kartu.
+
         Flexible(
           child: Text(
             plant.location,
@@ -204,8 +182,7 @@ class _LocationLine extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        // Kolom `Media Tanam` di design dibatasi lebarnya (teks panjang
-        // terpotong elipsis), bukan mengisi sisa ruang seperti Expanded.
+
         Flexible(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 118),
@@ -222,7 +199,6 @@ class _LocationLine extends StatelessWidget {
   }
 }
 
-/// Chip status huruf kapital, mis. "PERLU DISIRAM".
 class CareStatusChip extends StatelessWidget {
   const CareStatusChip({super.key, required this.status});
 
@@ -245,7 +221,6 @@ class CareStatusChip extends StatelessWidget {
   }
 }
 
-/// Lencana bulat 32px berisi ikon status (`Care Status/32px`, node `239:2316`).
 class CareStatusBadge extends StatelessWidget {
   const CareStatusBadge({super.key, required this.status, this.size = 32});
 
@@ -263,23 +238,15 @@ class CareStatusBadge extends StatelessWidget {
         boxShadow: AppColors.shadow1,
       ),
       alignment: Alignment.center,
-      child: AgroIcon(
-        switch (status) {
-          CareStatus.needsWater => AppAssets.waterDrops,
-          CareStatus.needsFertilizer => AppAssets.wateringCan,
-          CareStatus.safe => AppAssets.checkCircle,
-        },
-        size: size / 2,
-      ),
+      child: AgroIcon(switch (status) {
+        CareStatus.needsWater => AppAssets.waterDrops,
+        CareStatus.needsFertilizer => AppAssets.wateringCan,
+        CareStatus.safe => AppAssets.checkCircle,
+      }, size: size / 2),
     );
   }
 }
 
-/// Kartu ringkasan angka (dipakai di Profile).
-///
-/// Geometri dari design: padding 17, radius 12, jarak antar-baris 4 (bukan 8),
-/// border `#E1E3E4` (lebih dingin dari border kartu biasa). Lebar 196 karena
-/// dua kartu + jarak 16 harus pas 408 pada kanvas 440.
 class StatCard extends StatelessWidget {
   const StatCard({
     super.key,
@@ -334,11 +301,6 @@ class StatCard extends StatelessWidget {
   }
 }
 
-/// Kartu cuaca — `Weather card` (node `239:2591`), 408x82, padding 17, radius 16.
-///
-/// Kartunya putih; kesan kebiruan datang dari satu lingkaran
-/// `rgba(223,244,251,0.59)` 128px yang di-blur 20px dan menonjol keluar di
-/// sudut kanan atas — direplikasi sebagai lapisan terpisah di bawah isi kartu.
 class WeatherCard extends StatelessWidget {
   const WeatherCard({
     super.key,
@@ -364,9 +326,6 @@ class WeatherCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: SizedBox(
-            // Diukur langsung dari frame Home: border atas kartu ini di baris
-            // 232, bawahnya di 313 → tinggi 82. (Komponen WeatherCard di design
-            // punya empat varian dengan tinggi berbeda; Home memakai varian 82.)
             height: 82,
             child: Stack(
               children: [

@@ -7,7 +7,6 @@ import 'package:lottie/lottie.dart';
 
 import 'package:frontend/features/splash/splash_screen.dart';
 
-/// Widget dummy sebagai tujuan splash, supaya test tidak perlu tahu layar asli.
 class _DummyNextScreen extends StatelessWidget {
   const _DummyNextScreen();
 
@@ -17,11 +16,6 @@ class _DummyNextScreen extends StatelessWidget {
 
 Widget _app(Widget child) => MaterialApp(home: child);
 
-/// Waktu (ms) keyframe terakhir yang **masih mengubah nilai** di `splash.json`.
-///
-/// "Frame terakhir" saja tidak berguna karena semua track hanya menahan nilai
-/// di frame akhir; yang dicari adalah keyframe terakhir yang nilainya berbeda
-/// dari nilai akhir — di situlah gerakan sungguh-sungguh berhenti.
 Future<int> _lastMovementMs() async {
   final json = jsonDecode(
     File(SplashScreen.assetPath).readAsStringSync(),
@@ -71,12 +65,9 @@ void main() {
       ),
     );
 
-    // Sebelum durasi habis, layar tujuan belum boleh muncul.
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('NEXT'), findsNothing);
 
-    // Jaring pengaman (duration + loadGrace) yang menyelamatkan: aset Lottie
-    // tidak bisa dimuat di `flutter test`.
     await tester.pump(const Duration(milliseconds: 2400));
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump();
@@ -98,9 +89,6 @@ void main() {
       ),
     );
 
-    // `dispose` harus membatalkan timer, jadi tidak boleh ada navigasi ke
-    // route yang sudah tiada — termasuk setelah lewat jaring pengaman
-    // (duration + loadGrace).
     await tester.pumpWidget(_app(const Scaffold(body: Text('OTHER'))));
     await tester.pump(const Duration(milliseconds: 2500));
 
@@ -119,8 +107,6 @@ void main() {
           'cadangan (teks "Agronoma"), bukan animasi logo.',
     );
 
-    // Diurai dengan paket yang benar-benar dipakai di runtime, bukan pemeriksa
-    // JSON biasa — kegagalan parsing ketahuan di sini, bukan di layar pengguna.
     final bytes = file.readAsBytesSync();
     final composition = await LottieComposition.fromBytes(bytes);
 
@@ -131,9 +117,6 @@ void main() {
   });
 
   test('durasi animasi cocok dengan jeda handoff splash', () async {
-    // Kontrak mudah rusak tanpa ketahuan: Lottie diekspor ulang lebih pendek
-    // bisa membuat handoff memotong gerakan terakhir. Ambang dihitung dari
-    // berkasnya sendiri supaya tetap benar setelah ekspor ulang.
     final lastMovement = await _lastMovementMs();
     expect(
       lastMovement,
@@ -176,9 +159,6 @@ void main() {
   });
 
   test('Lottie tidak memakai aset raster (semua glyph vektor)', () async {
-    // Kontrak kualitas: seluruh glyph harus vektor supaya tajam di layar
-    // padat. Ekspor Figma sempat menanam "g", "o", "a" sebagai PNG 1x; test
-    // ini gagal jika ekspor ulang diam-diam mengembalikannya jadi gambar.
     final json = jsonDecode(
       File(SplashScreen.assetPath).readAsStringSync(),
     ) as Map<String, dynamic>;
@@ -196,7 +176,6 @@ void main() {
           'layar padat; konversi ulang ke path vektor.',
     );
 
-    // Tidak boleh ada layer bergambar (ty=2) yang tersisa di mana pun.
     var imageLayers = 0;
     void walk(Object? node) {
       if (node is List) return node.forEach(walk);
@@ -210,9 +189,6 @@ void main() {
   });
 
   test('glyph hasil konversi tetap punya animasi aslinya', () async {
-    // Konversi image -> shape hanya boleh mengubah representasi, bukan timing:
-    // glyph ("a" ind 8, "o" ind 10, "g" ind 11) tetap harus punya keyframe
-    // opacity dan posisi-x yang menggerakkannya masuk.
     final json = jsonDecode(
       File(SplashScreen.assetPath).readAsStringSync(),
     ) as Map<String, dynamic>;
@@ -235,9 +211,6 @@ void main() {
   });
 
   test('kanvas Lottie memakai rasio design 440x956', () async {
-    // Rasio inilah yang membuat logo duduk di posisi/margin yang sama seperti
-    // Figma tanpa perhitungan manual (layer "agronoma full" di (51, 309)
-    // pada kanvas 440x956).
     final bytes = File(SplashScreen.assetPath).readAsBytesSync();
     final composition = await LottieComposition.fromBytes(bytes);
     expect(

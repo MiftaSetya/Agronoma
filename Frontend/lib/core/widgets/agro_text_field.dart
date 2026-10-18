@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:frontend/core/theme/theme.dart';
 
-/// Kolom teks berjudul — komponen `textfield/with title` (node `278:2802`):
-/// label SemiBold 14, jarak 8, input tinggi 44, border `#E7E9E7` radius 12.
 class AgroTextField extends StatelessWidget {
   const AgroTextField({
     super.key,
@@ -27,10 +25,8 @@ class AgroTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool obscureText;
 
-  /// Ikon di dalam kotak, di kiri (mis. tag/pot pada varian field).
   final Widget? prefixIcon;
 
-  /// Widget di kanan, mis. tombol mata untuk kata sandi.
   final Widget? suffix;
 
   final String? errorText;
@@ -88,8 +84,6 @@ class AgroTextField extends StatelessWidget {
   }
 }
 
-/// Tombol mata untuk menampilkan/menyembunyikan kata sandi
-/// (`text_icons/show password`, node `155:993`).
 class PasswordVisibilityToggle extends StatelessWidget {
   const PasswordVisibilityToggle({
     super.key,
@@ -102,10 +96,6 @@ class PasswordVisibilityToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Saat kata sandi tersembunyi, design menampilkan ikon mata terbuka
-    // (artinya "ketuk untuk melihat"), dan ikon mata tercoret saat kata sandi
-    // sedang terlihat ("ketuk untuk menyembunyikan"). Itu juga pola yang lazim,
-    // jadi ikon Material dipakai apa adanya tanpa aset tambahan.
     return GestureDetector(
       onTap: onPressed,
       child: Icon(
@@ -116,4 +106,3 @@ class PasswordVisibilityToggle extends StatelessWidget {
     );
   }
 }
-

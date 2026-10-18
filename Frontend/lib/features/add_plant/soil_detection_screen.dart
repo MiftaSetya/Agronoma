@@ -6,16 +6,6 @@ import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
 import 'package:frontend/core/widgets/agro_camera_view.dart';
 
-/// Layar kamera "Deteksi Jenis Tanah" pada langkah 3 wizard (frame `101:701`).
-///
-/// Bingkainya sama persis dengan layar deteksi penyakit — keduanya memakai
-/// [AgroCameraView] — hanya judul dan teks petunjuknya yang berbeda.
-///
-/// Hasil analisisnya **sungguhan**: foto jepretan dikirim ke `POST /soil-scan`
-/// lewat [AddPlantController.scanSoil], lalu jenis tanah yang dikembalikan
-/// model disimpan ke draft. Mode contoh ([CameraScope.sampleOnly]) tidak punya
-/// berkas jepretan, jadi repositori contoh yang menjawab — layar ini tidak
-/// membedakan keduanya.
 class SoilDetectionScreen extends StatefulWidget {
   const SoilDetectionScreen({super.key});
 
@@ -34,8 +24,6 @@ class _SoilDetectionScreenState extends State<SoilDetectionScreen> {
     if (!mounted) return;
     setState(() => _analyzing = false);
 
-    // Analisis gagal: layar tetap terbuka supaya pengguna bisa memotret ulang
-    // (jenis tanah manual juga masih tersedia lewat "Kembali" di wizard).
     if (result == null) {
       final error = context.read<AddPlantController>().error;
       ScaffoldMessenger.of(context).showSnackBar(

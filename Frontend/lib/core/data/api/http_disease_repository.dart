@@ -91,7 +91,9 @@ class HttpDiseaseRepository implements DiseaseRepository {
       symptoms: const [],
       steps: [
         DiseaseStep(
-          title: pestName == _healthyName ? 'Tidak perlu tindakan' : 'Penanganan',
+          title: pestName == _healthyName
+              ? 'Tidak perlu tindakan'
+              : 'Penanganan',
           detail: action.isEmpty
               ? 'Tidak ada saran penanganan dari server.'
               : action,

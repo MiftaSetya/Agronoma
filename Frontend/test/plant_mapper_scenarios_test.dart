@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/core/data/api/plant_mapper.dart';
 import 'package:frontend/core/models/plant.dart';
 
-/// Satu baris `UserPlantResource` seperti yang dikirim backend.
 Map<String, dynamic> _json({
   int id = 6,
   String name = 'Cabai Rawit',
@@ -118,7 +117,12 @@ void main() {
 
     test('kode asing tidak membuat aplikasi gagal', () {
       final plant = PlantMapper.fromBackend(
-        _json(medium: 'hidroponik', soil: 'pasir', phase: 'unknown', badge: 'x'),
+        _json(
+          medium: 'hidroponik',
+          soil: 'pasir',
+          phase: 'unknown',
+          badge: 'x',
+        ),
       );
       expect(plant.media, isA<PlantingMedia>());
       expect(plant.soilName, isNotEmpty);
@@ -144,7 +148,7 @@ void main() {
 
     test('jadwal perawatan tidak dikarang dari resource tanaman', () {
       final plant = PlantMapper.fromBackend(_json());
-      // Jadwal datang dari care-calendar; resource tanaman tidak memuatnya.
+
       expect(plant.tasks, isEmpty);
       expect(plant.timeline, isEmpty);
     });

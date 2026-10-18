@@ -9,10 +9,6 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_common.dart';
 import 'package:frontend/core/widgets/app_shell.dart';
 
-/// Layar Beranda — frame `Home` (node `10:29`) pada Figma.
-///
-/// Ini isi tab saja; topbar & navbar disediakan `MainShell`/`AppShell`, supaya
-/// saat berpindah tab keduanya tidak ikut dibangun ulang.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -24,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Setelah frame pertama: menghindari notifyListeners() saat build berjalan.
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) context.read<PlantController>().load();
     });
@@ -39,8 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return RefreshIndicator(
       onRefresh: () => controller.load(force: true),
-      // Jarak mengikuti design: antar-seksi 24px, 24px sebelum judul
-      // seksi, dan 16px ke kartu pertama.
+
       child: ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.page,
@@ -51,9 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _Greeting(name: name),
           const SizedBox(height: AppSpacing.xxl),
-          // Satu kartu per kota unik: tanaman pengguna boleh berada di tempat
-          // berbeda, jadi satu kartu "Surabaya" untuk semuanya akan salah.
-          // Dengan satu lokasi, hasilnya persis seperti design.
+
           if (controller.cityWeather.isNotEmpty) ...[
             for (var i = 0; i < controller.cityWeather.length; i++) ...[
               if (i > 0) const SizedBox(height: AppSpacing.md),
@@ -66,8 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
             const SizedBox(height: AppSpacing.xxl),
           ],
-          // Tanpa `actionLabel`: di frame Home, container "Lihat Semua"
-          // berstatus hidden, jadi design memang hanya menampilkan judulnya.
+
           const SectionHeader(title: 'Tanaman Saya'),
           const SizedBox(height: AppSpacing.lg),
           if (controller.isLoading && controller.plants.isEmpty)
@@ -79,8 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
             EmptyState(
               icon: AppAssets.pottedPlant,
               title: 'Gagal memuat data',
-              message:
-                  'Periksa koneksi internet, lalu coba lagi.',
+              message: 'Periksa koneksi internet, lalu coba lagi.',
               actionLabel: 'Coba lagi',
               onAction: () => controller.load(force: true),
             )
@@ -119,9 +110,7 @@ class _Greeting extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Hallo, $name!', style: AppTextStyles.greetingLarge),
-        // Di design kedua baris ini berdempet tanpa `gap`: kotak barisnya
-        // sudah menyisakan jarak, jadi menambah 4px justru menggeser seluruh
-        // isi Home ke bawah.
+
         Text(
           'Ayo cek tanamanmu hari ini!',
           style: AppTextStyles.titleWide.copyWith(color: AppColors.darkGrey),

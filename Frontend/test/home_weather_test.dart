@@ -16,8 +16,6 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_common.dart';
 import 'package:frontend/features/home/home_screen.dart';
 
-/// Tanaman dua kota: inilah situasi yang membuat satu kartu cuaca "Surabaya"
-/// untuk semua tanaman menjadi salah.
 Plant _plant(String id, String name, String city) => Plant(
   id: id,
   name: name,
@@ -50,11 +48,9 @@ class _FakePlantRepository implements PlantRepository {
   noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
-/// Cuaca tiruan yang mencatat tanaman mana yang diminta untuk tiap kota.
 class _FakeWeatherRepository implements WeatherRepository {
   final List<String> requested = [];
 
-  /// Kondisi per kota; kota yang tidak ada di peta ini tidak punya data.
   final Map<String, String> conditions;
 
   _FakeWeatherRepository(this.conditions);
@@ -136,13 +132,10 @@ void main() {
       {'Surabaya': 'Cerah', 'Malang': 'Hujan Ringan'},
     );
 
-    // Dua kota → dua kartu, masing-masing dengan nama kotanya sendiri. Nama
-    // kota juga muncul di kartu tanaman, jadi pencarian dibatasi ke WeatherCard.
     final cards = tester.widgetList<WeatherCard>(find.byType(WeatherCard));
     expect(cards.map((c) => c.city), ['Surabaya', 'Malang']);
     expect(cards.map((c) => c.condition), ['Cerah', 'Hujan Ringan']);
 
-    // Tiga tanaman di dua kota → hanya dua permintaan cuaca.
     expect(weather.requested, ['1@Surabaya', '3@Malang']);
   });
 
@@ -151,18 +144,14 @@ void main() {
   ) async {
     await pumpHome(
       tester,
-      [
-        _plant('1', 'Cabai Rawit', 'Surabaya'),
-        _plant('3', 'Selada', 'Malang'),
-      ],
-      // Malang sengaja tidak punya data: meniru cache backend yang belum
-      // terisi karena cronjob belum jalan untuk kota itu.
+      [_plant('1', 'Cabai Rawit', 'Surabaya'), _plant('3', 'Selada', 'Malang')],
+
       {'Surabaya': 'Cerah'},
     );
 
     final cards = tester.widgetList<WeatherCard>(find.byType(WeatherCard));
     expect(cards.map((c) => c.city), ['Surabaya']);
-    // Daftar tanaman tetap utuh walau cuaca satu kota kosong.
+
     expect(find.text('Cabai Rawit'), findsOneWidget);
     expect(find.text('Selada'), findsOneWidget);
   });

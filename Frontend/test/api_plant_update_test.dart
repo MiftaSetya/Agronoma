@@ -36,7 +36,6 @@ Map<String, dynamic> _plantJson() => {
   },
 };
 
-/// Merekam body `PATCH` yang benar-benar dikirim ke backend.
 void main() {
   late List<Map<String, dynamic>> patches;
 
@@ -46,9 +45,7 @@ void main() {
     final client = ApiClient(
       httpClient: MockClient((request) async {
         if (request.method == 'PATCH') {
-          patches.add(
-            jsonDecode(request.body) as Map<String, dynamic>,
-          );
+          patches.add(jsonDecode(request.body) as Map<String, dynamic>);
           return http.Response(
             jsonEncode({'plant': _plantJson()}),
             200,
@@ -93,7 +90,6 @@ void main() {
 
     await repo.updatePlant('6', name: '   ');
 
-    // Tidak ada yang berubah → tidak perlu PATCH sama sekali.
     expect(patches, isEmpty);
   });
 

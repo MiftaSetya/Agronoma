@@ -1,17 +1,6 @@
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/models/soil_type.dart';
 
-/// Tujuh jenis tanah pada daftar "Saya Tahu Jenis Tanah" (frame `113:765`).
-///
-/// Ini **katalog design**, bukan data contoh: backend tidak punya endpoint
-/// daftar jenis tanah (hanya menerima `soil_type` pada endpoint AI), dan
-/// fotonya memang aset design. Karena itu daftar yang sama dipakai baik saat
-/// mode contoh maupun saat tersambung ke backend.
-///
-/// Nama dan keterangannya disalin dari render design; pasangan foto ↔ jenis
-/// dipastikan dengan membandingkan piksel kartu design terhadap tiap berkas —
-/// dulu daftar ini meminjam foto tanaman cabai/tomat sehingga gambarnya sama
-/// sekali tidak berhubungan.
 class SoilCatalog {
   SoilCatalog._();
 
@@ -20,7 +9,8 @@ class SoilCatalog {
       id: 's1',
       code: 'artificial_media',
       name: 'Media Tanam Campuran',
-      description: 'Racikan buatan khusus yang biasanya terdiri dari pupuk '
+      description:
+          'Racikan buatan khusus yang biasanya terdiri dari pupuk '
           'kompos, sekam, atau sabut kelapa.',
       photoAsset: AppAssets.photoMulchWood,
     ),
@@ -28,7 +18,8 @@ class SoilCatalog {
       id: 's2',
       code: 'fertile',
       name: 'Tanah gembur',
-      description: 'Kaya nutrisi, bertekstur remah, dan subur. Pilihan '
+      description:
+          'Kaya nutrisi, bertekstur remah, dan subur. Pilihan '
           'terbaik untuk mayoritas tanaman.',
       photoAsset: AppAssets.photoSoilCompost,
     ),
@@ -36,7 +27,8 @@ class SoilCatalog {
       id: 's3',
       code: 'clay',
       name: 'Tanah liat',
-      description: 'Bertekstur padat, menggumpal, dan lengket saat basah. '
+      description:
+          'Bertekstur padat, menggumpal, dan lengket saat basah. '
           'Mengikat air lebih lama.',
       photoAsset: AppAssets.photoSoilCracked,
     ),
@@ -44,7 +36,8 @@ class SoilCatalog {
       id: 's4',
       code: 'sandy',
       name: 'Tanah berpasir',
-      description: 'Berbutir kasar dan sangat cepat kering. Air mengalir ke '
+      description:
+          'Berbutir kasar dan sangat cepat kering. Air mengalir ke '
           'bawah dengan sangat bebas.',
       photoAsset: AppAssets.photoSoilBrown,
     ),
@@ -52,7 +45,8 @@ class SoilCatalog {
       id: 's5',
       code: 'chalky',
       name: 'Tanah kapur',
-      description: 'Berwarna pucat dan sering bercampur kerikil atau serpihan '
+      description:
+          'Berwarna pucat dan sering bercampur kerikil atau serpihan '
           'batu. Cenderung cepat kering.',
       photoAsset: AppAssets.photoSoilGravel,
     ),
@@ -60,7 +54,8 @@ class SoilCatalog {
       id: 's6',
       code: 'volcanic',
       name: 'Tanah vulkanik',
-      description: 'Berwarna hitam pekat yang sangat subur. Kaya mineral '
+      description:
+          'Berwarna hitam pekat yang sangat subur. Kaya mineral '
           'alami dari abu pegunungan.',
       photoAsset: AppAssets.photoSoilDark,
     ),
@@ -68,23 +63,16 @@ class SoilCatalog {
       id: 's7',
       code: 'peat',
       name: 'Tanah gambut',
-      description: 'Terasa berserat dari sisa pelapukan tanaman. Sangat empuk '
+      description:
+          'Terasa berserat dari sisa pelapukan tanaman. Sangat empuk '
           'dan menyimpan banyak air.',
       photoAsset: AppAssets.photoMulchStraw,
     ),
   ];
 
-  /// Jenis tanah dari kode enum backend. Kode tak dikenal jatuh ke "Tanah
-  /// gembur" (jenis paling umum) supaya wizard tidak pernah kehilangan pilihan
-  /// hanya karena model AI mengirim nilai di luar enum.
-  static SoilType byCode(String code) => types.firstWhere(
-    (soil) => soil.code == code,
-    orElse: () => types[1],
-  );
+  static SoilType byCode(String code) =>
+      types.firstWhere((soil) => soil.code == code, orElse: () => types[1]);
 
-  /// Kebalikan [byCode]: nama tampilan → jenis tanah, atau `null` bila tidak
-  /// ada yang cocok. Dipakai saat menyimpan "Setelan Tanaman"; `null` berarti
-  /// pilihan tidak berubah, jadi tidak ada yang perlu dikirim.
   static SoilType? byName(String name) {
     for (final soil in types) {
       if (soil.name == name) return soil;

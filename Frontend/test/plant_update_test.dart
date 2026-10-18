@@ -7,8 +7,6 @@ import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/weather.dart';
 import 'package:frontend/core/state/plant_controller.dart';
 
-/// Repositori yang bisa disuruh gagal, untuk memastikan kegagalan simpan
-/// benar-benar dilaporkan ke pemanggil — bukan ditelan diam-diam.
 class _FakePlantRepository implements PlantRepository {
   _FakePlantRepository(this.plant, {this.failUpdates = false});
 
@@ -94,19 +92,20 @@ void main() {
     expect(controller.findById('6')!.name, 'Kangkung Uji');
   });
 
-  test('simpan yang gagal melaporkan false, bukan menutup seolah berhasil', () async {
-    final repo = _FakePlantRepository(_plant(), failUpdates: true);
-    final controller = build(repo);
-    await controller.load();
+  test(
+    'simpan yang gagal melaporkan false, bukan menutup seolah berhasil',
+    () async {
+      final repo = _FakePlantRepository(_plant(), failUpdates: true);
+      final controller = build(repo);
+      await controller.load();
 
-    final ok = await controller.updatePlant('6', name: 'Kangkung Uji');
+      final ok = await controller.updatePlant('6', name: 'Kangkung Uji');
 
-    // Inti bug lama: kegagalan hanya disimpan di `error`, pemanggil tidak tahu
-    // apa pun dan tetap menutup sheet.
-    expect(ok, isFalse);
-    expect(controller.error, isNotNull);
-    expect(controller.findById('6')!.name, 'Kangkung');
-  });
+      expect(ok, isFalse);
+      expect(controller.error, isNotNull);
+      expect(controller.findById('6')!.name, 'Kangkung');
+    },
+  );
 
   test('simpan yang gagal tidak mengubah daftar tanaman', () async {
     final repo = _FakePlantRepository(_plant(), failUpdates: true);

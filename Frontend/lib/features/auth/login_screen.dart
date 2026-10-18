@@ -7,7 +7,6 @@ import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/core/widgets/agro_text_field.dart';
 import 'package:frontend/features/auth/widgets/auth_layout.dart';
 
-/// Layar Login — frame `Login` (node `150:951`) pada Figma.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 

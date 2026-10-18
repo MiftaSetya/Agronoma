@@ -11,8 +11,6 @@ import 'package:frontend/features/plant_detail/ai_chatbot_screen.dart';
 import 'package:frontend/features/plant_detail/plant_detail_screen.dart';
 import 'package:frontend/features/splash/splash_screen.dart';
 
-/// Nama rute dikumpulkan di satu tempat supaya tidak ada string rute yang
-/// ditulis lepas di dalam widget, dan tujuan mana pun bisa diganti dari sini.
 class Routes {
   Routes._();
 
@@ -20,10 +18,8 @@ class Routes {
   static const login = '/login';
   static const register = '/register';
 
-  /// Beranda; dipakai juga oleh layar yang ingin masuk dalam keadaan awal.
   static const home = '/home';
 
-  /// Profil. Isinya tetap `MainShell` yang sama — hanya tab awalnya berbeda.
   static const profile = '/profile';
 
   static const plantDetail = '/plant-detail';
@@ -33,18 +29,14 @@ class Routes {
   static const diseaseDetection = '/disease-detection';
 }
 
-/// Argumen untuk [Routes.plantDetail] dan [Routes.plantChat].
 class PlantDetailArgs {
   const PlantDetailArgs({required this.plantId, this.initialTab = 0});
 
   final String plantId;
 
-  /// 0 = Ringkasan, 1 = Perawatan.
   final int initialTab;
 }
 
-/// Membangun halaman dari nama rute via `MaterialApp.onGenerateRoute`,
-/// sehingga seluruh peta rute ada di satu berkas dan `main.dart` tetap tipis.
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   switch (settings.name) {
     case Routes.splash:
@@ -96,6 +88,5 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   }
 }
 
-/// Halaman biasa dengan transisi geser dari kanan (khas iOS/Android).
 PageRoute<T> _page<T>(Widget child, RouteSettings settings) =>
     MaterialPageRoute<T>(builder: (_) => child, settings: settings);

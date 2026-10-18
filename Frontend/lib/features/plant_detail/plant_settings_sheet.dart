@@ -9,21 +9,11 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
-/// Drawer "Setelan Tanaman" (frame `EditPlant drawer`, node `291:2872`),
-/// dibuka lewat tombol gir di kepala Detail Tanaman.
-///
-/// Ganti foto sengaja belum aktif: tombol kamera di [_PhotoPicker] hanya
-/// menampilkan snackbar karena butuh plugin kamera/galeri.
 class PlantSettingsSheet extends StatefulWidget {
   const PlantSettingsSheet({super.key, required this.plant});
 
   final Plant plant;
 
-  /// Mengembalikan `true` bila ada perubahan yang benar-benar tersimpan.
-  ///
-  /// Pemanggil memakainya untuk memuat ulang tanaman: layar Detail memegang
-  /// salinannya sendiri (`_plant`), jadi tanpa sinyal ini header dan ringkasan
-  /// tetap menampilkan nilai lama sampai halaman dibuka ulang.
   static Future<bool> show(BuildContext context, Plant plant) async {
     final saved = await showModalBottomSheet<bool>(
       context: context,
@@ -49,8 +39,6 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
   late String _soilName;
   late GrowthPhase _phase;
 
-  /// Menahan tombol selama penyimpanan berjalan supaya ketukan ganda tidak
-  /// mengirim dua permintaan.
   bool _saving = false;
 
   @override
@@ -87,7 +75,6 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Gagang tarik (frame "Close" pada design).
               Center(
                 child: Container(
                   width: 32,
@@ -126,8 +113,7 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                 label: 'Lokasi Tanaman',
                 leading: AgroIcon(AppAssets.locationTag, size: 20),
                 trailing: const AgroIcon(AppAssets.chevronRightThin, size: 20),
-                // Field lokasi bersifat baca: menekannya tidak melakukan aksi
-                // (belum ada pemilih lokasi baru).
+
                 child: Text(
                   _location,
                   style: AppTextStyles.bodyLarge.copyWith(
@@ -175,9 +161,7 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                   GrowthPhase.values.map((p) => p.label).toList(),
                   _phase.label,
                   (v) => setState(() {
-                    _phase = GrowthPhase.values.firstWhere(
-                      (p) => p.label == v,
-                    );
+                    _phase = GrowthPhase.values.firstWhere((p) => p.label == v);
                   }),
                 ),
                 child: Text(
@@ -220,10 +204,6 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                               if (!context.mounted) return;
                               setState(() => _saving = false);
 
-                              // Sheet hanya menutup bila benar-benar tersimpan;
-                              // dulu ia menutup lebih dulu sehingga kegagalan
-                              // terlihat seperti berhasil. Nilai `true` juga
-                              // memberi tahu Detail bahwa datanya sudah basi.
                               if (ok) {
                                 Navigator.of(context).pop(true);
                               } else {
@@ -247,9 +227,11 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
     );
   }
 
-  /// Pemilih sederhana berupa daftar pilihan dalam sheet baru — design tidak
-  /// menggambar state "dropdown terbuka", jadi bentuknya sengaja minimal.
-  Future<void> _pick(List<String> options, String current, void Function(String) onPick) {
+  Future<void> _pick(
+    List<String> options,
+    String current,
+    void Function(String) onPick,
+  ) {
     return showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppColors.surface,
@@ -266,7 +248,9 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                 title: Text(
                   option,
                   style: AppTextStyles.bodyLarge.copyWith(
-                    color: option == current ? AppColors.primary : AppColors.darkGrey,
+                    color: option == current
+                        ? AppColors.primary
+                        : AppColors.darkGrey,
                     fontWeight: option == current ? FontWeight.w600 : null,
                   ),
                 ),
@@ -282,8 +266,6 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
   }
 }
 
-/// Foto tanaman 80px dengan tombol kamera menimpanya. Menekannya belum
-/// mengganti foto — lihat catatan di kepala kelas.
 class _PhotoPicker extends StatelessWidget {
   const _PhotoPicker({required this.photoAsset});
 
@@ -335,8 +317,6 @@ class _PhotoPicker extends StatelessWidget {
   }
 }
 
-/// Baris "label + kotak isian" seperti komponen `textfield/with title` design,
-/// dengan sekat vertikal abu di belakang ikon prefix.
 class _LabeledField extends StatelessWidget {
   const _LabeledField({
     required this.label,
@@ -404,10 +384,7 @@ class _LabeledField extends StatelessWidget {
                       left: leading == null ? AppSpacing.md : 0,
                       right: AppSpacing.sm,
                     ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: child,
-                    ),
+                    child: Align(alignment: Alignment.centerLeft, child: child),
                   ),
                 ),
                 if (trailing != null) ...[

@@ -3,10 +3,6 @@ import 'package:latlong2/latlong.dart';
 
 import 'soil_type.dart';
 
-/// Satu rekomendasi tanaman dari langkah 4 wizard "Tambah Tanaman" (hasil
-/// "AI Recommendation"). Kartu design hanya menampilkan foto, nama, dua chip,
-/// dan deskripsi — `suitability`, `difficulty`, dan `harvestAge` lama
-/// sengaja dihapus karena tidak pernah tampil di frame itu.
 @immutable
 class PlantRecommendation {
   const PlantRecommendation({
@@ -22,8 +18,6 @@ class PlantRecommendation {
   final String photoAsset;
   final String description;
 
-  /// Chip di bawah nama. Bukan daftar bebas: design hanya punya tiga varian —
-  /// "Pilihan Terbaik" (kartu paling sesuai), lalu `Indoor`/`Outdoor`.
   final List<String> tags;
 
   bool get bestFor => tags.contains(bestForTag);
@@ -48,9 +42,6 @@ class PlantRecommendation {
   };
 }
 
-/// Data yang dikumpulkan sepanjang wizard "Tambah Tanaman"; dipegang oleh
-/// [AddPlantController] agar tiap langkah bisa membaca pilihan sebelumnya
-/// tanpa melempar argumen lewat rute.
 @immutable
 class AddPlantDraft {
   const AddPlantDraft({
@@ -73,33 +64,22 @@ class AddPlantDraft {
   final String? locationName;
   final String? locationAddress;
 
-  /// Titik yang dipilih di peta. Bisa berasal dari lokasi contoh mana pun atau
-  /// titik bebas hasil menggeser peta; disimpan supaya pilihan itu tidak hilang
-  /// saat berpindah langkah.
   final LatLng? locationPosition;
 
-  /// Kota dan provinsi lokasi terpilih. Design hanya menggambar satu blok
-  /// alamat, padahal endpoint AI dan `POST /plants` menuntut keduanya terpisah;
-  /// nilainya diambil dari [MapLocation] contoh (lihat [AddPlantController]).
   final String? locationCity;
   final String? locationProvince;
 
-  /// Pengguna sudah menekan "Konfirmasi Lokasi".
   final bool locationConfirmed;
 
   final String? media;
   final SoilType? soil;
 
-  /// Tanah sudah dianalisis lewat kamera.
   final bool soilDetected;
 
-  /// Berkas foto tanah hasil kamera (null bila mode contoh). Disimpan supaya
-  /// analisis sungguhan bisa dikirim ke backend tanpa memotret ulang.
   final String? soilPhotoPath;
 
   final PlantRecommendation? recommendation;
 
-  /// Nama tanaman yang diisi manual (langkah "Tambah manual tanaman").
   final String? manualName;
   final String? manualScientificName;
 

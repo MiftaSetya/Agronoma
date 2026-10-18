@@ -9,11 +9,6 @@ import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/api/token_store.dart';
 import 'package:frontend/core/state/session_expiry.dart';
 
-/// Klien HTTP tipis untuk backend Agronoma.
-///
-/// Tanggung jawabnya sengaja sempit: menyusun URL, memasang header, menyisipkan
-/// token, lalu mengubah kesalahan HTTP menjadi [ApiException] berbahasa
-/// Indonesia. Bentuk data tiap domain diurus repositori.
 class ApiClient {
   ApiClient({
     http.Client? httpClient,
@@ -31,13 +26,8 @@ class ApiClient {
   late final SessionExpiry? _sessionExpiry;
   final String baseUrl;
 
-  /// Waktu tunggu standar; endpoint AI bisa lebih lama, jadi pemanggil boleh
-  /// menaikkannya lewat [timeout].
   static const Duration defaultTimeout = Duration(seconds: 30);
 
-  /// Header `Accept: application/json` wajib: tanpa itu Laravel menganggap
-  /// permintaan sebagai navigasi browser dan middleware `auth` mencoba
-  /// mengalihkan ke rute `login` (yang tidak ada) sehingga balasannya 500.
   Map<String, String> _headers({String? contentType, String? bearer}) {
     return {
       'Accept': 'application/json',
@@ -77,7 +67,6 @@ class ApiClient {
     ),
   );
 
-  /// Unggah satu berkas (multipart) — dipakai scan tanah & scan hama.
   Future<dynamic> postMultipart(
     String path, {
     required String field,
@@ -101,7 +90,6 @@ class ApiClient {
     return _headers(contentType: contentType, bearer: token);
   }
 
-  /// Menjalankan permintaan lalu menormalkan hasil/kesalahan.
   Future<dynamic> _send(
     Future<http.Response> Function() request, {
     Duration? timeout,
@@ -164,8 +152,6 @@ class ApiClient {
     );
   }
 
-  /// `errors` dari Laravel berbentuk `{field: [pesan, ...]}`; UI hanya perlu
-  /// pesan pertama tiap field.
   Map<String, String> _parseFieldErrors(Object? raw) {
     if (raw is! Map) return const {};
     final result = <String, String>{};

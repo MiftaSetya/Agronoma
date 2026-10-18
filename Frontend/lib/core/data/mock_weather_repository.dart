@@ -2,11 +2,6 @@ import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/data/weather_repository.dart';
 import 'package:frontend/core/models/weather.dart';
 
-/// Cuaca contoh dari [MockData].
-///
-/// Dipakai mode contoh (`useSampleData`) dan pengujian. Kota yang diminta
-/// dipakai apa adanya sebagai label, supaya kartu Home tetap menampilkan kota
-/// tanaman pemiliknya walau datanya contoh.
 class MockWeatherRepository implements WeatherRepository {
   const MockWeatherRepository();
 

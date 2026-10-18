@@ -4,7 +4,6 @@ import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/api/token_store.dart';
 import 'package:frontend/core/models/app_user.dart';
 
-/// Hasil satu operasi autentikasi.
 class AuthResult {
   const AuthResult.success(this.user) : error = null;
 
@@ -16,38 +15,25 @@ class AuthResult {
   bool get isSuccess => user != null;
 }
 
-/// Antarmuka autentikasi.
-///
-/// [AuthController] hanya berbicara ke antarmuka ini, sehingga mode contoh
-/// (tanpa backend) dan mode sungguhan bisa ditukar tanpa menyentuh layar.
 abstract class AuthRepository {
-  /// Masuk, lalu menyimpan token akses.
   Future<AuthResult> login({required String email, required String password});
 
-  /// Mendaftar akun baru, lalu menyimpan token akses.
   Future<AuthResult> register({
     required String name,
     required String email,
     required String password,
   });
 
-  /// Menghapus token di server lalu di perangkat.
   Future<void> logout();
 
-  /// Mengambil pengguna dari token tersimpan; `null` bila tidak ada/kedaluwarsa.
   Future<AppUser?> currentUser();
 
-  /// Statistik profil (`GET /profile`): jumlah tanaman, panen, skor perawatan.
   Future<AppUser> refreshStats(AppUser user);
 
-  /// Menandai apakah ada sesi yang perlu dipulihkan saat aplikasi dibuka.
   Future<bool> hasSession();
 }
 
-/// Implementasi nyata di atas REST API.
 class HttpAuthRepository implements AuthRepository {
-  /// Nama parameter dibedakan dari field privat agar `prefer_initializing_formals`
-  /// tidak menyala (pola yang sama dipakai [PlantController]).
   HttpAuthRepository({
     required ApiClient apiClient,
     required TokenStore tokenStore,
@@ -154,7 +140,6 @@ class HttpAuthRepository implements AuthRepository {
     }
   }
 
-  /// Backend membalas `{user: {...}}`, baik saat login maupun `GET /user`.
   AppUser? _userFrom(Object? body) {
     if (body is! Map<String, dynamic>) return null;
     final raw = body['user'];
@@ -168,10 +153,9 @@ class HttpAuthRepository implements AuthRepository {
       id: '${json['id']}',
       name: (json['name'] as String?) ?? 'Pengguna',
       email: (json['email'] as String?) ?? '',
-      // Foto profil belum disediakan API; aset design dipakai apa adanya.
+
       photoAsset: AppAssets.photoProfile,
-      // Statistik dan skor perawatan didapat dari `GET /profile` — pada tahap
-      // ini nilainya nol sampai alur itu disambungkan.
+
       totalPlants: 0,
       harvestedThisSeason: 0,
       careScore: 0,
@@ -180,10 +164,6 @@ class HttpAuthRepository implements AuthRepository {
   }
 }
 
-/// Implementasi contoh: selalu berhasil selama validasi lokal lolos.
-///
-/// Dipakai mode pratinjau dan widget test supaya alur Login/Register bisa
-/// dicoba tanpa server.
 class SampleAuthRepository implements AuthRepository {
   SampleAuthRepository({AppUser? user}) : _user = user ?? _sampleUser;
 

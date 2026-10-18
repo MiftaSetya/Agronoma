@@ -23,11 +23,6 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_camera_view.dart';
 import 'package:provider/provider.dart';
 
-/// Seluruh "kabel" aplikasi: repositori disuntikkan sebagai **antarmuka**
-/// ([PlantRepository] dkk., bukan kelas mock-nya) sehingga saat backend siap
-/// cukup ganti satu baris di sini tanpa menyentuh layar. Parameter repositori
-/// dan [initialRoute] juga disediakan agar widget test bisa menyuntikkan data
-/// yang pasti dan langsung membuka layar yang diuji.
 class AgronomaApp extends StatelessWidget {
   const AgronomaApp({
     super.key,
@@ -43,67 +38,35 @@ class AgronomaApp extends StatelessWidget {
     this.useSampleData = false,
   });
 
-  /// Sumber data tanaman; default [MockPlantRepository].
   final PlantRepository? plantRepository;
 
-  /// Sumber data wizard "Tambah Tanaman" (scan tanah, rekomendasi AI, simpan
-  /// lewat `POST /plants`). `null` = otomatis: [HttpAddPlantRepository] bila
-  /// [useSampleData] `false`, [SampleAddPlantRepository] bila `true`.
   final AddPlantRepository? addPlantRepository;
 
-  /// Sumber data cuaca; default [MockWeatherRepository].
   final WeatherRepository? weatherRepository;
 
-  /// Sumber data diagnosis; default [MockDiseaseRepository].
   final DiseaseRepository? diseaseRepository;
 
-  /// Sumber autentikasi. `null` = otomatis: [HttpAuthRepository] bila
-  /// [useSampleData] `false`, [SampleAuthRepository] bila `true`.
   final AuthRepository? authRepository;
 
-  /// Memakai data contoh alih-alih backend.
-  ///
-  /// `true` saat pratinjau desain & widget test (tanpa server), `false` untuk
-  /// aplikasi sungguhan. Saat `false`, [authRepository] boleh diisi sendiri —
-  /// dipakai test integrasi yang mengganti [TokenStore] dengan versi memori.
   final bool useSampleData;
 
-  /// Rute pertama yang dibuka. Default splash.
   final String initialRoute;
 
-  /// Layar yang langsung ditampilkan tanpa lewat router; dipakai widget test
-  /// dan `lib/dev_preview.dart`. Di produksi biarkan `null` agar
-  /// [initialRoute] yang berlaku.
   final Widget? home;
 
-  /// Pengguna awal. Bila diisi, sesi langsung dianggap sudah masuk.
-  ///
-  /// Dipakai `lib/dev_preview.dart` supaya Home dan Profile bisa dipotret
-  /// dengan data yang benar tanpa melewati layar Login — kalau tidak, kedua
-  /// layar itu hanya menampilkan nilai kosong.
   final AppUser? signedInUser;
 
-  /// Memaksa layar kamera memakai foto contoh alih-alih pratinjau langsung.
-  ///
-  /// Dinyalakan pipeline tangkapan layar: frame Figma menggambar sebuah foto,
-  /// jadi membandingkan pikselnya dengan pratinjau kamera sungguhan tidak akan
-  /// pernah masuk akal.
   final bool sampleCamera;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Autentikasi: backend sungguhan, atau contoh saat [useSampleData].
-        // `TokenStore` disuntikkan ke `ApiClient` supaya test bisa memakai
-        // penyimpanan dalam memori.
         Provider<TokenStore>(
           create: (_) =>
               useSampleData ? InMemoryTokenStore() : const SecureTokenStore(),
         ),
-        ChangeNotifierProvider<SessionExpiry>(
-          create: (_) => SessionExpiry(),
-        ),
+        ChangeNotifierProvider<SessionExpiry>(create: (_) => SessionExpiry()),
         Provider<ApiClient>(
           create: (ctx) => ApiClient(
             tokenStore: ctx.read<TokenStore>(),
@@ -111,10 +74,6 @@ class AgronomaApp extends StatelessWidget {
           ),
         ),
 
-        // Sumber data yang membaca backend. Didaftarkan **sesudah** [ApiClient]
-        // karena `Provider` hanya bisa membaca provider yang ditulis lebih dulu.
-        // Cuaca ikut lewat backend (`GET /plants/{id}/weather`) dan bukan lagi
-        // satu kota tetap, karena tanaman pengguna bisa berada di banyak lokasi.
         Provider<PlantRepository>(
           create: (ctx) =>
               plantRepository ??
@@ -129,9 +88,7 @@ class AgronomaApp extends StatelessWidget {
                   ? const MockWeatherRepository()
                   : HttpWeatherRepository(apiClient: ctx.read<ApiClient>())),
         ),
-        // Sumber data wizard "Tambah Tanaman". Didaftarkan **sesudah**
-        // [ApiClient] karena `Provider` hanya bisa membaca provider yang
-        // dituliskan lebih dulu.
+
         Provider<AddPlantRepository>(
           create: (ctx) =>
               addPlantRepository ??
@@ -150,8 +107,6 @@ class AgronomaApp extends StatelessWidget {
                     )),
         ),
 
-        // Deteksi penyakit butuh [ApiClient] (multipart ke `POST /pest-scans`),
-        // jadi didaftarkan sesudahnya. Mode contoh tetap memakai hasil contoh.
         Provider<DiseaseRepository>(
           create: (ctx) =>
               diseaseRepository ??
@@ -160,9 +115,6 @@ class AgronomaApp extends StatelessWidget {
                   : HttpDiseaseRepository(apiClient: ctx.read<ApiClient>())),
         ),
 
-        // Controller didaftarkan di root supaya state-nya tidak hilang saat
-        // berpindah halaman: sesi login, daftar tanaman, draft wizard, dan
-        // percakapan bot.
         ChangeNotifierProvider(
           create: (ctx) => AuthController(
             authSource: ctx.read<AuthRepository>(),
@@ -193,17 +145,6 @@ class AgronomaApp extends StatelessWidget {
   }
 }
 
-/// Menjaga agar data satu sesi tidak tertinggal ke sesi berikutnya.
-///
-/// Dua jalan keluar yang harus sama-sama membersihkan:
-///
-/// 1. pengguna menekan "Keluar" ([AuthController.signOut]);
-/// 2. server menolak token yang tersimpan (401), ditandai [SessionExpiry] oleh
-///    [ApiClient].
-///
-/// Tanpa ini daftar tanaman, cuaca, kalender, dan percakapan milik pengguna
-/// sebelumnya tetap ada di memori — pengguna berikutnya melihat tanaman orang
-/// lain sampai aplikasi ditutup paksa.
 class _SessionResetGate extends StatefulWidget {
   const _SessionResetGate({
     required this.sampleCamera,

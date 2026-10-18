@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 enum ChatAuthor { user, bot }
 
-/// Satu gelembung percakapan pada layar AI Chatbot.
 @immutable
 class ChatMessage {
   const ChatMessage({required this.author, required this.text});
