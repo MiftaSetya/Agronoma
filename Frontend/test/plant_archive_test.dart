@@ -50,9 +50,13 @@ class _ArchiveFakeRepository implements PlantRepository {
       [...active, ...archived].firstWhere((p) => p.id == id);
 
   @override
-  Future<List<CareDay>> careDays(Plant plant, {required DateTime today}) async => [
+  Future<List<CareDay>> careDays(
+    Plant plant, {
+    DateTime? today,
+    String? month,
+  }) async => [
     CareDay(
-      date: PlantSchedule.isoDate(today),
+      date: PlantSchedule.isoDate(today ?? DateTime.now()),
       wateringStatus: rainDays ? 'skip_rain' : 'need_water',
       fertilizingStatus: 'none',
       wateringLogId: rainDays ? 42 : null,

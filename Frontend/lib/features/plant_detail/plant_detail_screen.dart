@@ -786,7 +786,7 @@ class _PerawatanTabState extends State<_PerawatanTab> {
         const SizedBox(height: AppSpacing.lg),
         _ScanHistoryCard(plantId: plant.id),
         const SizedBox(height: AppSpacing.lg),
-        _CareCalendarCard(days: careDays),
+        _CareCalendarCard(plantId: plant.id, days: careDays),
         const SizedBox(height: AppSpacing.lg),
         _CareListCard(plant: plant, tasks: tasks),
       ],
@@ -993,79 +993,128 @@ class _ScanCard extends StatelessWidget {
   }
 }
 
-class _CareCalendarCard extends StatelessWidget {
-  const _CareCalendarCard({required this.days});
+class _CareCalendarCard extends StatefulWidget {
+  const _CareCalendarCard({required this.plantId, required this.days});
+
+  final String plantId;
 
   final List<CareDay> days;
 
   @override
+  State<_CareCalendarCard> createState() => _CareCalendarCardState();
+}
+
+class _CareCalendarCardState extends State<_CareCalendarCard> {
+  late DateTime _month = DateTime.now();
+
+  static const _monthNames = [
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember',
+  ];
+
+  bool get _isCurrentMonth =>
+      _month.year == DateTime.now().year && _month.month == DateTime.now().month;
+
+  void _shift(int delta) {
+    final next = DateTime(_month.year, _month.month + delta);
+    final now = DateTime.now();
+    final isBefore =
+        next.year < now.year || (next.year == now.year && next.month < now.month);
+    if (isBefore) return;
+    setState(() => _month = next);
+    context.read<PlantController>().loadCalendarMonth(
+          widget.plantId,
+          next,
+        );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<PlantController>().loadCalendarMonth(
+              widget.plantId,
+              _month,
+            );
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final weeks = _weekFrom(days);
+    final controller = context.watch<PlantController>();
+    final days =
+        controller.calendarDaysFor(widget.plantId, _month);
+    final effective = days.isEmpty && _isCurrentMonth ? widget.days : days;
+    final loading = controller.isCalendarLoading(widget.plantId, _month) &&
+        effective.isEmpty;
+    final cells = _cellsFrom(effective);
 
     return _DetailCard(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Kalender Perawatan', style: AppTextStyles.cardTitleWide),
-          const SizedBox(height: AppSpacing.lg),
-          SizedBox(
-            height: 86,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: weeks.length,
-              separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-              itemBuilder: (_, i) {
-                final d = weeks[i];
-                return Container(
-                  constraints: const BoxConstraints(minWidth: 56),
-                  padding: const EdgeInsets.all(9),
-                  decoration: BoxDecoration(
-                    color: d.active
-                        ? const Color(0x14C2F573)
-                        : AppColors.surface,
-                    borderRadius: AppRadius.lgAll,
-                    border: Border.all(
-                      color: d.active ? AppColors.primary : AppColors.border,
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        d.day,
-                        style: AppTextStyles.calendarDay.copyWith(
-                          color: d.active
-                              ? AppColors.primary
-                              : AppColors.darkGrey,
-                        ),
-                      ),
-                      Text(d.date, style: AppTextStyles.calendarDate),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (d.watering) ...[
-                            const AgroIcon(
-                              AppAssets.calendarWatering,
-                              size: 12,
-                            ),
-                          ],
-                          if (d.fertilizer) ...[
-                            if (d.watering)
-                              const SizedBox(width: AppSpacing.xs),
-                            const AgroIcon(
-                              AppAssets.calendarFertilizer,
-                              size: 12,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Kalender Perawatan',
+                  style: AppTextStyles.cardTitleWide,
+                ),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                onPressed: _isCurrentMonth ? null : () => _shift(-1),
+                icon: const Icon(Icons.chevron_left_rounded, size: 22),
+              ),
+              Text(
+                '${_monthNames[_month.month - 1]} ${_month.year}',
+                style: AppTextStyles.titleMedium,
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                onPressed: () => _shift(1),
+                icon: const Icon(Icons.chevron_right_rounded, size: 22),
+              ),
+            ],
           ),
+          const SizedBox(height: AppSpacing.md),
+          if (loading)
+            const Padding(
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (cells.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+              child: Text(
+                'Belum ada jadwal perawatan pada bulan ini.',
+                style: AppTextStyles.bodyMuted,
+              ),
+            )
+          else
+            SizedBox(
+              height: 86,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: cells.length,
+                separatorBuilder: (_, _) =>
+                    const SizedBox(width: AppSpacing.sm),
+                itemBuilder: (_, i) => _DayCell(cell: cells[i]),
+              ),
+            ),
           const SizedBox(height: AppSpacing.lg),
           const Row(
             children: [
@@ -1082,26 +1131,71 @@ class _CareCalendarCard extends StatelessWidget {
   static List<
     ({String day, String date, bool active, bool watering, bool fertilizer})
   >
-  _weekFrom(List<CareDay> days) {
+  _cellsFrom(List<CareDay> days) {
     final today = DateTime.now();
     final byDate = {for (final day in days) day.date: day};
 
     return [
-      for (var offset = 0; offset < 7; offset++)
+      for (final entry in byDate.values)
         () {
-          final date = today.add(Duration(days: offset));
-          final entry = byDate[PlantSchedule.isoDate(date)];
+          final date = DateTime.parse(entry.date);
+          final key = PlantSchedule.isoDate(date);
           return (
-            day: WeatherCodes.dayLabel(PlantSchedule.isoDate(date)),
+            day: WeatherCodes.dayLabel(key),
             date: '${date.day}',
-            active: offset == 0,
+            active: key == PlantSchedule.isoDate(today),
             watering:
-                entry != null &&
-                (entry.needsWater || entry.waitsForRain || entry.watered),
-            fertilizer: entry != null && entry.fertilized,
+                entry.needsWater || entry.waitsForRain || entry.watered,
+            fertilizer: entry.fertilized,
           );
         }(),
     ];
+  }
+}
+
+class _DayCell extends StatelessWidget {
+  const _DayCell({required this.cell});
+
+  final ({String day, String date, bool active, bool watering, bool fertilizer})
+  cell;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 56),
+      padding: const EdgeInsets.all(9),
+      decoration: BoxDecoration(
+        color: cell.active ? const Color(0x14C2F573) : AppColors.surface,
+        borderRadius: AppRadius.lgAll,
+        border: Border.all(
+          color: cell.active ? AppColors.primary : AppColors.border,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            cell.day,
+            style: AppTextStyles.calendarDay.copyWith(
+              color: cell.active ? AppColors.primary : AppColors.darkGrey,
+            ),
+          ),
+          Text(cell.date, style: AppTextStyles.calendarDate),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (cell.watering) ...[
+                const AgroIcon(AppAssets.calendarWatering, size: 12),
+              ],
+              if (cell.fertilizer) ...[
+                if (cell.watering) const SizedBox(width: AppSpacing.xs),
+                const AgroIcon(AppAssets.calendarFertilizer, size: 12),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 

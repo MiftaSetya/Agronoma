@@ -22,6 +22,8 @@ class PlantController extends ChangeNotifier {
 
   Map<String, List<CareDay>> _careDays = const {};
 
+  Map<String, List<CareDay>> _careDaysByMonth = const {};
+
   bool _loading = false;
   Object? _error;
 
@@ -36,6 +38,37 @@ class PlantController extends ChangeNotifier {
       _weatherByCity[city]?.forecast ?? const [];
 
   List<CareDay> careDaysFor(String plantId) => _careDays[plantId] ?? const [];
+
+  List<CareDay> calendarDaysFor(String plantId, DateTime month) {
+    return _careDaysByMonth['$plantId|${_monthKey(month)}'] ?? const [];
+  }
+
+  bool isCalendarLoading(String plantId, DateTime month) =>
+      _calendarLoading == '$plantId|${_monthKey(month)}';
+
+  String? _calendarLoading;
+
+  static String _monthKey(DateTime month) =>
+      '${month.year}-${month.month.toString().padLeft(2, '0')}';
+
+  Future<void> loadCalendarMonth(String plantId, DateTime month) async {
+    final plant = findById(plantId);
+    if (plant == null) return;
+    final key = '$plantId|${_monthKey(month)}';
+    if (_calendarLoading == key) return;
+    _calendarLoading = key;
+    notifyListeners();
+    try {
+      final days = await _repository.careDays(plant, month: _monthKey(month));
+      _careDaysByMonth = {..._careDaysByMonth, key: days};
+      _error = null;
+    } catch (e) {
+      _error = e;
+    } finally {
+      _calendarLoading = null;
+      notifyListeners();
+    }
+  }
 
   List<CareTask> tasksFor(String plantId) {
     final plant = findById(plantId);
@@ -60,6 +93,8 @@ class PlantController extends ChangeNotifier {
     _plants = const [];
     _weatherByCity = const {};
     _careDays = const {};
+    _careDaysByMonth = const {};
+    _calendarLoading = null;
     _adopted = const [];
     _archived = const [];
     _error = null;
@@ -152,6 +187,10 @@ class PlantController extends ChangeNotifier {
 
       if (days.isNotEmpty) {
         _careDays = {..._careDays, plantId: days};
+        _careDaysByMonth = {
+          ..._careDaysByMonth,
+          '$plantId|${_monthKey(DateTime.now())}': days,
+        };
       }
       notifyListeners();
     } catch (e) {

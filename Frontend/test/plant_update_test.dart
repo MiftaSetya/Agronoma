@@ -25,7 +25,8 @@ class _FakePlantRepository implements PlantRepository {
   @override
   Future<List<CareDay>> careDays(
     Plant plant, {
-    required DateTime today,
+    DateTime? today,
+    String? month,
   }) async => const [];
 
   @override

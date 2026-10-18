@@ -19,7 +19,11 @@ abstract class PlantRepository {
 
   Future<void> postponeWatering(String plantId);
 
-  Future<List<CareDay>> careDays(Plant plant, {required DateTime today});
+  Future<List<CareDay>> careDays(
+    Plant plant, {
+    DateTime? today,
+    String? month,
+  });
 
   Future<Plant> setTaskDone(String plantId, CareTaskKind kind, bool done);
   Future<Plant> updatePlant(
@@ -68,7 +72,11 @@ class MockPlantRepository implements PlantRepository {
   Future<void> postponeWatering(String plantId) async {}
 
   @override
-  Future<List<CareDay>> careDays(Plant plant, {required DateTime today}) async {
+  Future<List<CareDay>> careDays(
+    Plant plant, {
+    DateTime? today,
+    String? month,
+  }) async {
     await Future<void>.delayed(const Duration(milliseconds: 150));
     return const [];
   }

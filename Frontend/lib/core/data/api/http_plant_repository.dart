@@ -83,11 +83,19 @@ class HttpPlantRepository implements PlantRepository {
   }
 
   @override
-  Future<List<CareDay>> careDays(Plant plant, {required DateTime today}) async {
-    final month = '${today.year}-${today.month.toString().padLeft(2, '0')}';
+  Future<List<CareDay>> careDays(
+    Plant plant, {
+    DateTime? today,
+    String? month,
+  }) async {
+    final target = month ??
+        (() {
+          final base = today ?? DateTime.now();
+          return '${base.year}-${base.month.toString().padLeft(2, '0')}';
+        })();
     final body = await _api.get(
       'plants/${plant.id}/care-calendar',
-      query: {'month': month},
+      query: {'month': target},
     );
     final raw = body is Map<String, dynamic> ? body['days'] : null;
     if (raw is! List) return const [];

@@ -41,7 +41,11 @@ class _ScheduleFakeRepository implements PlantRepository {
   Future<Plant> getPlant(String id) async => _plant;
 
   @override
-  Future<List<CareDay>> careDays(Plant plant, {required DateTime today}) async {
+  Future<List<CareDay>> careDays(
+    Plant plant, {
+    DateTime? today,
+    String? month,
+  }) async {
     careDaysCalls++;
     final fixed = fixedDays;
     if (fixed != null) return fixed;
