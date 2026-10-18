@@ -16,7 +16,6 @@ class AppNotification {
   final bool isRead;
   final List<int> relatedPlantIds;
 
-  bool get isWatering => type == 'watering';
   bool get isPhaseChange => type == 'phase_change';
 
   factory AppNotification.fromJson(Map<String, dynamic> json) =>

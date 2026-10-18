@@ -271,7 +271,6 @@ void main() {
       expect(plant.place, PlantingMedia.openField.label);
 
       expect(plant.tasks, isEmpty);
-      expect(plant.timeline, isEmpty);
     });
 
     test('kota dan provinsi contoh dipakai bila lokasi belum dipilih', () {

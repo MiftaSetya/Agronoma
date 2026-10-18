@@ -150,7 +150,6 @@ void main() {
       final plant = PlantMapper.fromBackend(_json());
 
       expect(plant.tasks, isEmpty);
-      expect(plant.timeline, isEmpty);
     });
 
     test('nama ilmiah hanya terisi bila pemanggil memberikannya', () {

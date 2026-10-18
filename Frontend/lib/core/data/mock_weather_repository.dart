@@ -16,8 +16,6 @@ class MockWeatherRepository implements WeatherRepository {
       condition: MockData.weather.condition,
       temperature: MockData.weather.temperature,
       iconAsset: MockData.weather.iconAsset,
-      humidity: MockData.weather.humidity,
-      windSpeed: MockData.weather.windSpeed,
       forecast: MockData.forecast,
     );
   }

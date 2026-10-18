@@ -13,20 +13,15 @@ class ChatController extends ChangeNotifier {
   final DiseaseRepository _diseaseRepository;
 
   final List<ChatMessage> _messages = [];
-  Disease? _diagnosis;
-  bool _diagnosing = false;
   bool _typing = false;
   bool _sending = false;
   Object? _error;
   int? _sessionId;
 
   List<ChatMessage> get messages => List.unmodifiable(_messages);
-  Disease? get diagnosis => _diagnosis;
-  bool get isDiagnosing => _diagnosing;
   bool get isTyping => _typing;
   bool get isSending => _sending;
   Object? get error => _error;
-  bool get hasError => _error != null;
 
   static ChatMessage get _greeting {
     return const ChatMessage(
@@ -129,24 +124,11 @@ class ChatController extends ChangeNotifier {
   }
 
   Future<Disease> diagnose({String? imagePath, String? plantId}) async {
-    _diagnosing = true;
-    notifyListeners();
-    try {
-      _diagnosis = await _diseaseRepository.detect(
-        imagePath: imagePath,
-        plantId: plantId,
-      );
-      return _diagnosis!;
-    } finally {
-      _diagnosing = false;
-      notifyListeners();
-    }
+    return _diseaseRepository.detect(imagePath: imagePath, plantId: plantId);
   }
 
   void reset() {
     _messages.clear();
-    _diagnosis = null;
-    _diagnosing = false;
     _typing = false;
     _sending = false;
     _error = null;

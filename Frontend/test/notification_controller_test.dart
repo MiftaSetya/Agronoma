@@ -59,7 +59,7 @@ void main() {
 
     expect(notification.id, 9);
     expect(notification.isPhaseChange, isTrue);
-    expect(notification.isWatering, isFalse);
+    expect(notification.type, 'phase_change');
     expect(notification.isRead, isTrue);
     expect(notification.relatedPlantIds, [4, 5]);
   });

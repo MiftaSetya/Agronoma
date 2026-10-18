@@ -59,7 +59,6 @@ class PlantMapper {
       soilName: soil.name,
 
       tasks: const [],
-      timeline: const [],
     );
   }
 

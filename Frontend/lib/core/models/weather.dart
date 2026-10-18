@@ -7,8 +7,6 @@ class Weather {
     required this.condition,
     required this.temperature,
     this.iconAsset,
-    this.humidity,
-    this.windSpeed,
     this.forecast = const [],
   });
 
@@ -20,10 +18,6 @@ class Weather {
 
   final String? iconAsset;
 
-  final int? humidity;
-
-  final String? windSpeed;
-
   final List<WeatherForecast> forecast;
 
   String get temperatureLabel => '$temperature°C';
@@ -33,8 +27,6 @@ class Weather {
     condition: json['condition'] as String,
     temperature: (json['temperature'] as num).toInt(),
     iconAsset: json['iconAsset'] as String?,
-    humidity: (json['humidity'] as num?)?.toInt(),
-    windSpeed: json['windSpeed'] as String?,
     forecast: (json['forecast'] as List? ?? const [])
         .map((e) => WeatherForecast.fromJson(e as Map<String, dynamic>))
         .toList(),
@@ -45,8 +37,6 @@ class Weather {
     'condition': condition,
     'temperature': temperature,
     'iconAsset': iconAsset,
-    'humidity': humidity,
-    'windSpeed': windSpeed,
     'forecast': forecast.map((e) => e.toJson()).toList(),
   };
 }

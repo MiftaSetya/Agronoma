@@ -502,7 +502,6 @@ class SampleAddPlantRepository implements AddPlantRepository {
       soilName: soil.name,
 
       tasks: const [],
-      timeline: const [],
     );
   }
 }

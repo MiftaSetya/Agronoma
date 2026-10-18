@@ -148,32 +148,6 @@ class CareTask {
   };
 }
 
-class GrowthMilestone {
-  const GrowthMilestone({
-    required this.label,
-    required this.date,
-    required this.reached,
-  });
-
-  final String label;
-  final String date;
-
-  final bool reached;
-
-  factory GrowthMilestone.fromJson(Map<String, dynamic> json) =>
-      GrowthMilestone(
-        label: json['label'] as String,
-        date: json['date'] as String,
-        reached: json['reached'] as bool? ?? false,
-      );
-
-  Map<String, dynamic> toJson() => {
-    'label': label,
-    'date': date,
-    'reached': reached,
-  };
-}
-
 @immutable
 class Plant {
   const Plant({
@@ -195,7 +169,6 @@ class Plant {
     this.soilName = 'Tanah gembur',
     this.secondaryStatus,
     this.tasks = const [],
-    this.timeline = const [],
     this.photoUrl,
   });
 
@@ -232,7 +205,6 @@ class Plant {
   final String soilName;
 
   final List<CareTask> tasks;
-  final List<GrowthMilestone> timeline;
 
   int get phaseIndex => GrowthPhase.values.indexOf(phase);
   int get ageInDays =>
@@ -274,7 +246,6 @@ class Plant {
     soilName: soilName ?? this.soilName,
     secondaryStatus: secondaryStatus ?? this.secondaryStatus,
     tasks: tasks ?? this.tasks,
-    timeline: timeline,
   );
 
   factory Plant.fromJson(Map<String, dynamic> json) => Plant(
@@ -301,9 +272,6 @@ class Plant {
     tasks: (json['tasks'] as List? ?? [])
         .map((e) => CareTask.fromJson(e as Map<String, dynamic>))
         .toList(),
-    timeline: (json['timeline'] as List? ?? [])
-        .map((e) => GrowthMilestone.fromJson(e as Map<String, dynamic>))
-        .toList(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -325,7 +293,6 @@ class Plant {
     'fertilizer': fertilizer,
     'soilName': soilName,
     'tasks': tasks.map((e) => e.toJson()).toList(),
-    'timeline': timeline.map((e) => e.toJson()).toList(),
     'photoUrl': photoUrl,
   };
 }

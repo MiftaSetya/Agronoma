@@ -68,13 +68,6 @@ class MockData {
     'Generatif',
   ];
 
-  static final List<GrowthMilestone> _timeline = [
-    GrowthMilestone(label: 'Semai', date: '1 Jun', reached: true),
-    GrowthMilestone(label: 'Vegetatif', date: '14 Jun', reached: true),
-    GrowthMilestone(label: 'Generatif', date: '2 Jul', reached: true),
-    GrowthMilestone(label: 'Panen', date: 'Perkiraan 20 Jul', reached: false),
-  ];
-
   static final List<Plant> plants = [
     Plant(
       id: 'p1',
@@ -96,7 +89,6 @@ class MockData {
       fertilizer: 'NPK Daun',
       soilName: 'Tanah gembur',
       tasks: _tasksWater,
-      timeline: _timeline,
     ),
     Plant(
       id: 'p2',
@@ -117,7 +109,6 @@ class MockData {
       fertilizer: 'NPK Buah',
       soilName: 'Tanah vulkanik',
       tasks: _tasksFertilize,
-      timeline: _timeline,
     ),
     Plant(
       id: 'p3',
@@ -138,7 +129,6 @@ class MockData {
       fertilizer: 'NPK Kandang',
       soilName: 'Tanah liat',
       tasks: const [],
-      timeline: _timeline,
     ),
   ];
 
@@ -147,8 +137,6 @@ class MockData {
     condition: 'Sebagian Berawan',
     temperature: 28,
     iconAsset: AppAssets.weatherPartlyCloudy,
-    humidity: 74,
-    windSpeed: '12 km/j',
   );
 
   static const List<WeatherForecast> forecast = [
