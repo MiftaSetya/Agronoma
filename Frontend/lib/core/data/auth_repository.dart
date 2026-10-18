@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/data/api/api_client.dart';
 import 'package:frontend/core/data/api/api_exception.dart';
@@ -17,7 +19,6 @@ class AuthResult {
 
 abstract class AuthRepository {
   Future<AuthResult> login({required String email, required String password});
-
   Future<AuthResult> register({
     required String name,
     required String email,
@@ -32,7 +33,11 @@ abstract class AuthRepository {
 
   Future<AppUser> saveWateringReminder(AppUser user, bool enabled);
 
+  Future<AppUser> uploadPhoto(AppUser user, String imagePath);
+
   Future<bool> hasSession();
+
+  Future<void> registerDeviceToken(String token);
 }
 
 class HttpAuthRepository implements AuthRepository {
@@ -85,6 +90,11 @@ class HttpAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> registerDeviceToken(String token) async {
+    await _client.post('device-token', body: {'push_token': token});
+  }
+
+  @override
   Future<AppUser?> currentUser() async {
     if (!await hasSession()) return null;
     try {
@@ -126,6 +136,34 @@ class HttpAuthRepository implements AuthRepository {
       body: {'watering_reminder_enabled': enabled},
     );
     return user.copyWith(wateringReminderEnabled: enabled);
+  }
+
+  @override
+  Future<AppUser> uploadPhoto(AppUser user, String imagePath) async {
+    final file = File(imagePath);
+    final raw = await _client.postMultipart(
+      'profile/photo',
+      field: 'image',
+      bytes: await file.readAsBytes(),
+      filename: file.uri.pathSegments.last,
+    );
+
+    if (raw is! Map<String, dynamic>) {
+      throw const ApiException(
+        message: 'Foto profil gagal disimpan.',
+        statusCode: 500,
+      );
+    }
+
+    final url = raw['photo_url'] as String?;
+    if (url == null || url.isEmpty) {
+      throw const ApiException(
+        message: 'Foto profil gagal disimpan.',
+        statusCode: 500,
+      );
+    }
+
+    return user.copyWith(photoUrl: url);
   }
 
   Future<AuthResult> _authenticate(
@@ -171,6 +209,7 @@ class HttpAuthRepository implements AuthRepository {
       email: (json['email'] as String?) ?? '',
 
       photoAsset: AppAssets.photoProfile,
+      photoUrl: json['photo_url'] as String?,
 
       totalPlants: 0,
       harvestedThisSeason: 0,
@@ -228,4 +267,11 @@ class SampleAuthRepository implements AuthRepository {
   @override
   Future<AppUser> saveWateringReminder(AppUser user, bool enabled) async =>
       user.copyWith(wateringReminderEnabled: enabled);
+
+  @override
+  Future<AppUser> uploadPhoto(AppUser user, String imagePath) async =>
+      user.copyWith(photoUrl: 'file://$imagePath');
+
+  @override
+  Future<void> registerDeviceToken(String token) async {}
 }

@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\WateringLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -43,14 +46,37 @@ class ProfileController extends Controller
         ], 200);
     }
 
+    public function uploadPhoto(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'image' => ['required', 'image', 'max:5120'],
+        ]);
+
+        $user = $request->user();
+        $oldPhoto = $user->photo;
+        $image = $validated['image'];
+
+        $path = $image->store('photos/profile', 'public');
+
+        $user->update(['photo' => $path]);
+
+        if ($oldPhoto !== null) {
+            Storage::disk('public')->delete($oldPhoto);
+        }
+
+        return response()->json([
+            'photo_url' => $user->photoUrl(),
+        ], 200);
+    }
+
     private function defaultPreferences(): array
     {
         return ['watering_reminder_enabled' => true];
     }
 
-    private function careScoreCounts(\App\Models\User $user): array
+    private function careScoreCounts(User $user): array
     {
-        $logs = \App\Models\WateringLog::query()
+        $logs = WateringLog::query()
             ->whereIn('user_plant_id', $user->userPlants()->select('id'))
             ->get(['scheduled_date', 'status', 'rain_confirmed', 'user_moisture_feedback']);
 
@@ -99,7 +125,7 @@ class ProfileController extends Controller
         return [$done, $owed];
     }
 
-    private function careScorePercent(\App\Models\User $user): int
+    private function careScorePercent(User $user): int
     {
         [$done, $owed] = $this->careScoreCounts($user);
 

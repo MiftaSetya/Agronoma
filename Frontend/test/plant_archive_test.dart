@@ -94,6 +94,9 @@ class _ArchiveFakeRepository implements PlantRepository {
   Future<void> moistureFeedback(int wateringLogId, {required bool moist}) async {}
 
   @override
+  Future<void> postponeWatering(String plantId) async {}
+
+  @override
   Future<Plant> updatePlant(
     String plantId, {
     String? name,

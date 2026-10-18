@@ -2,9 +2,11 @@
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
+import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_location.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
+import 'package:frontend/core/models/plant_suitability.dart';
 import 'package:frontend/core/routing/app_router.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
 import 'package:frontend/core/state/plant_controller.dart';
@@ -432,13 +434,68 @@ class _LocationStepState extends State<_LocationStep> {
           top: Radius.circular(AppRadius.sheet),
         ),
       ),
-      builder: (_) => const _NewLocationSheet(),
+      builder: (_) => const _LocationSheet(),
     );
 
     if (!mounted || created == null) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Lokasi "${created.label}" ditambahkan.')),
     );
+  }
+
+  Future<void> _editLocation(PlantLocation location) async {
+    final updated = await showModalBottomSheet<PlantLocation>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.sheet),
+        ),
+      ),
+      builder: (_) => _LocationSheet(existing: location),
+    );
+
+    if (!mounted || updated == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Lokasi "${updated.label}" diperbarui.')),
+    );
+  }
+
+  Future<void> _deleteLocation(PlantLocation location) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus lokasi'),
+        content: Text(
+          'Hapus lokasi "${location.label}"? '
+          'Lokasi yang masih dipakai tanaman tidak bisa dihapus.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted || confirmed != true) return;
+    final add = context.read<AddPlantController>();
+    final ok = await add.deleteLocation(location.id);
+    if (!mounted || ok) return;
+
+    final error = add.error;
+    final message = error is ApiException
+        ? error.message
+        : 'Lokasi gagal dihapus. Coba lagi.';
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -486,6 +543,8 @@ class _LocationStepState extends State<_LocationStep> {
                     onTap: () => context
                         .read<AddPlantController>()
                         .selectLocation(location),
+                    onEdit: () => _editLocation(location),
+                    onDelete: () => _deleteLocation(location),
                   ),
                 const SizedBox(height: AppSpacing.sm),
                 AgroOutlineButton(
@@ -540,20 +599,30 @@ class _EmptyLocations extends StatelessWidget {
   }
 }
 
-class _NewLocationSheet extends StatefulWidget {
-  const _NewLocationSheet();
+class _LocationSheet extends StatefulWidget {
+  const _LocationSheet({this.existing});
+
+  final PlantLocation? existing;
 
   @override
-  State<_NewLocationSheet> createState() => _NewLocationSheetState();
+  State<_LocationSheet> createState() => _LocationSheetState();
 }
 
-class _NewLocationSheetState extends State<_NewLocationSheet> {
-  final _label = TextEditingController();
-  final _city = TextEditingController();
-  final _province = TextEditingController();
+class _LocationSheetState extends State<_LocationSheet> {
+  late final TextEditingController _label = TextEditingController(
+    text: widget.existing?.label ?? '',
+  );
+  late final TextEditingController _city = TextEditingController(
+    text: widget.existing?.city ?? '',
+  );
+  late final TextEditingController _province = TextEditingController(
+    text: widget.existing?.province ?? '',
+  );
 
   bool _saving = false;
   String? _errorText;
+
+  bool get _isEditing => widget.existing != null;
 
   @override
   void dispose() {
@@ -577,23 +646,34 @@ class _NewLocationSheetState extends State<_NewLocationSheet> {
       _errorText = null;
     });
 
-    final created = await context.read<AddPlantController>().createLocation(
-      label: label,
-      city: city,
-      province: _province.text.trim(),
-    );
+    final add = context.read<AddPlantController>();
+    final PlantLocation? saved;
+    if (_isEditing) {
+      saved = await add.updateLocation(
+        widget.existing!.id,
+        label: label,
+        city: city,
+        province: _province.text.trim(),
+      );
+    } else {
+      saved = await add.createLocation(
+        label: label,
+        city: city,
+        province: _province.text.trim(),
+      );
+    }
 
     if (!mounted) return;
     setState(() => _saving = false);
 
-    if (created == null) {
+    if (saved == null) {
       setState(
         () => _errorText = 'Lokasi gagal disimpan. Periksa koneksi Anda.',
       );
       return;
     }
 
-    Navigator.of(context).pop(created);
+    Navigator.of(context).pop(saved);
   }
 
   @override
@@ -622,7 +702,7 @@ class _NewLocationSheetState extends State<_NewLocationSheet> {
             ),
             const SizedBox(height: AppSpacing.xl),
             Text(
-              'Lokasi baru',
+              _isEditing ? 'Edit lokasi' : 'Lokasi baru',
               style: AppTextStyles.titleLarge.copyWith(height: 19 / 16),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -672,12 +752,16 @@ class _LocationOption extends StatelessWidget {
     required this.address,
     required this.selected,
     required this.onTap,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   final String name;
   final String address;
   final bool selected;
   final VoidCallback onTap;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -713,6 +797,20 @@ class _LocationOption extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            IconButton(
+              key: const Key('location-edit'),
+              icon: const Icon(Icons.edit_outlined, size: 20),
+              color: AppColors.grey,
+              tooltip: 'Edit lokasi',
+              onPressed: onEdit,
+            ),
+            IconButton(
+              key: const Key('location-delete'),
+              icon: const Icon(Icons.delete_outline, size: 20),
+              color: AppColors.grey,
+              tooltip: 'Hapus lokasi',
+              onPressed: onDelete,
             ),
           ],
         ),
@@ -1085,6 +1183,10 @@ class _RecommendationStepState extends State<_RecommendationStep> {
                               .read<AddPlantController>()
                               .selectRecommendation(r),
                         ),
+                      if (draft.hasPlant) ...[
+                        const SizedBox(height: AppSpacing.lg),
+                        _SuitabilityCard(),
+                      ],
                     ],
                   ],
                 ),
@@ -1124,9 +1226,187 @@ class _RecommendationStepState extends State<_RecommendationStep> {
   }
 }
 
+class _SuitabilityCard extends StatelessWidget {
+  const _SuitabilityCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final add = context.watch<AddPlantController>();
+    final result = add.suitability;
+    final loading = add.isLoadingSuitability;
+    final failed = !loading && result == null && add.error != null;
+    final idle = result == null && !loading && !failed;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppRadius.mdAll,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const AgroIcon(AppAssets.infoFill, size: 20),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Cek kesesuaian tanaman',
+                  style: AppTextStyles.titleMedium,
+                ),
+              ),
+              TextButton(
+                key: const Key('check-suitability'),
+                onPressed: loading
+                    ? null
+                    : () => context.read<AddPlantController>().checkSuitability(),
+                child: Text(idle || failed ? 'Periksa' : 'Periksa ulang'),
+              ),
+            ],
+          ),
+          if (loading) ...[
+            const SizedBox(height: AppSpacing.md),
+            const Center(child: CircularProgressIndicator()),
+          ] else if (result != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                _SuitabilityBadge(verdict: result.verdict),
+                const SizedBox(width: AppSpacing.md),
+                Text(
+                  '${result.averageScore}',
+                  style: AppTextStyles.displayMedium.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+                Text(
+                  '/100 rata-rata',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.grey,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _SuitabilityScoreRow(label: 'Iklim & lokasi', value: result.climateFit),
+            _SuitabilityScoreRow(label: 'Produksi', value: result.productivity),
+            _SuitabilityScoreRow(label: 'Mudah dirawat', value: result.easeOfCare),
+            const SizedBox(height: AppSpacing.md),
+            Text(result.reasoning, style: AppTextStyles.bodyMuted),
+            if (result.alternativeSuggestion != null &&
+                result.alternativeSuggestion!.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Alternatif: ${result.alternativeSuggestion}',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.grey,
+                ),
+              ),
+            ],
+          ] else if (failed) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Evaluasi gagal. Periksa koneksi lalu coba lagi.',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.danger,
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Lihat apakah tanaman pilihanmu sesuai dengan lokasi, '
+              'media tanam, dan tanahmu.',
+              style: AppTextStyles.bodyMuted,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SuitabilityBadge extends StatelessWidget {
+  const _SuitabilityBadge({required this.verdict});
+
+  final PlantSuitabilityVerdict verdict;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (verdict) {
+      PlantSuitabilityVerdict.suitable => AppColors.primary,
+      PlantSuitabilityVerdict.marginal => AppColors.harvest,
+      PlantSuitabilityVerdict.notSuitable => AppColors.danger,
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: AppRadius.chipAll,
+        border: Border.all(color: color),
+      ),
+      child: Text(
+        switch (verdict) {
+          PlantSuitabilityVerdict.suitable => 'Sesuai',
+          PlantSuitabilityVerdict.marginal => 'Cukup sesuai',
+          PlantSuitabilityVerdict.notSuitable => 'Kurang sesuai',
+        },
+        style: AppTextStyles.labelSmall.copyWith(color: color),
+      ),
+    );
+  }
+}
+
+class _SuitabilityScoreRow extends StatelessWidget {
+  const _SuitabilityScoreRow({required this.label, required this.value});
+
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(label, style: AppTextStyles.bodySmall),
+          ),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: AppRadius.chipAll,
+              child: LinearProgressIndicator(
+                value: value / 100,
+                minHeight: 6,
+                backgroundColor: AppColors.surfaceAlt,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 36,
+            child: Text(
+              '$value',
+              textAlign: TextAlign.right,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.grey,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ManualAddButton extends StatelessWidget {
   const _ManualAddButton({required this.onTap});
-
   final VoidCallback onTap;
 
   @override

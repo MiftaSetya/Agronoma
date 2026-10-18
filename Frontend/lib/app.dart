@@ -13,6 +13,7 @@ import 'package:frontend/core/data/mock_disease_repository.dart';
 import 'package:frontend/core/data/mock_weather_repository.dart';
 import 'package:frontend/core/data/notification_repository.dart';
 import 'package:frontend/core/data/plant_repository.dart';
+import 'package:frontend/core/data/scan_history_repository.dart';
 import 'package:frontend/core/data/weather_repository.dart';
 import 'package:frontend/core/models/app_user.dart';
 import 'package:frontend/core/routing/app_router.dart';
@@ -21,6 +22,8 @@ import 'package:frontend/core/state/auth_controller.dart';
 import 'package:frontend/core/state/chat_controller.dart';
 import 'package:frontend/core/state/notification_controller.dart';
 import 'package:frontend/core/state/plant_controller.dart';
+import 'package:frontend/core/state/push_token_service.dart';
+import 'package:frontend/core/state/scan_history_controller.dart';
 import 'package:frontend/core/state/session_expiry.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_camera_view.dart';
@@ -138,6 +141,7 @@ class AgronomaApp extends StatelessWidget {
           create: (ctx) => AuthController(
             authSource: ctx.read<AuthRepository>(),
             initialUser: signedInUser,
+            pushTokens: PushTokenService(),
           ),
         ),
         ChangeNotifierProvider(
@@ -160,6 +164,15 @@ class AgronomaApp extends StatelessWidget {
           create: (ctx) => NotificationController(
             ctx.read<NotificationRepository>(),
           ),
+        ),
+        Provider<ScanHistoryRepository>(
+          create: (ctx) => useSampleData
+              ? const SampleScanHistoryRepository()
+              : HttpScanHistoryRepository(apiClient: ctx.read<ApiClient>()),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) =>
+              ScanHistoryController(ctx.read<ScanHistoryRepository>()),
         ),
       ],
       child: _SessionResetGate(
@@ -211,6 +224,10 @@ class _SessionResetGateState extends State<_SessionResetGate> {
     _expiry = expiry..addListener(_onExpired);
     _signedIn = auth.isSignedIn;
 
+    if (_signedIn) {
+      context.read<NotificationController>().startPolling();
+    }
+
     if (expiry.expired) _onExpired();
   }
 
@@ -221,7 +238,11 @@ class _SessionResetGateState extends State<_SessionResetGate> {
     final signedIn = auth.isSignedIn;
     if (signedIn == _signedIn) return;
 
-    if (!signedIn) _clearSessionData();
+    if (!signedIn) {
+      _clearSessionData();
+    } else {
+      context.read<NotificationController>().startPolling();
+    }
     _signedIn = signedIn;
   }
 
@@ -244,6 +265,8 @@ class _SessionResetGateState extends State<_SessionResetGate> {
     context.read<ChatController>().reset();
     context.read<AddPlantController>().reset();
     context.read<NotificationController>().reset();
+    context.read<NotificationController>().stopPolling();
+    context.read<ScanHistoryController>().reset();
   }
 
   @override

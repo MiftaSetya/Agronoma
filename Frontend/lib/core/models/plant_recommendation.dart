@@ -115,14 +115,23 @@ class AddPlantDraft {
     String? phase,
     bool clearRecommendation = false,
     bool clearManualName = false,
+    bool clearLocation = false,
   }) => AddPlantDraft(
-    locationName: locationName ?? this.locationName,
-    locationAddress: locationAddress ?? this.locationAddress,
-    locationPosition: locationPosition ?? this.locationPosition,
-    locationCity: locationCity ?? this.locationCity,
-    locationProvince: locationProvince ?? this.locationProvince,
-    locationId: locationId ?? this.locationId,
-    locationConfirmed: locationConfirmed ?? this.locationConfirmed,
+    locationName: clearLocation ? null : (locationName ?? this.locationName),
+    locationAddress: clearLocation
+        ? null
+        : (locationAddress ?? this.locationAddress),
+    locationPosition: clearLocation
+        ? null
+        : (locationPosition ?? this.locationPosition),
+    locationCity: clearLocation ? null : (locationCity ?? this.locationCity),
+    locationProvince: clearLocation
+        ? null
+        : (locationProvince ?? this.locationProvince),
+    locationId: clearLocation ? null : (locationId ?? this.locationId),
+    locationConfirmed: clearLocation
+        ? false
+        : (locationConfirmed ?? this.locationConfirmed),
     media: media ?? this.media,
     soil: soil ?? this.soil,
     soilDetected: soilDetected ?? this.soilDetected,

@@ -10,6 +10,7 @@ import 'package:frontend/core/data/soil_catalog.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_location.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
+import 'package:frontend/core/models/plant_suitability.dart';
 import 'package:frontend/core/models/soil_type.dart';
 
 abstract class AddPlantRepository {
@@ -21,6 +22,23 @@ abstract class AddPlantRepository {
 
   Future<PlantLocation> createLocation({
     required String label,
+    required String city,
+    required String province,
+  });
+
+  Future<PlantLocation> updateLocation(
+    int id, {
+    required String label,
+    required String city,
+    required String province,
+  });
+
+  Future<void> deleteLocation(int id);
+
+  Future<PlantSuitability> checkSuitability({
+    required String plantName,
+    required PlantingMedia media,
+    required SoilType soil,
     required String city,
     required String province,
   });
@@ -90,6 +108,71 @@ class HttpAddPlantRepository implements AddPlantRepository {
     }
 
     return PlantLocation.fromJson(raw);
+  }
+
+  @override
+  Future<PlantLocation> updateLocation(
+    int id, {
+    required String label,
+    required String city,
+    required String province,
+  }) async {
+    final raw = await _client.patch(
+      'locations/$id',
+      body: {
+        'label': label.trim(),
+        'city': city.trim(),
+        'province': province.trim().isEmpty ? null : province.trim(),
+      },
+    );
+
+    if (raw is! Map<String, dynamic>) {
+      throw const ApiException(
+        message: 'Lokasi tanam gagal diperbarui.',
+        statusCode: 500,
+      );
+    }
+
+    final updated = raw['location'];
+    if (updated is! Map<String, dynamic>) {
+      throw const ApiException(
+        message: 'Lokasi tanam gagal diperbarui.',
+        statusCode: 500,
+      );
+    }
+
+    return PlantLocation.fromJson(updated);
+  }
+
+  @override
+  Future<void> deleteLocation(int id) async {
+    await _client.delete('locations/$id');
+  }
+
+  @override
+  Future<PlantSuitability> checkSuitability({
+    required String plantName,
+    required PlantingMedia media,
+    required SoilType soil,
+    required String city,
+    required String province,
+  }) async {
+    final body = await _json('plant-suitability', {
+      'plant_name': plantName.trim(),
+      'planting_medium': BackendCodes.plantingMedium(media),
+      'soil_type': BackendCodes.soilType(soil),
+      'city': city,
+      'province': province,
+    });
+
+    if (body['plant_name'] is! String && body['verdict'] is! String) {
+      throw const ApiException(
+        message: 'Evaluasi kesesuaian tidak berhasil dibuat.',
+        statusCode: 500,
+      );
+    }
+
+    return PlantSuitability.fromJson(body);
   }
 
   @override
@@ -305,6 +388,58 @@ class SampleAddPlantRepository implements AddPlantRepository {
     );
     _locations.insert(0, created);
     return created;
+  }
+
+  @override
+  Future<PlantLocation> updateLocation(
+    int id, {
+    required String label,
+    required String city,
+    required String province,
+  }) async {
+    final index = _locations.indexWhere((l) => l.id == id);
+    if (index == -1) {
+      throw ApiException(
+        message: 'Lokasi tidak ditemukan.',
+        statusCode: 404,
+      );
+    }
+
+    final updated = PlantLocation(
+      id: id,
+      label: label.trim(),
+      city: city.trim(),
+      province: province.trim(),
+    );
+    _locations[index] = updated;
+    return updated;
+  }
+
+  @override
+  Future<void> deleteLocation(int id) async {
+    _locations.removeWhere((l) => l.id == id);
+  }
+
+  @override
+  Future<PlantSuitability> checkSuitability({
+    required String plantName,
+    required PlantingMedia media,
+    required SoilType soil,
+    required String city,
+    required String province,
+  }) async {
+    await Future<void>.delayed(_latency);
+    return PlantSuitability(
+      plantName: plantName.trim(),
+      verdict: PlantSuitabilityVerdict.suitable,
+      climateFit: 88,
+      productivity: 90,
+      easeOfCare: 84,
+      reasoning:
+          '$plantName cocok ditanam di $city pada media '
+          '${media.label} dengan tanah ${soil.name}.',
+      alternativeSuggestion: null,
+    );
   }
 
   @override

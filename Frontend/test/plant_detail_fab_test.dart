@@ -5,10 +5,12 @@ import 'package:provider/provider.dart';
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/data/api/plant_schedule.dart';
 import 'package:frontend/core/data/plant_repository.dart';
+import 'package:frontend/core/data/scan_history_repository.dart';
 import 'package:frontend/core/data/weather_repository.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/weather.dart';
 import 'package:frontend/core/state/plant_controller.dart';
+import 'package:frontend/core/state/scan_history_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/features/plant_detail/plant_detail_screen.dart';
 
@@ -114,6 +116,11 @@ void main() {
               weatherSource: _FakeWeatherRepository(),
             ),
           ),
+          ChangeNotifierProvider<ScanHistoryController>(
+            create: (_) => ScanHistoryController(
+              const SampleScanHistoryRepository(),
+            ),
+          ),
         ],
         child: MaterialApp(
           theme: AppTheme.light,
@@ -212,21 +219,20 @@ void main() {
     (tester) async {
       final repo = await pumpDetail(tester, screen: const Size(440, 740));
 
-      final list = verticalList();
-      for (var i = 0; i < 6; i++) {
-        await tester.drag(list, const Offset(0, -400));
-        await tester.pumpAndSettle();
-      }
-
-      final row = tester.getRect(
-        find
-            .ancestor(
-              of: find.text(CareTaskKind.watering.actionLabel),
-              matching: find.byType(InkWell),
+      final row = find.byKey(const Key('task-row-watering'));
+      await tester.scrollUntilVisible(
+        row,
+        200,
+        scrollable: find
+            .descendant(
+              of: verticalList(),
+              matching: find.byType(Scrollable),
             )
             .first,
       );
-      await tester.tapAt(Offset(row.right - 24, row.center.dy));
+      await tester.pumpAndSettle();
+
+      await tester.tap(row, warnIfMissed: true);
       await tester.pumpAndSettle();
 
       expect(repo.completed, 1);

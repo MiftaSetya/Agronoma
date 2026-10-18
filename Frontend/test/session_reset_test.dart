@@ -174,6 +174,9 @@ class _StatsAuthRepository implements AuthRepository {
   Future<bool> hasSession() async => true;
 
   @override
+  Future<AppUser> uploadPhoto(AppUser user, String imagePath) async => user;
+
+  @override
   Future<AppUser?> currentUser() async =>
       _user(totalPlants: 0, harvested: 0, score: 0);
 
@@ -202,6 +205,9 @@ class _StatsAuthRepository implements AuthRepository {
   Future<void> logout() async {
     logoutCalls++;
   }
+
+  @override
+  Future<void> registerDeviceToken(String token) async {}
 }
 
 class _OnePlantRepository implements PlantRepository {
@@ -260,6 +266,9 @@ class _OnePlantRepository implements PlantRepository {
 
   @override
   Future<void> moistureFeedback(int wateringLogId, {required bool moist}) async {}
+
+  @override
+  Future<void> postponeWatering(String plantId) async {}
 }
 
 class _NoWeatherRepository implements WeatherRepository {

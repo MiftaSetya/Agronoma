@@ -5,9 +5,11 @@ import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/data/api/plant_schedule.dart';
 import 'package:frontend/core/data/api/weather_codes.dart';
 import 'package:frontend/core/models/plant.dart';
+import 'package:frontend/core/models/scan_record.dart';
 import 'package:frontend/core/models/weather.dart';
 import 'package:frontend/core/routing/app_router.dart';
 import 'package:frontend/core/state/plant_controller.dart';
+import 'package:frontend/core/state/scan_history_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/core/widgets/agro_common.dart';
@@ -782,6 +784,8 @@ class _PerawatanTabState extends State<_PerawatanTab> {
                   .pushNamed(Routes.diseaseDetection, arguments: plant.id),
         ),
         const SizedBox(height: AppSpacing.lg),
+        _ScanHistoryCard(plantId: plant.id),
+        const SizedBox(height: AppSpacing.lg),
         _CareCalendarCard(days: careDays),
         const SizedBox(height: AppSpacing.lg),
         _CareListCard(plant: plant, tasks: tasks),
@@ -790,9 +794,135 @@ class _PerawatanTabState extends State<_PerawatanTab> {
   }
 }
 
+class _ScanHistoryCard extends StatefulWidget {
+  const _ScanHistoryCard({required this.plantId});
+
+  final String plantId;
+
+  @override
+  State<_ScanHistoryCard> createState() => _ScanHistoryCardState();
+}
+
+class _ScanHistoryCardState extends State<_ScanHistoryCard> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<ScanHistoryController>().load(widget.plantId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.watch<ScanHistoryController>();
+    final items = controller.historyFor(widget.plantId);
+    final loading = controller.isLoading && items.isEmpty;
+
+    return _DetailCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text('Riwayat Pemindaian', style: AppTextStyles.cardTitle),
+              ),
+              Text(
+                '${items.length} hasil',
+                style: AppTextStyles.bodyMuted,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          if (loading)
+            const Padding(
+              padding: EdgeInsets.all(AppSpacing.md),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (controller.error != null)
+            Text(
+              'Riwayat gagal dimuat. Periksa koneksi lalu coba lagi.',
+              style: AppTextStyles.bodyMuted,
+            )
+          else if (items.isEmpty)
+            Text(
+              'Belum ada pemindaian untuk tanaman ini.',
+              style: AppTextStyles.bodyMuted,
+            )
+          else
+            ...[
+              for (final record in items.take(3)) ...[
+                _ScanHistoryRow(record: record),
+                if (record != items.take(3).last)
+                  const SizedBox(height: AppSpacing.sm),
+              ],
+            ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ScanHistoryRow extends StatelessWidget {
+  const _ScanHistoryRow({required this.record});
+
+  final ScanRecord record;
+
+  @override
+  Widget build(BuildContext context) {
+    final healthy = record.isHealthy;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        borderRadius: AppRadius.mdAll,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: healthy ? AppColors.primaryTint : AppColors.careWaterTint,
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: AgroIcon(
+              healthy ? AppAssets.leafFill : AppAssets.diseaseScan,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  healthy ? 'Tanaman Sehat' : record.pestName,
+                  style: AppTextStyles.titleMedium.copyWith(
+                    fontSize: 14,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  '${record.scannedAt.day}/${record.scannedAt.month}/${record.scannedAt.year} · '
+                  '${record.confidenceLabel} yakin',
+                  style: AppTextStyles.bodyMuted,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ScanCard extends StatelessWidget {
   const _ScanCard({required this.onTap});
-
   final VoidCallback onTap;
 
   @override
@@ -1005,6 +1135,7 @@ class _CareListCard extends StatefulWidget {
 
 class _CareListCardState extends State<_CareListCard> {
   bool _sendingMoisture = false;
+  bool _postponing = false;
 
   Future<void> _sendMoisture({required bool moist}) async {
     setState(() => _sendingMoisture = true);
@@ -1029,11 +1160,32 @@ class _CareListCardState extends State<_CareListCard> {
     );
   }
 
+  Future<void> _postpone() async {
+    setState(() => _postponing = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await context
+        .read<PlantController>()
+        .postponeWatering(widget.plant.id);
+    if (!mounted) return;
+    setState(() => _postponing = false);
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          ok
+              ? 'Penyiraman ditunda ke besok.'
+              : 'Gagal menunda penyiraman. Periksa koneksi Anda.',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasks = widget.tasks;
     final care = context.watch<PlantController>().todayCare(widget.plant.id);
     final needsMoisture = care?.awaitsMoistureFeedback ?? false;
+    final canPostpone = care?.needsWater ?? false;
 
     return _DetailCard(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -1098,6 +1250,23 @@ class _CareListCardState extends State<_CareListCard> {
               ),
               if (task != tasks.last) const SizedBox(height: AppSpacing.sm),
             ],
+          if (canPostpone) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: _postponing ? null : _postpone,
+                icon: _postponing
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : null,
+                label: const Text('Tunda ke besok'),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1117,6 +1286,7 @@ class _TaskRow extends StatelessWidget {
       color: AppColors.surface,
       borderRadius: AppRadius.lgAll,
       child: InkWell(
+        key: Key('task-row-${task.kind.name}'),
         onTap: task.done ? null : onToggle,
         borderRadius: AppRadius.lgAll,
         child: Container(

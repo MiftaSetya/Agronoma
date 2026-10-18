@@ -57,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::get('profile', [ProfileController::class, 'show']);
     Route::patch('profile/preferences', [ProfileController::class, 'updatePreferences']);
+    Route::post('profile/photo', [ProfileController::class, 'uploadPhoto']);
 });
 
 Route::get('/', function () {

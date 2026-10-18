@@ -10,6 +10,7 @@ class AppUser {
     required this.totalPlants,
     required this.harvestedThisSeason,
     required this.careScore,
+    this.photoUrl,
     this.wateringReminderEnabled = true,
     this.joinedAt,
   });
@@ -19,6 +20,8 @@ class AppUser {
   final String email;
 
   final String photoAsset;
+
+  final String? photoUrl;
 
   final int totalPlants;
   final int harvestedThisSeason;
@@ -33,12 +36,15 @@ class AppUser {
     int? totalPlants,
     int? harvestedThisSeason,
     double? careScore,
+    String? photoUrl,
+    bool clearPhotoUrl = false,
     bool? wateringReminderEnabled,
   }) => AppUser(
     id: id,
     name: name,
     email: email,
     photoAsset: photoAsset,
+    photoUrl: clearPhotoUrl ? null : (photoUrl ?? this.photoUrl),
     totalPlants: totalPlants ?? this.totalPlants,
     harvestedThisSeason: harvestedThisSeason ?? this.harvestedThisSeason,
     careScore: careScore ?? this.careScore,
@@ -61,6 +67,7 @@ class AppUser {
     name: json['name'] as String,
     email: json['email'] as String,
     photoAsset: json['photoAsset'] as String,
+    photoUrl: json['photoUrl'] as String?,
     totalPlants: (json['totalPlants'] as num).toInt(),
     harvestedThisSeason: (json['harvestedThisSeason'] as num).toInt(),
     careScore: (json['careScore'] as num).toDouble(),
@@ -75,6 +82,7 @@ class AppUser {
     'name': name,
     'email': email,
     'photoAsset': photoAsset,
+    'photoUrl': photoUrl,
     'totalPlants': totalPlants,
     'harvestedThisSeason': harvestedThisSeason,
     'careScore': careScore,

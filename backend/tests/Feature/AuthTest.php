@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 test('pengguna dapat registrasi dan menerima token', function () {
     $response = $this->postJson('/api/register', [
@@ -70,4 +72,53 @@ test('user dapat menyimpan push token device', function () {
         'id' => $user->id,
         'push_token' => 'fcm-token-abc',
     ]);
+});
+
+test('user dapat mengunggah foto profil', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+
+    $image = UploadedFile::fake()->image('profil.jpg', 100, 100);
+
+    $response = $this->actingAs($user, 'sanctum')
+        ->postJson('/api/profile/photo', ['image' => $image])
+        ->assertStatus(200);
+
+    $path = $user->fresh()->photo;
+    expect($path)->toStartWith('photos/profile/');
+    Storage::disk('public')->assertExists($path);
+
+    $url = $user->fresh()->photoUrl();
+    expect($url)->toContain($path);
+});
+
+test('unggah foto profil menolak file bukan gambar', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+
+    $file = UploadedFile::fake()->create('catatan.txt', 10);
+
+    $this->actingAs($user, 'sanctum')
+        ->postJson('/api/profile/photo', ['image' => $file])
+        ->assertStatus(422);
+});
+
+test('foto profil lama terhapus setelah unggah baru', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+
+    $first = UploadedFile::fake()->image('satu.jpg', 100, 100);
+    $this->actingAs($user, 'sanctum')
+        ->postJson('/api/profile/photo', ['image' => $first])
+        ->assertStatus(200);
+    $oldPath = $user->fresh()->photo;
+
+    $second = UploadedFile::fake()->image('dua.jpg', 100, 100);
+    $this->actingAs($user, 'sanctum')
+        ->postJson('/api/profile/photo', ['image' => $second])
+        ->assertStatus(200);
+    $newPath = $user->fresh()->photo;
+
+    Storage::disk('public')->assertExists($newPath);
+    Storage::disk('public')->assertMissing($oldPath);
 });

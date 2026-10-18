@@ -6,6 +6,7 @@ import 'package:frontend/core/data/soil_catalog.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_location.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
+import 'package:frontend/core/models/plant_suitability.dart';
 import 'package:frontend/core/models/soil_type.dart';
 
 class AddPlantController extends ChangeNotifier {
@@ -21,6 +22,8 @@ class AddPlantController extends ChangeNotifier {
   List<PlantRecommendation> _recommendations = const [];
   List<SoilType> _soilTypes = const [];
   List<PlantLocation> _locations = const [];
+  PlantSuitability? _suitability;
+  bool _loadingSuitability = false;
   bool _loading = false;
   bool _loadingLocations = false;
   Object? _error;
@@ -29,6 +32,8 @@ class AddPlantController extends ChangeNotifier {
   List<PlantRecommendation> get recommendations => _recommendations;
   List<SoilType> get soilTypes => _soilTypes;
   List<PlantLocation> get locations => _locations;
+  PlantSuitability? get suitability => _suitability;
+  bool get isLoadingSuitability => _loadingSuitability;
   bool get isLoading => _loading;
   bool get isLoadingLocations => _loadingLocations;
   Object? get error => _error;
@@ -110,9 +115,105 @@ class AddPlantController extends ChangeNotifier {
     }
   }
 
+  Future<PlantLocation?> updateLocation(
+    int id, {
+    required String label,
+    required String city,
+    required String province,
+  }) async {
+    _error = null;
+    try {
+      final updated = await _repository.updateLocation(
+        id,
+        label: label,
+        city: city,
+        province: province,
+      );
+      _locations = [
+        for (final l in _locations)
+          if (l.id == id) updated else l,
+      ];
+      if (_draft.locationId == id) {
+        _draft = _draft.copyWith(
+          locationName: updated.label,
+          locationAddress: updated.region,
+          locationCity: updated.city,
+          locationProvince: updated.province,
+        );
+      }
+      notifyListeners();
+      return updated;
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<bool> deleteLocation(int id) async {
+    _error = null;
+    try {
+      await _repository.deleteLocation(id);
+      _locations = [
+        for (final l in _locations)
+          if (l.id != id) l,
+      ];
+      if (_draft.locationId == id) {
+        _draft = _draft.copyWith(
+          locationId: null,
+          locationConfirmed: false,
+          clearLocation: true,
+        );
+      }
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      return false;
+    }
+  }
+
   void confirmLocation() {
     _draft = _draft.copyWith(locationConfirmed: true);
     notifyListeners();
+  }
+
+  Future<PlantSuitability?> checkSuitability() async {
+    if (_loadingSuitability) return null;
+    final plantName = _draft.resolvedName;
+    final locationId = _draft.locationId;
+    PlantLocation? location;
+    for (final l in _locations) {
+      if (l.id == locationId) {
+        location = l;
+        break;
+      }
+    }
+
+    _loadingSuitability = true;
+    _suitability = null;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final result = await _repository.checkSuitability(
+        plantName: plantName,
+        media: media,
+        soil: soil,
+        city: location?.city ?? city,
+        province: location?.province ?? province,
+      );
+      _suitability = result;
+      return result;
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      return null;
+    } finally {
+      _loadingSuitability = false;
+      notifyListeners();
+    }
   }
 
   void setMedia(String media) {
@@ -237,6 +338,8 @@ class AddPlantController extends ChangeNotifier {
   void reset() {
     _draft = const AddPlantDraft();
     _recommendations = const [];
+    _suitability = null;
+    _loadingSuitability = false;
     _error = null;
     notifyListeners();
   }

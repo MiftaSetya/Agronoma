@@ -58,6 +58,9 @@ class _RestoringAuthRepository implements AuthRepository {
   Future<bool> hasSession() async => true;
 
   @override
+  Future<AppUser> uploadPhoto(AppUser user, String imagePath) async => user;
+
+  @override
   Future<AppUser?> currentUser() async => const AppUser(
     id: '11',
     name: 'Pulih Sesi',
@@ -90,4 +93,7 @@ class _RestoringAuthRepository implements AuthRepository {
   @override
   Future<AppUser> saveWateringReminder(AppUser user, bool enabled) async =>
       user.copyWith(wateringReminderEnabled: enabled);
+
+  @override
+  Future<void> registerDeviceToken(String token) async {}
 }

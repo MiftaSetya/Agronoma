@@ -17,6 +17,8 @@ abstract class PlantRepository {
     required bool moist,
   });
 
+  Future<void> postponeWatering(String plantId);
+
   Future<List<CareDay>> careDays(Plant plant, {required DateTime today});
 
   Future<Plant> setTaskDone(String plantId, CareTaskKind kind, bool done);
@@ -61,6 +63,9 @@ class MockPlantRepository implements PlantRepository {
 
   @override
   Future<void> moistureFeedback(int wateringLogId, {required bool moist}) async {}
+
+  @override
+  Future<void> postponeWatering(String plantId) async {}
 
   @override
   Future<List<CareDay>> careDays(Plant plant, {required DateTime today}) async {

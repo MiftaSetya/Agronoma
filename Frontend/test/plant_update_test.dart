@@ -13,6 +13,8 @@ class _FakePlantRepository implements PlantRepository {
   final Plant plant;
   bool failUpdates;
   int updateCalls = 0;
+  int postponeCalls = 0;
+  bool failPostpone = false;
 
   @override
   Future<List<Plant>> getPlants() async => [plant];
@@ -61,6 +63,12 @@ class _FakePlantRepository implements PlantRepository {
 
   @override
   Future<void> moistureFeedback(int wateringLogId, {required bool moist}) async {}
+
+  @override
+  Future<void> postponeWatering(String plantId) async {
+    postponeCalls++;
+    if (failPostpone) throw Exception('jaringan putus');
+  }
 }
 
 class _FakeWeatherRepository implements WeatherRepository {
@@ -129,5 +137,29 @@ void main() {
 
     expect(controller.plants, hasLength(1));
     expect(controller.plants.single.name, 'Kangkung');
+  });
+
+  test('tunda penyiraman memanggil endpoint sekali dan laporan true', () async {
+    final repo = _FakePlantRepository(_plant());
+    final controller = build(repo);
+    await controller.load();
+
+    final ok = await controller.postponeWatering('6');
+
+    expect(ok, isTrue);
+    expect(repo.postponeCalls, 1);
+    expect(controller.error, isNull);
+  });
+
+  test('tunda penyiraman yang gagal melaporkan false', () async {
+    final repo = _FakePlantRepository(_plant())..failPostpone = true;
+    final controller = build(repo);
+    await controller.load();
+
+    final ok = await controller.postponeWatering('6');
+
+    expect(ok, isFalse);
+    expect(repo.postponeCalls, 1);
+    expect(controller.error, isNotNull);
   });
 }

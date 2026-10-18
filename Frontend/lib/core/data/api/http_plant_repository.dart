@@ -75,6 +75,14 @@ class HttpPlantRepository implements PlantRepository {
   }
 
   @override
+  Future<void> postponeWatering(String plantId) async {
+    await _api.post(
+      'plants/$plantId/watering/postpone',
+      timeout: _actionTimeout,
+    );
+  }
+
+  @override
   Future<List<CareDay>> careDays(Plant plant, {required DateTime today}) async {
     final month = '${today.year}-${today.month.toString().padLeft(2, '0')}';
     final body = await _api.get(

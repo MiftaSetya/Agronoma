@@ -2,6 +2,7 @@
     <!-- Peta langkah 1 memuat ubin OpenStreetMap dari jaringan (flutter_map);
          tanpa izin ini ubinnya gagal di perangkat rilis. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:label="Agronoma"
         android:name="${applicationName}"

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
@@ -27,9 +28,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Future<void> _changePhoto() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+      maxWidth: 960,
+    );
+    if (picked == null || !mounted) return;
+
+    final auth = context.read<AuthController>();
+    final ok = await auth.uploadPhoto(picked.path);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok
+              ? 'Foto profil berhasil diperbarui.'
+              : 'Gagal mengunggah foto. Periksa koneksi lalu coba lagi.',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthController>().user;
+    final auth = context.watch<AuthController>();
+    final user = auth.user;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -39,7 +64,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         AppSpacing.xxl,
       ),
       children: [
-        _ProfileHeader(name: user?.name ?? 'Username', photo: user?.photoAsset),
+        _ProfileHeader(
+          name: user?.name ?? 'Username',
+          photo: user?.photoAsset,
+          photoUrl: user?.photoUrl,
+          uploading: auth.isUploadingPhoto,
+          onTapPhoto: _changePhoto,
+        ),
         const SizedBox(height: AppSpacing.xxxl),
         Row(
           children: [
@@ -113,30 +144,81 @@ class _ProfileScreenState extends State<ProfileScreen> {
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.name, this.photo});
+  const _ProfileHeader({
+    required this.name,
+    required this.onTapPhoto,
+    this.photo,
+    this.photoUrl,
+    this.uploading = false,
+  });
 
   final String name;
   final String? photo;
+  final String? photoUrl;
+  final bool uploading;
+  final VoidCallback onTapPhoto;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.surfaceAlt,
-            border: Border.all(color: AppColors.border, width: 2),
+        GestureDetector(
+          key: const Key('profile-photo'),
+          onTap: uploading ? null : onTapPhoto,
+          child: Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.surfaceAlt,
+                  border: Border.all(color: AppColors.border, width: 2),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: uploading
+                    ? const Center(child: CircularProgressIndicator())
+                    : photoUrl != null
+                    ? Image.network(
+                        photoUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const Icon(
+                          Icons.person,
+                          color: AppColors.grey,
+                        ),
+                      )
+                    : photo == null
+                    ? const Icon(Icons.person, color: AppColors.grey)
+                    : Image.asset(photo!, fit: BoxFit.cover),
+              ),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  width: 26,
+                  height: 26,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primary,
+                  ),
+                  child: const Icon(
+                    Icons.edit,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
           ),
-          clipBehavior: Clip.antiAlias,
-          child: photo == null
-              ? const Icon(Icons.person, color: AppColors.grey)
-              : Image.asset(photo!, fit: BoxFit.cover),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(name, style: AppTextStyles.displayName),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Ketuk foto untuk mengganti',
+          style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
+        ),
       ],
     );
   }

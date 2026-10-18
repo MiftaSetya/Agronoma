@@ -265,6 +265,20 @@ class PlantController extends ChangeNotifier {
     }
   }
 
+  Future<bool> postponeWatering(String plantId) async {
+    try {
+      await _repository.postponeWatering(plantId);
+      _error = null;
+      notifyListeners();
+      await loadTasks(plantId);
+      return true;
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> loadArchived() async {
     try {
       _archived = await _repository.getArchivedPlants();

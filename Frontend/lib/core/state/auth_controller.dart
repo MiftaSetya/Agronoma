@@ -3,17 +3,23 @@ import 'package:flutter/foundation.dart';
 import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/auth_repository.dart';
 import 'package:frontend/core/models/app_user.dart';
+import 'package:frontend/core/state/push_token_service.dart';
 
 enum AuthStatus { signedOut, signingIn, signedIn }
 
 class AuthController extends ChangeNotifier {
-  AuthController({required AuthRepository authSource, AppUser? initialUser})
-    : _repository = authSource,
-      _user = initialUser {
+  AuthController({
+    required AuthRepository authSource,
+    AppUser? initialUser,
+    PushTokenService? pushTokens,
+  }) : _repository = authSource,
+       pushTokenService = pushTokens,
+       _user = initialUser {
     if (initialUser != null) _status = AuthStatus.signedIn;
   }
 
   final AuthRepository _repository;
+  final PushTokenService? pushTokenService;
 
   AppUser? _user;
   AuthStatus _status = AuthStatus.signedOut;
@@ -41,7 +47,12 @@ class AuthController extends ChangeNotifier {
       _user = restored;
       _status = AuthStatus.signedIn;
       notifyListeners();
+      _registerPushToken();
     }
+  }
+
+  void _registerPushToken() {
+    pushTokenService?.registerToServer(_repository.registerDeviceToken);
   }
 
   Future<void> refreshStats() async {
@@ -54,6 +65,9 @@ class AuthController extends ChangeNotifier {
 
   bool _savingReminder = false;
   bool get isSavingReminder => _savingReminder;
+
+  bool _uploadingPhoto = false;
+  bool get isUploadingPhoto => _uploadingPhoto;
 
   Future<bool> setWateringReminder(bool enabled) async {
     final current = _user;
@@ -69,6 +83,24 @@ class AuthController extends ChangeNotifier {
       return false;
     } finally {
       _savingReminder = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> uploadPhoto(String imagePath) async {
+    final current = _user;
+    if (current == null || _uploadingPhoto) return false;
+
+    _uploadingPhoto = true;
+    notifyListeners();
+
+    try {
+      _user = await _repository.uploadPhoto(current, imagePath);
+      return true;
+    } on ApiException {
+      return false;
+    } finally {
+      _uploadingPhoto = false;
       notifyListeners();
     }
   }
@@ -161,6 +193,7 @@ class AuthController extends ChangeNotifier {
       _user = user;
       _status = AuthStatus.signedIn;
       notifyListeners();
+      _registerPushToken();
       return true;
     }
     return _failWith(

@@ -3,10 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/data/add_plant_repository.dart';
+import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_location.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
+import 'package:frontend/core/models/plant_suitability.dart';
 import 'package:frontend/core/models/soil_type.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
@@ -17,7 +19,6 @@ import 'package:frontend/features/add_plant/soil_detection_screen.dart';
 class _FakeRepository implements AddPlantRepository {
   @override
   Future<List<SoilType>> getSoilTypes() async => MockData.soilTypes;
-
   @override
   Future<List<PlantLocation>> getLocations() async => const [
     PlantLocation(
@@ -36,6 +37,17 @@ class _FakeRepository implements AddPlantRepository {
   }) async => PlantLocation(id: 2, label: label, city: city, province: province);
 
   @override
+  Future<PlantLocation> updateLocation(
+    int id, {
+    required String label,
+    required String city,
+    required String province,
+  }) async => PlantLocation(id: id, label: label, city: city, province: province);
+
+  @override
+  Future<void> deleteLocation(int id) async {}
+
+  @override
   Future<List<PlantRecommendation>> getRecommendations({
     required PlantingMedia media,
     required SoilType soil,
@@ -45,6 +57,63 @@ class _FakeRepository implements AddPlantRepository {
 
   @override
   noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+class _ConflictLocationRepository extends _FakeRepository {
+  @override
+  Future<List<PlantLocation>> getLocations() async => const [
+    PlantLocation(id: 9, label: 'Lama', city: 'Kota', province: 'Provinsi'),
+  ];
+
+  @override
+  Future<void> deleteLocation(int id) async {
+    throw const ApiException(
+      message: 'Lokasi ini masih dipakai tanaman.',
+      statusCode: 409,
+    );
+  }
+}
+
+class _SuitabilityRepository extends _FakeRepository {
+  String? lastPlantName;
+  String? lastCity;
+  String? lastProvince;
+  PlantingMedia? lastMedia;
+
+  @override
+  Future<PlantSuitability> checkSuitability({
+    required String plantName,
+    required PlantingMedia media,
+    required SoilType soil,
+    required String city,
+    required String province,
+  }) async {
+    lastPlantName = plantName;
+    lastCity = city;
+    lastProvince = province;
+    lastMedia = media;
+    return PlantSuitability(
+      plantName: plantName,
+      verdict: PlantSuitabilityVerdict.suitable,
+      climateFit: 88,
+      productivity: 90,
+      easeOfCare: 84,
+      reasoning: 'Cocok.',
+    );
+  }
+}
+
+class _FailingSuitabilityRepository extends _FakeRepository {
+  @override
+  Future<PlantSuitability> checkSuitability({
+    required String plantName,
+    required PlantingMedia media,
+    required SoilType soil,
+    required String city,
+    required String province,
+  }) async {
+    throw const ApiException(message: 'Server mati.', statusCode: 500);
+  }
 }
 
 void main() {
@@ -103,6 +172,85 @@ void main() {
       c.selectRecommendation(MockData.recommendations.first);
       expect(c.draft.manualName, isNull);
       expect(c.draft.resolvedName, MockData.recommendations.first.name);
+    });
+
+    test('updateLocation memperbarui daftar dan draft yang terpilih', () async {
+      final c = AddPlantController(dataSource: _FakeRepository());
+      await c.loadLocations();
+      c.selectLocation(c.locations.first);
+
+      final updated = await c.updateLocation(
+        1,
+        label: 'Kebun Depan',
+        city: 'Sidoarjo',
+        province: 'Jawa Timur',
+      );
+
+      expect(updated, isNotNull);
+      expect(updated!.label, 'Kebun Depan');
+      expect(c.locations.first.label, 'Kebun Depan');
+      expect(c.draft.locationName, 'Kebun Depan');
+      expect(c.draft.locationCity, 'Sidoarjo');
+    });
+
+    test('deleteLocation menghapus dari daftar dan draft yang terpilih',
+        () async {
+      final c = AddPlantController(dataSource: _FakeRepository());
+      await c.loadLocations();
+      c.selectLocation(c.locations.first);
+
+      final ok = await c.deleteLocation(1);
+
+      expect(ok, isTrue);
+      expect(c.locations, isEmpty);
+      expect(c.draft.locationId, isNull);
+      expect(c.draft.hasLocation, isFalse);
+    });
+
+    test('deleteLocation gagal (409) melaporkan false dan error tersimpan',
+        () async {
+      final c = AddPlantController(
+        dataSource: _ConflictLocationRepository(),
+      );
+      await c.loadLocations();
+
+      final ok = await c.deleteLocation(9);
+
+      expect(ok, isFalse);
+      expect(c.error, isA<ApiException>());
+      expect((c.error as ApiException).statusCode, 409);
+      expect(c.locations, isNotEmpty);
+    });
+
+    test('checkSuitability mengirim data draft ke repository', () async {
+      final repo = _SuitabilityRepository();
+      final c = AddPlantController(dataSource: repo);
+      await c.loadLocations();
+      c.selectLocation(c.locations.first);
+      c.setMedia(PlantingMedia.pot.name);
+      c.setManualPlant('Kangkung', null);
+
+      final result = await c.checkSuitability();
+
+      expect(result, isNotNull);
+      expect(repo.lastPlantName, 'Kangkung');
+      expect(repo.lastCity, 'Surabaya');
+      expect(repo.lastProvince, 'Jawa Timur');
+      expect(repo.lastMedia, PlantingMedia.pot);
+      expect(c.suitability, isNotNull);
+      expect(c.isLoadingSuitability, isFalse);
+    });
+
+    test('checkSuitability yang gagal melaporkan null dan error tersimpan',
+        () async {
+      final c = AddPlantController(dataSource: _FailingSuitabilityRepository());
+
+      final result = await c.checkSuitability();
+
+      expect(result, isNull);
+      expect(c.suitability, isNull);
+      expect(c.error, isNotNull);
+      expect(c.isLoadingSuitability, isFalse);
     });
   });
 

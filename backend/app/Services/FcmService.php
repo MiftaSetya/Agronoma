@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Exception\FirebaseException;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
-use Kreait\Firebase\Messaging\Messaging;
 
 class FcmService
 {
