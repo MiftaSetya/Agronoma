@@ -749,7 +749,11 @@ class _DeleteAction extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const AgroIcon(AppAssets.closeLine, size: 20),
+              const AgroIcon(
+                AppAssets.closeLine,
+                size: 20,
+                color: AppColors.danger,
+              ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
