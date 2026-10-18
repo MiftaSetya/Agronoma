@@ -268,8 +268,9 @@ class AgronomaDailyProcessing extends Command
 
             $phaseChanges = $data['phase_changes'] ?? [];
             $lines = $data['notification_lines'] ?? [];
+            $reminderEnabled = ($user->preferences['watering_reminder_enabled'] ?? true) !== false;
 
-            if ($lines !== []) {
+            if ($lines !== [] && $reminderEnabled) {
                 $relatedPlantIds = array_values(array_unique(array_merge(
                     $data['need_water_plants'] ?? [],
                     $data['delayed_plants'] ?? [],

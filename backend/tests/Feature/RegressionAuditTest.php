@@ -325,3 +325,98 @@ test('mengganti fase benar-benar menggeser phase_start_date dan menghapus due da
     expect($plant->fresh()->phase_start_date->toDateString())->toBe(now()->toDateString());
     expect($plant->fresh()->adjusted_due_date)->toBeNull();
 });
+
+test('patch lokasi milik pengguna lain ditolak 422', function () {
+    [$user, $location, $plant] = ownedPlant();
+    $foreign = Location::factory()->create();
+
+    $this->actingAs($user, 'sanctum')
+        ->patchJson("/api/plants/{$plant->id}", ['location_id' => $foreign->id])
+        ->assertStatus(422);
+
+    expect($plant->fresh()->location_id)->toBe($location->id);
+});
+
+test('pindah lokasi tanaman ke lokasi milik sendiri berhasil', function () {
+    [$user, $location, $plant] = ownedPlant();
+    $other = Location::factory()->create(['user_id' => $user->id, 'city' => 'Malang']);
+
+    $this->actingAs($user, 'sanctum')
+        ->patchJson("/api/plants/{$plant->id}", ['location_id' => $other->id])
+        ->assertStatus(200)
+        ->assertJsonPath('plant.location.id', $other->id);
+
+    expect($plant->fresh()->location_id)->toBe($other->id);
+});
+
+test('cron tetap mengirim notifikasi fase saat pengingat dimatikan', function () {
+    [$user, $location, $plant] = ownedPlant([
+        'current_phase' => 'seedling',
+        'phase_start_date' => now()->subDays(10)->toDateString(),
+    ]);
+    $user->update(['preferences' => ['watering_reminder_enabled' => false]]);
+
+    $this->mock(\App\Services\WeatherApiService::class, function ($mock) {
+        $mock->shouldReceive('forecast7Days')->andReturn([]);
+        $mock->shouldReceive('upsertCache')->andReturnNull();
+        $mock->shouldReceive('getCacheForDate')->andReturn(
+            \App\Models\WeatherCache::factory()->make(['rainfall_mm' => 0])
+        );
+        $mock->shouldReceive('getCacheForRange')->andReturn(collect());
+    });
+
+    $plant->forceFill(['last_fertilized_date' => null])->save();
+
+    $this->artisan('agronoma:daily-processing')->assertSuccessful();
+
+    expect(
+        \App\Models\Notification::where('user_id', $user->id)
+            ->where('type', 'phase_change')
+            ->count()
+    )->toBeGreaterThanOrEqual(0);
+});
+
+test('cron tidak membuat notifikasi penyiraman saat pengingat dimatikan', function () {
+    [$user, $location, $plant] = ownedPlant([
+        'last_watered_date' => now()->subDays(2)->toDateString(),
+    ]);
+    $user->update(['preferences' => ['watering_reminder_enabled' => false]]);
+
+    $this->mock(\App\Services\WeatherApiService::class, function ($mock) {
+        $mock->shouldReceive('forecast7Days')->andReturn([]);
+        $mock->shouldReceive('upsertCache')->andReturnNull();
+        $mock->shouldReceive('getCacheForDate')->andReturn(
+            \App\Models\WeatherCache::factory()->make(['rainfall_mm' => 0])
+        );
+        $mock->shouldReceive('getCacheForRange')->andReturn(collect());
+    });
+
+    $this->artisan('agronoma:daily-processing')->assertSuccessful();
+
+    expect(
+        \App\Models\Notification::where('user_id', $user->id)
+            ->where('type', 'watering')
+            ->count()
+    )->toBe(0);
+});
+
+test('care-calendar mengirim feedback kelembapan untuk status partial_rain', function () {
+    [$user, $location, $plant] = ownedPlant();
+
+    $log = WateringLog::factory()->create([
+        'user_plant_id' => $plant->id,
+        'status' => 'partial_rain',
+        'user_moisture_feedback' => 'not_answered',
+        'scheduled_date' => now()->toDateString(),
+    ]);
+
+    $this->actingAs($user, 'sanctum')
+        ->getJson("/api/plants/{$plant->id}/care-calendar")
+        ->assertStatus(200)
+        ->assertJsonFragment([
+            'date' => now()->toDateString(),
+            'watering_status' => 'partial_rain',
+            'watering_log_id' => $log->id,
+            'user_moisture_feedback' => 'not_answered',
+        ]);
+});

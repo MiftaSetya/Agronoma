@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class PlantController extends Controller
@@ -110,6 +111,7 @@ class PlantController extends Controller
                 'fertilizing_status' => $fertilizingLogs[$key]->status ?? 'none',
                 'watering_log_id' => $wateringLogs[$key]->id ?? null,
                 'rain_confirmed' => $wateringLogs[$key]->rain_confirmed ?? null,
+                'user_moisture_feedback' => $wateringLogs[$key]->user_moisture_feedback ?? null,
             ];
         }
 
@@ -127,6 +129,13 @@ class PlantController extends Controller
             'plant_name' => ['sometimes', 'string', 'max:150'],
             'planting_medium' => ['sometimes', 'in:home_yard,open_land,pot'],
             'soil_type' => ['sometimes', 'in:fertile,clay,sandy,chalky,volcanic,peat,artificial_media'],
+            'location_id' => [
+                'sometimes',
+                'integer',
+                Rule::exists('locations', 'id')->where('user_id', $request->user()->id),
+            ],
+        ], [
+            'location_id.exists' => 'Lokasi tanam itu tidak tersedia untuk akun Anda.',
         ]);
 
         if (isset($validated['current_phase'])) {
