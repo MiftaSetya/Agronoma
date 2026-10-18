@@ -143,19 +143,6 @@ class ChatController extends ChangeNotifier {
     }
   }
 
-  void discussDiagnosis(Disease disease) {
-    _messages.add(
-      ChatMessage(
-        author: ChatAuthor.bot,
-        text:
-            'Hasil pemindaian terakhir: ${disease.name} '
-            '(${disease.confidenceLabel} yakin). Mau saya jelaskan cara '
-            'penanganannya?',
-      ),
-    );
-    notifyListeners();
-  }
-
   void reset() {
     _messages.clear();
     _diagnosis = null;
