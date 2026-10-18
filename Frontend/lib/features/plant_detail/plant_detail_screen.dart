@@ -779,9 +779,15 @@ class _PerawatanTabState extends State<_PerawatanTab> {
         Text('Perawatan', style: AppTextStyles.sectionTitle),
         const SizedBox(height: AppSpacing.lg),
         _ScanCard(
-          onTap: () =>
-              Navigator.of(context)
-                  .pushNamed(Routes.diseaseDetection, arguments: plant.id),
+          onTap: () async {
+            await Navigator.of(
+              context,
+            ).pushNamed(Routes.diseaseDetection, arguments: plant.id);
+            if (!context.mounted) return;
+            final history = context.read<ScanHistoryController>();
+            history.invalidate(plant.id);
+            await history.load(plant.id);
+          },
         ),
         const SizedBox(height: AppSpacing.lg),
         _ScanHistoryCard(plantId: plant.id),
