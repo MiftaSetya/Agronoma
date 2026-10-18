@@ -232,6 +232,9 @@ class _OnePlantRepository implements PlantRepository {
   Future<Plant> getPlant(String id) async => (await getPlants()).first;
 
   @override
+  Future<String?> dashboardGreeting() async => null;
+
+  @override
   Future<List<CareDay>> careDays(
     Plant plant, {
     DateTime? today,

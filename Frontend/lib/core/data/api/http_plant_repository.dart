@@ -37,6 +37,18 @@ class HttpPlantRepository implements PlantRepository {
   }
 
   @override
+  Future<String?> dashboardGreeting() async {
+    try {
+      final body = await _api.get('dashboard');
+      return body is Map<String, dynamic>
+          ? body['greeting'] as String?
+          : null;
+    } on ApiException {
+      return null;
+    }
+  }
+
+  @override
   Future<List<Plant>> getArchivedPlants() async {
     final body = await _api.get('plants', query: {'status': 'archived'});
     final raw = body is Map<String, dynamic> ? body['data'] : null;

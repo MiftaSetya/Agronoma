@@ -23,6 +23,9 @@ class _FakePlantRepository implements PlantRepository {
   Future<Plant> getPlant(String id) async => plant;
 
   @override
+  Future<String?> dashboardGreeting() async => null;
+
+  @override
   Future<List<CareDay>> careDays(
     Plant plant, {
     DateTime? today,

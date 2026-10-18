@@ -18,6 +18,8 @@ class PlantController extends ChangeNotifier {
 
   List<Plant> _plants = const [];
 
+  String? _greeting;
+
   Map<String, Weather> _weatherByCity = const {};
 
   Map<String, List<CareDay>> _careDays = const {};
@@ -28,6 +30,8 @@ class PlantController extends ChangeNotifier {
   Object? _error;
 
   List<Plant> get plants => _plants;
+
+  String? get greeting => _greeting;
 
   List<Weather> get cityWeather =>
       _weatherByCity.values.toList(growable: false);
@@ -91,6 +95,7 @@ class PlantController extends ChangeNotifier {
 
   void reset() {
     _plants = const [];
+    _greeting = null;
     _weatherByCity = const {};
     _careDays = const {};
     _careDaysByMonth = const {};
@@ -123,6 +128,7 @@ class PlantController extends ChangeNotifier {
           if (!fetchedIds.contains(p.id)) p,
       ];
       _weatherByCity = await _loadWeatherPerCity(_plants);
+      _greeting = await _repository.dashboardGreeting();
     } catch (e) {
       _error = e;
     } finally {

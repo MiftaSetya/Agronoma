@@ -50,6 +50,9 @@ class _ArchiveFakeRepository implements PlantRepository {
       [...active, ...archived].firstWhere((p) => p.id == id);
 
   @override
+  Future<String?> dashboardGreeting() async => null;
+
+  @override
   Future<List<CareDay>> careDays(
     Plant plant, {
     DateTime? today,

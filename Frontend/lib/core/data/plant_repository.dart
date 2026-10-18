@@ -6,6 +6,8 @@ abstract class PlantRepository {
   Future<List<Plant>> getPlants();
   Future<Plant> getPlant(String id);
 
+  Future<String?> dashboardGreeting();
+
   Future<List<Plant>> getArchivedPlants();
 
   Future<void> setArchived(String plantId, {required bool archived});
@@ -55,6 +57,9 @@ class MockPlantRepository implements PlantRepository {
     await Future<void>.delayed(const Duration(milliseconds: 150));
     return _plants.firstWhere((p) => p.id == id);
   }
+
+  @override
+  Future<String?> dashboardGreeting() async => null;
 
   @override
   Future<List<Plant>> getArchivedPlants() async => const [];

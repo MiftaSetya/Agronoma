@@ -32,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final name = context.select<AuthController, String>(
       (a) => a.user?.firstName ?? 'User',
     );
+    final greeting = controller.greeting ?? 'Hallo, $name!';
 
     return RefreshIndicator(
       onRefresh: () => controller.load(force: true),
@@ -44,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
           AppShell.bottomInset,
         ),
         children: [
-          _Greeting(name: name),
+          _Greeting(text: greeting),
           const SizedBox(height: AppSpacing.xxl),
 
           if (controller.cityWeather.isNotEmpty) ...[
@@ -100,16 +101,16 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _Greeting extends StatelessWidget {
-  const _Greeting({required this.name});
+  const _Greeting({required this.text});
 
-  final String name;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Hallo, $name!', style: AppTextStyles.greetingLarge),
+        Text(text, style: AppTextStyles.greetingLarge),
 
         Text(
           'Ayo cek tanamanmu hari ini!',
