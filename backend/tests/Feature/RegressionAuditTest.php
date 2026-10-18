@@ -2,9 +2,12 @@
 
 use App\Models\FertilizingLog;
 use App\Models\Location;
+use App\Models\Notification;
 use App\Models\User;
 use App\Models\UserPlant;
 use App\Models\WateringLog;
+use App\Models\WeatherCache;
+use App\Services\WeatherApiService;
 
 function ownedPlant(array $overrides = []): array
 {
@@ -24,11 +27,11 @@ test('cron tidak menulis baris ganda saat dijalankan dua kali', function () {
         'last_watered_date' => now()->subDays(2)->toDateString(),
     ]);
 
-    $this->mock(\App\Services\WeatherApiService::class, function ($mock) {
+    $this->mock(WeatherApiService::class, function ($mock) {
         $mock->shouldReceive('forecast7Days')->andReturn([]);
         $mock->shouldReceive('upsertCache')->andReturnNull();
         $mock->shouldReceive('getCacheForDate')->andReturn(
-            \App\Models\WeatherCache::factory()->make(['rainfall_mm' => 0])
+            WeatherCache::factory()->make(['rainfall_mm' => 0])
         );
         $mock->shouldReceive('getCacheForRange')->andReturn(collect());
     });
@@ -43,7 +46,7 @@ test('cron tidak menulis baris ganda saat dijalankan dua kali', function () {
     )->toBe(1);
 
     expect(
-        \App\Models\Notification::where('user_id', $user->id)
+        Notification::where('user_id', $user->id)
             ->where('type', 'watering')
             ->count()
     )->toBe(1);
@@ -356,11 +359,11 @@ test('cron tetap mengirim notifikasi fase saat pengingat dimatikan', function ()
     ]);
     $user->update(['preferences' => ['watering_reminder_enabled' => false]]);
 
-    $this->mock(\App\Services\WeatherApiService::class, function ($mock) {
+    $this->mock(WeatherApiService::class, function ($mock) {
         $mock->shouldReceive('forecast7Days')->andReturn([]);
         $mock->shouldReceive('upsertCache')->andReturnNull();
         $mock->shouldReceive('getCacheForDate')->andReturn(
-            \App\Models\WeatherCache::factory()->make(['rainfall_mm' => 0])
+            WeatherCache::factory()->make(['rainfall_mm' => 0])
         );
         $mock->shouldReceive('getCacheForRange')->andReturn(collect());
     });
@@ -370,7 +373,7 @@ test('cron tetap mengirim notifikasi fase saat pengingat dimatikan', function ()
     $this->artisan('agronoma:daily-processing')->assertSuccessful();
 
     expect(
-        \App\Models\Notification::where('user_id', $user->id)
+        Notification::where('user_id', $user->id)
             ->where('type', 'phase_change')
             ->count()
     )->toBeGreaterThanOrEqual(0);
@@ -382,11 +385,11 @@ test('cron tidak membuat notifikasi penyiraman saat pengingat dimatikan', functi
     ]);
     $user->update(['preferences' => ['watering_reminder_enabled' => false]]);
 
-    $this->mock(\App\Services\WeatherApiService::class, function ($mock) {
+    $this->mock(WeatherApiService::class, function ($mock) {
         $mock->shouldReceive('forecast7Days')->andReturn([]);
         $mock->shouldReceive('upsertCache')->andReturnNull();
         $mock->shouldReceive('getCacheForDate')->andReturn(
-            \App\Models\WeatherCache::factory()->make(['rainfall_mm' => 0])
+            WeatherCache::factory()->make(['rainfall_mm' => 0])
         );
         $mock->shouldReceive('getCacheForRange')->andReturn(collect());
     });
@@ -394,7 +397,7 @@ test('cron tidak membuat notifikasi penyiraman saat pengingat dimatikan', functi
     $this->artisan('agronoma:daily-processing')->assertSuccessful();
 
     expect(
-        \App\Models\Notification::where('user_id', $user->id)
+        Notification::where('user_id', $user->id)
             ->where('type', 'watering')
             ->count()
     )->toBe(0);
@@ -419,4 +422,66 @@ test('care-calendar mengirim feedback kelembapan untuk status partial_rain', fun
             'watering_log_id' => $log->id,
             'user_moisture_feedback' => 'not_answered',
         ]);
+});
+
+test('weather mengambil cache baru saat cache kosong', function () {
+    [$user, $location, $plant] = ownedPlant();
+
+    $days = collect(range(0, 6))->map(fn ($offset) => [
+        'date' => now()->addDays($offset)->toDateString(),
+        'condition' => 'sunny',
+        'rainfall_mm' => 0,
+        'rain_probability_percent' => 0,
+        'temp_min' => 24,
+        'temp_max' => 31,
+    ])->all();
+
+    $this->mock(WeatherApiService::class, function ($mock) use ($days) {
+        $mock->shouldReceive('forecast7Days')->once()->andReturn($days);
+        $mock->shouldReceive('upsertCache')
+            ->once()
+            ->andReturnUsing(function ($city, $province, $forecast) {
+                foreach ($forecast as $day) {
+                    WeatherCache::updateOrCreate(
+                        ['city' => $city, 'province' => $province, 'date' => $day['date']],
+                        [
+                            'condition' => $day['condition'],
+                            'rainfall_mm' => $day['rainfall_mm'],
+                            'rain_probability_percent' => $day['rain_probability_percent'],
+                            'temp_min' => $day['temp_min'],
+                            'temp_max' => $day['temp_max'],
+                            'fetched_at' => now(),
+                        ]
+                    );
+                }
+            });
+    });
+
+    $this->actingAs($user, 'sanctum')
+        ->getJson("/api/plants/{$plant->id}/weather")
+        ->assertStatus(200)
+        ->assertJsonCount(7, 'forecast')
+        ->assertJsonPath('forecast.0.condition', 'sunny');
+});
+
+test('weather tidak fetch ulang saat cache sudah lengkap', function () {
+    [$user, $location, $plant] = ownedPlant();
+
+    foreach (range(0, 6) as $offset) {
+        WeatherCache::factory()->create([
+            'city' => $location->city,
+            'province' => $location->province,
+            'date' => now()->addDays($offset)->toDateString(),
+        ]);
+    }
+
+    $this->mock(WeatherApiService::class, function ($mock) {
+        $mock->shouldReceive('forecast7Days')->never();
+        $mock->shouldReceive('upsertCache')->never();
+    });
+
+    $this->actingAs($user, 'sanctum')
+        ->getJson("/api/plants/{$plant->id}/weather")
+        ->assertStatus(200)
+        ->assertJsonCount(7, 'forecast');
 });

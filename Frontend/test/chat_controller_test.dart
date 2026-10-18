@@ -6,15 +6,10 @@ import 'package:frontend/core/models/chat_message.dart';
 import 'package:frontend/core/state/chat_controller.dart';
 
 class _MemoryChatRepository implements ChatRepository {
-  _MemoryChatRepository({
-    this.sessionId,
-    this.history = const [],
-    this.createdFor,
-  });
+  _MemoryChatRepository({this.sessionId, this.history = const []});
 
   int? sessionId;
   List<Map<String, String>> history;
-  String? createdFor;
 
   int _createCalls = 0;
 
@@ -23,7 +18,6 @@ class _MemoryChatRepository implements ChatRepository {
   @override
   Future<int> createSession({String? plantId}) async {
     _createCalls++;
-    createdFor = plantId;
     sessionId = 1;
     return sessionId!;
   }

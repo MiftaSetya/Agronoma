@@ -4,18 +4,21 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserPlantResource;
-use App\Models\Location;
 use App\Models\UserPlant;
 use App\Models\WeatherCache;
+use App\Services\WeatherApiService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Throwable;
 
 class PlantController extends Controller
 {
+    public function __construct(private readonly WeatherApiService $weatherApiService) {}
+
     public function index(Request $request): JsonResponse
     {
         $plantQuery = $request->user()->userPlants()->with('location');
@@ -54,6 +57,20 @@ class PlantController extends Controller
             ->whereBetween('date', [$from, $to])
             ->orderBy('date')
             ->get();
+
+        if ($cache->count() < 7) {
+            try {
+                $forecast = $this->weatherApiService->forecast7Days($city);
+                $this->weatherApiService->upsertCache($city, $province, $forecast);
+            } catch (Throwable) {
+            }
+
+            $cache = WeatherCache::where('city', $city)
+                ->where('province', $province)
+                ->whereBetween('date', [$from, $to])
+                ->orderBy('date')
+                ->get();
+        }
 
         $forecast = $cache->map(fn (WeatherCache $entry): array => [
             'date' => $entry->date->toDateString(),

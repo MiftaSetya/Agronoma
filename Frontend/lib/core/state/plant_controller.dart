@@ -69,7 +69,10 @@ class PlantController extends ChangeNotifier {
 
   Future<void> load({bool force = false}) async {
     if (_loading) return;
-    if (!force && _plants.isNotEmpty && _weatherByCity.isNotEmpty) return;
+    if (!force && _plants.isNotEmpty && _weatherByCity.isNotEmpty) {
+      _refreshWeather();
+      return;
+    }
 
     _loading = true;
     _error = null;
@@ -91,6 +94,15 @@ class PlantController extends ChangeNotifier {
       _loading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> _refreshWeather() async {
+    final plants = _plants;
+    if (plants.isEmpty) return;
+    final refreshed = await _loadWeatherPerCity(plants);
+    if (refreshed.isEmpty) return;
+    _weatherByCity = refreshed;
+    notifyListeners();
   }
 
   Future<Map<String, Weather>> _loadWeatherPerCity(List<Plant> plants) async {
