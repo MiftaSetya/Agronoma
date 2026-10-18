@@ -12,6 +12,11 @@ abstract class PlantRepository {
 
   Future<void> confirmRain(int wateringLogId, {required bool rained});
 
+  Future<void> moistureFeedback(
+    int wateringLogId, {
+    required bool moist,
+  });
+
   Future<List<CareDay>> careDays(Plant plant, {required DateTime today});
 
   Future<Plant> setTaskDone(String plantId, CareTaskKind kind, bool done);
@@ -19,6 +24,7 @@ abstract class PlantRepository {
     String plantId, {
     String? name,
     String? location,
+    int? locationId,
     String? place,
     GrowthPhase? phase,
     String? soilName,
@@ -54,6 +60,9 @@ class MockPlantRepository implements PlantRepository {
   Future<void> confirmRain(int wateringLogId, {required bool rained}) async {}
 
   @override
+  Future<void> moistureFeedback(int wateringLogId, {required bool moist}) async {}
+
+  @override
   Future<List<CareDay>> careDays(Plant plant, {required DateTime today}) async {
     await Future<void>.delayed(const Duration(milliseconds: 150));
     return const [];
@@ -83,6 +92,7 @@ class MockPlantRepository implements PlantRepository {
     String plantId, {
     String? name,
     String? location,
+    int? locationId,
     String? place,
     GrowthPhase? phase,
     String? soilName,
@@ -93,6 +103,7 @@ class MockPlantRepository implements PlantRepository {
     final updated = _plants[index].copyWith(
       name: name,
       location: location,
+      locationId: locationId,
       place: place,
       phase: phase,
       soilName: soilName,

@@ -37,6 +37,8 @@ class PlantMapper {
           ]) ??
           'Lokasi Tanam',
 
+      locationId: (location?['id'] as num?)?.toInt(),
+
       place: media.label,
       media: media,
       status: BackendCodes.badgeStatus(json['badge_status'] as String?),

@@ -10,6 +10,7 @@ import 'package:frontend/core/models/weather.dart';
 import 'package:frontend/core/routing/app_router.dart';
 import 'package:frontend/core/state/plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/core/widgets/agro_common.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 import 'package:frontend/features/plant_detail/plant_settings_sheet.dart';
@@ -993,14 +994,48 @@ class _Legend extends StatelessWidget {
   }
 }
 
-class _CareListCard extends StatelessWidget {
+class _CareListCard extends StatefulWidget {
   const _CareListCard({required this.plant, required this.tasks});
 
   final Plant plant;
   final List<CareTask> tasks;
 
   @override
+  State<_CareListCard> createState() => _CareListCardState();
+}
+
+class _CareListCardState extends State<_CareListCard> {
+  bool _sendingMoisture = false;
+
+  Future<void> _sendMoisture({required bool moist}) async {
+    setState(() => _sendingMoisture = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await context.read<PlantController>().confirmMoisture(
+      widget.plant.id,
+      moist: moist,
+    );
+    if (!mounted) return;
+    setState(() => _sendingMoisture = false);
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          ok
+              ? moist
+                    ? 'Tanah masih lembap, penyiraman ditunda.'
+                    : 'Tanah kering, jadwal penyiraman dikembalikan.'
+              : 'Gagal menyimpan kondisi tanah. Periksa koneksi Anda.',
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final tasks = widget.tasks;
+    final care = context.watch<PlantController>().todayCare(widget.plant.id);
+    final needsMoisture = care?.awaitsMoistureFeedback ?? false;
+
     return _DetailCard(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -1008,7 +1043,37 @@ class _CareListCard extends StatelessWidget {
         children: [
           Text('Perawatan Hari Ini', style: AppTextStyles.cardTitle),
           const SizedBox(height: AppSpacing.lg),
-          if (tasks.isEmpty)
+          if (needsMoisture) ...[
+            Text(
+              'Hujan kemarin hanya membasahi sebagian. Bagaimana kondisi '
+              'tanah hari ini?',
+              style: AppTextStyles.bodyMuted,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: AgroOutlineButton(
+                    label: 'Masih Lembap',
+                    onPressed: _sendingMoisture
+                        ? null
+                        : () => _sendMoisture(moist: true),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: AgroOutlineButton(
+                    label: 'Tanah Kering',
+                    onPressed: _sendingMoisture
+                        ? null
+                        : () => _sendMoisture(moist: false),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+          if (tasks.isEmpty && !needsMoisture)
             Text(
               'Tidak ada jadwal perawatan untuk hari ini.',
               style: AppTextStyles.bodyMuted,
@@ -1021,7 +1086,7 @@ class _CareListCard extends StatelessWidget {
                   final messenger = ScaffoldMessenger.of(context);
                   final ok = await context
                       .read<PlantController>()
-                      .toggleTask(plant.id, task.kind, !task.done);
+                      .toggleTask(widget.plant.id, task.kind, !task.done);
                   if (ok) return;
                   messenger.showSnackBar(
                     const SnackBar(
@@ -1053,7 +1118,7 @@ class _TaskRow extends StatelessWidget {
       color: AppColors.surface,
       borderRadius: AppRadius.lgAll,
       child: InkWell(
-        onTap: onToggle,
+        onTap: task.done ? null : onToggle,
         borderRadius: AppRadius.lgAll,
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.lg),

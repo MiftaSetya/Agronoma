@@ -1,4 +1,5 @@
 import 'package:frontend/core/data/api/api_client.dart';
+import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/api/backend_codes.dart';
 import 'package:frontend/core/data/api/plant_mapper.dart';
 import 'package:frontend/core/data/api/plant_schedule.dart';
@@ -65,6 +66,15 @@ class HttpPlantRepository implements PlantRepository {
   }
 
   @override
+  Future<void> moistureFeedback(int wateringLogId, {required bool moist}) async {
+    await _api.post(
+      'watering-logs/$wateringLogId/moisture-feedback',
+      body: {'user_moisture_feedback': moist ? 'moist' : 'dry'},
+      timeout: _actionTimeout,
+    );
+  }
+
+  @override
   Future<List<CareDay>> careDays(Plant plant, {required DateTime today}) async {
     final month = '${today.year}-${today.month.toString().padLeft(2, '0')}';
     final body = await _api.get(
@@ -86,14 +96,20 @@ class HttpPlantRepository implements PlantRepository {
     CareTaskKind kind,
     bool done,
   ) async {
-    if (done) {
-      await _api.post(
-        kind == CareTaskKind.fertilizing
-            ? 'plants/$plantId/fertilizing/complete'
-            : 'plants/$plantId/watering/complete',
-        timeout: _actionTimeout,
+    if (!done) {
+      throw const ApiException(
+        message: 'Perawatan yang sudah selesai tidak bisa dibatalkan.',
+        statusCode: 409,
       );
     }
+
+    await _api.post(
+      kind == CareTaskKind.fertilizing
+          ? 'plants/$plantId/fertilizing/complete'
+          : 'plants/$plantId/watering/complete',
+      timeout: _actionTimeout,
+    );
+
     return getPlant(plantId);
   }
 
@@ -102,6 +118,7 @@ class HttpPlantRepository implements PlantRepository {
     String plantId, {
     String? name,
     String? location,
+    int? locationId,
     String? place,
     GrowthPhase? phase,
     String? soilName,
@@ -110,6 +127,9 @@ class HttpPlantRepository implements PlantRepository {
 
     if (name != null && name.trim().isNotEmpty) {
       body['plant_name'] = name.trim();
+    }
+    if (locationId != null) {
+      body['location_id'] = locationId;
     }
     if (phase != null) {
       body['current_phase'] = BackendCodes.phase(phase);

@@ -1,11 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
-import 'package:frontend/core/data/mock_data.dart';
-import 'package:frontend/core/models/map_location.dart';
 import 'package:frontend/core/models/plant.dart';
+import 'package:frontend/core/models/plant_location.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/routing/app_router.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
@@ -13,7 +11,6 @@ import 'package:frontend/core/state/plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
-import 'package:frontend/core/widgets/agro_map.dart';
 import 'package:frontend/core/widgets/agro_text_field.dart';
 import 'package:frontend/core/widgets/app_shell.dart';
 import 'package:frontend/features/add_plant/soil_detection_screen.dart';
@@ -402,90 +399,31 @@ class _EmptyRecommendations extends StatelessWidget {
   }
 }
 
-MapLocation _exampleLocation(String? name) => MockData.locations.firstWhere(
-  (loc) => loc.name == name,
-  orElse: () => MockData.locations.first,
-);
-
-class _LocationStep extends StatelessWidget {
+class _LocationStep extends StatefulWidget {
   const _LocationStep({required this.onNext});
 
   static const String _title = 'Dimana tanaman ini akan tumbuh?';
   static const String _description =
-      'Aplikasi memerlukan akses lokasi untuk menganalisis data cuaca lokal, '
-      'kelembapan, dan kondisi cahaya matahari yang tepat bagi tanamanmu.';
-
-  static const double _mapHeight = 380;
-
-  static const double _mapTop = 296 - 120;
-
-  static const double _cardTop = 662 - 120;
+      'Pilih lokasi tanam yang tersimpan di akunmu. Kota lokasi dipakai '
+      'untuk membaca data cuaca dan kelembapan setempat.';
 
   final VoidCallback onNext;
 
   @override
-  Widget build(BuildContext context) {
-    final draft = context.watch<AddPlantController>().draft;
-    final picked = _exampleLocation(draft.locationName);
+  State<_LocationStep> createState() => _LocationStepState();
+}
 
-    final center = draft.locationPosition ?? picked.position;
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Positioned(
-          top: _mapTop,
-          left: 0,
-          right: 0,
-          height: _mapHeight,
-
-          child: AgroMap(center: center, interactive: false),
-        ),
-
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: const _HeaderCard(
-            step: 0,
-            title: _title,
-            description: _description,
-          ),
-        ),
-        Positioned(
-          top: _cardTop,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: SingleChildScrollView(
-            reverse: true,
-            child: _LocationConfirmCard(
-              name: picked.name,
-              address: picked.address,
-              onConfirm: () {
-                context.read<AddPlantController>().setLocation(
-                  picked.name,
-                  picked.address,
-                  position: center,
-                  city: picked.city,
-                  province: picked.province,
-                );
-                onNext();
-              },
-              onChange: () => _showLocationPicker(context, picked, center),
-            ),
-          ),
-        ),
-      ],
-    );
+class _LocationStepState extends State<_LocationStep> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<AddPlantController>().loadLocations();
+    });
   }
 
-  void _showLocationPicker(
-    BuildContext context,
-    MapLocation current,
-    LatLng? point,
-  ) {
-    showModalBottomSheet<void>(
+  Future<void> _createLocation() async {
+    final created = await showModalBottomSheet<PlantLocation>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
@@ -494,252 +432,239 @@ class _LocationStep extends StatelessWidget {
           top: Radius.circular(AppRadius.sheet),
         ),
       ),
-      builder: (_) =>
-          _LocationPickerSheet(initial: current, initialPoint: point),
+      builder: (_) => const _NewLocationSheet(),
     );
-  }
-}
 
-class _LocationPickerSheet extends StatefulWidget {
-  const _LocationPickerSheet({required this.initial, this.initialPoint});
-
-  final MapLocation initial;
-
-  final LatLng? initialPoint;
-
-  @override
-  State<_LocationPickerSheet> createState() => _LocationPickerSheetState();
-}
-
-class _LocationPickerSheetState extends State<_LocationPickerSheet> {
-  late LatLng _point = widget.initialPoint ?? widget.initial.position;
-
-  late MapLocation? _nearest = _find(_point);
-
-  static const Distance _distance = Distance();
-
-  MapLocation? _find(LatLng point) {
-    MapLocation? best;
-    var bestMeters = double.infinity;
-    for (final loc in MockData.locations) {
-      final meters = _distance.as(LengthUnit.Meter, point, loc.position);
-      if (meters < bestMeters) {
-        best = loc;
-        bestMeters = meters;
-      }
-    }
-
-    return bestMeters <= 2000 ? best : null;
-  }
-
-  void _onMoved(LatLng point) {
-    setState(() {
-      _point = point;
-      _nearest = _find(point);
-    });
+    if (!mounted || created == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Lokasi "${created.label}" ditambahkan.')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final label = _nearest?.name ?? 'Titik di peta';
-    final detail =
-        _nearest?.address ??
-        '${_point.latitude.toStringAsFixed(5)}, '
-            '${_point.longitude.toStringAsFixed(5)}';
+    final add = context.watch<AddPlantController>();
+    final draft = add.draft;
+    final hasSelection = draft.locationId != null;
 
-    return SafeArea(
-      top: false,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            height: 300,
-            child: AgroMap(center: _point, onCenterChanged: _onMoved),
+    return ListView(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xxxl),
+      children: [
+        const _HeaderCard(
+          step: 0,
+          title: _LocationStep._title,
+          description: _LocationStep._description,
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.page,
+            AppSpacing.lg,
+            AppSpacing.page,
+            AppSpacing.lg,
           ),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const AgroIcon(AppAssets.locationFilled, size: 24),
-                    const SizedBox(width: AppSpacing.xs),
-                    Expanded(
-                      child: Text(
-                        label,
-                        style: AppTextStyles.titleLarge.copyWith(
-                          color: AppColors.darkGrey,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  detail,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.grey,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                for (final loc in MockData.locations)
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (add.isLoadingLocations)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (add.locations.isEmpty)
+                _EmptyLocations(
+                  hasError: add.error != null,
+                  onRetry: () =>
+                      context.read<AddPlantController>().loadLocations(),
+                  onCreate: _createLocation,
+                )
+              else ...[
+                for (final location in add.locations)
                   _LocationOption(
-                    name: loc.name,
-                    address: loc.address,
-                    selected: loc == _nearest,
-                    onTap: () => setState(() {
-                      _point = loc.position;
-                      _nearest = loc;
-                    }),
+                    name: location.label,
+                    address: location.region,
+                    selected: location.id == draft.locationId,
+                    onTap: () => context
+                        .read<AddPlantController>()
+                        .selectLocation(location),
                   ),
                 const SizedBox(height: AppSpacing.sm),
-                AgroButton(
-                  label: 'Pilih Lokasi Ini',
-                  onPressed: () {
-                    final known = _nearest ?? MockData.locations.first;
-                    context.read<AddPlantController>().setLocation(
-                      label,
-                      detail,
-                      position: _point,
-                      city: known.city,
-                      province: known.province,
-                    );
-                    Navigator.of(context).pop();
-                  },
+                AgroOutlineButton(
+                  label: 'Tambah lokasi baru',
+                  onPressed: _createLocation,
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LocationConfirmCard extends StatelessWidget {
-  const _LocationConfirmCard({
-    required this.name,
-    required this.address,
-    required this.onConfirm,
-    required this.onChange,
-  });
-
-  final String name;
-  final String address;
-  final VoidCallback onConfirm;
-  final VoidCallback onChange;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.page - _border,
-        AppSpacing.xxl - _border,
-        AppSpacing.page - _border,
-        AppSpacing.xxxl,
-      ),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
-        border: Border(
-          top: BorderSide(color: AppColors.border),
-          left: BorderSide(color: AppColors.border),
-          right: BorderSide(color: AppColors.border),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x0D000000),
-            offset: Offset(0, -1),
-            blurRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const AgroIcon(AppAssets.locationFilled, size: 24),
-              const SizedBox(width: AppSpacing.xs),
-              Expanded(
-                child: _TrimmedText(
-                  text: name,
-                  style: AppTextStyles.headlineLarge.copyWith(
-                    color: AppColors.darkGrey,
-                    fontWeight: FontWeight.w700,
-                    height: 29 / 20,
-                  ),
-
-                  trimAdjust: _capTrimAdjust(20, 29),
-                  maxLines: 1,
-                ),
+              const SizedBox(height: AppSpacing.xxl),
+              AgroButton(
+                label: 'Konfirmasi Lokasi',
+                onPressed: hasSelection ? widget.onNext : null,
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          _TrimmedText(
-            text: address,
-            style: AppTextStyles.bodyLarge.copyWith(
-              color: AppColors.grey,
-              fontWeight: FontWeight.w500,
-              height: 16 / 14,
-            ),
-
-            trimAdjust: _capTrimAdjust(14, 16),
-            maxLines: 2,
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-          AgroButton(label: 'Konfirmasi Lokasi', onPressed: onConfirm),
-          const SizedBox(height: AppSpacing.sm),
-          AgroOutlineButton(label: 'Ubah Lokasi', onPressed: onChange),
-        ],
-      ),
+        ),
+      ],
     );
-  }
-
-  static double _capTrimAdjust(double fontSize, double lineHeight) {
-    const ascent = 2269 / 2048;
-    const descent = 660 / 2048;
-    const capHeight = 1490 / 2048;
-    final halfLeading = (lineHeight - (ascent + descent) * fontSize) / 2;
-
-    final capTop = halfLeading + (ascent - capHeight) * fontSize;
-
-    return capTop -
-        (lineHeight - fontSize * (ascent + descent)) / 2 -
-        (capHeight * fontSize - fontSize * (ascent + descent)) / 2;
   }
 }
 
-class _TrimmedText extends StatelessWidget {
-  const _TrimmedText({
-    required this.text,
-    required this.style,
-    required this.trimAdjust,
-    this.maxLines,
+class _EmptyLocations extends StatelessWidget {
+  const _EmptyLocations({
+    required this.hasError,
+    required this.onRetry,
+    required this.onCreate,
   });
 
-  final String text;
-  final TextStyle style;
-  final double trimAdjust;
-  final int? maxLines;
+  final bool hasError;
+  final VoidCallback onRetry;
+  final VoidCallback onCreate;
 
   @override
   Widget build(BuildContext context) {
-    return Transform.translate(
-      offset: Offset(0, -trimAdjust),
-      child: Text(
-        text,
-        style: style,
-        maxLines: maxLines,
-        overflow: TextOverflow.ellipsis,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          hasError
+              ? 'Daftar lokasi gagal dimuat. Periksa koneksi lalu coba lagi.'
+              : 'Belum ada lokasi tanam di akunmu. Tambahkan lokasi dulu '
+                    'supaya cuaca setempat bisa dibaca.',
+          style: AppTextStyles.bodyMuted,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        AgroButton(label: 'Tambah lokasi baru', onPressed: onCreate),
+        if (hasError) ...[
+          const SizedBox(height: AppSpacing.sm),
+          AgroOutlineButton(label: 'Coba lagi', onPressed: onRetry),
+        ],
+      ],
+    );
+  }
+}
+
+class _NewLocationSheet extends StatefulWidget {
+  const _NewLocationSheet();
+
+  @override
+  State<_NewLocationSheet> createState() => _NewLocationSheetState();
+}
+
+class _NewLocationSheetState extends State<_NewLocationSheet> {
+  final _label = TextEditingController();
+  final _city = TextEditingController();
+  final _province = TextEditingController();
+
+  bool _saving = false;
+  String? _errorText;
+
+  @override
+  void dispose() {
+    _label.dispose();
+    _city.dispose();
+    _province.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final label = _label.text.trim();
+    final city = _city.text.trim();
+
+    if (label.isEmpty || city.isEmpty) {
+      setState(() => _errorText = 'Nama lokasi dan kota wajib diisi.');
+      return;
+    }
+
+    setState(() {
+      _saving = true;
+      _errorText = null;
+    });
+
+    final created = await context.read<AddPlantController>().createLocation(
+      label: label,
+      city: city,
+      province: _province.text.trim(),
+    );
+
+    if (!mounted) return;
+    setState(() => _saving = false);
+
+    if (created == null) {
+      setState(
+        () => _errorText = 'Lokasi gagal disimpan. Periksa koneksi Anda.',
+      );
+      return;
+    }
+
+    Navigator.of(context).pop(created);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppSpacing.page,
+        right: AppSpacing.page,
+        top: AppSpacing.lg,
+        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.xxl,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 32,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: AppRadius.chipAll,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            Text(
+              'Lokasi baru',
+              style: AppTextStyles.titleLarge.copyWith(height: 19 / 16),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            AgroTextField(
+              label: 'Nama lokasi',
+              hint: 'Contoh: Pekarangan belakang',
+              controller: _label,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            AgroTextField(
+              label: 'Kota',
+              hint: 'Contoh: Surabaya',
+              controller: _city,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            AgroTextField(
+              label: 'Provinsi',
+              hint: 'Contoh: Jawa Timur',
+              controller: _province,
+            ),
+            if (_errorText != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                _errorText!,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.danger,
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.xxl),
+            AgroButton(
+              label: 'Simpan lokasi',
+              loading: _saving,
+              onPressed: _saving ? null : _submit,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
 
 class _LocationOption extends StatelessWidget {
   const _LocationOption({
@@ -1127,7 +1052,7 @@ class _RecommendationStepState extends State<_RecommendationStep> {
                           children: [
                             CircularProgressIndicator(),
                             SizedBox(height: AppSpacing.lg),
-                            Text('Menganalisis tanaman…'),
+                            Text('Menganalisis tanamanâ€¦'),
                           ],
                         ),
                       )
@@ -1192,7 +1117,7 @@ class _RecommendationStepState extends State<_RecommendationStep> {
           onBack: widget.onBack,
           onNext: widget.onNext,
           enabled: widget.enabled,
-          nextLabel: add.isLoading ? 'Menganalisis…' : 'Lanjut',
+          nextLabel: add.isLoading ? 'Menganalisisâ€¦' : 'Lanjut',
         ),
       ],
     );

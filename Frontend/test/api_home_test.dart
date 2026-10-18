@@ -7,6 +7,7 @@ import 'package:http/testing.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/data/api/api_client.dart';
+import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/api/http_plant_repository.dart';
 import 'package:frontend/core/data/api/http_weather_repository.dart';
 import 'package:frontend/core/data/api/plant_schedule.dart';
@@ -182,7 +183,7 @@ void main() {
       expect(paths, contains('/api/plants/6/fertilizing/complete'));
     });
 
-    test('membatalkan centang tidak mengirim permintaan', () async {
+    test('membatalkan centang ditolak tanpa menyentuh jaringan', () async {
       var requests = 0;
       final repo = HttpPlantRepository(
         apiClient: _client((request) async {
@@ -195,9 +196,12 @@ void main() {
         }),
       );
 
-      await repo.setTaskDone('6', CareTaskKind.watering, false);
+      await expectLater(
+        repo.setTaskDone('6', CareTaskKind.watering, false),
+        throwsA(isA<ApiException>()),
+      );
 
-      expect(requests, 1);
+      expect(requests, 0);
     });
 
     test('arsip memakai PATCH status=archived', () async {

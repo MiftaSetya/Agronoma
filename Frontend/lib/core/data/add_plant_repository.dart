@@ -8,6 +8,7 @@ import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/data/plant_catalog.dart';
 import 'package:frontend/core/data/soil_catalog.dart';
 import 'package:frontend/core/models/plant.dart';
+import 'package:frontend/core/models/plant_location.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/models/soil_type.dart';
 
@@ -15,6 +16,14 @@ abstract class AddPlantRepository {
   Future<List<SoilType>> getSoilTypes();
 
   Future<SoilScanResult> scanSoil({String? imagePath});
+
+  Future<List<PlantLocation>> getLocations();
+
+  Future<PlantLocation> createLocation({
+    required String label,
+    required String city,
+    required String province,
+  });
 
   Future<List<PlantRecommendation>> getRecommendations({
     required PlantingMedia media,
@@ -28,6 +37,7 @@ abstract class AddPlantRepository {
     String? scientificName,
     required PlantingMedia media,
     required SoilType soil,
+    required int locationId,
     required String city,
     required String province,
     required String locationLabel,
@@ -44,11 +54,43 @@ class HttpAddPlantRepository implements AddPlantRepository {
 
   static const Duration aiTimeout = Duration(seconds: 120);
 
-  int? _locationId;
-  String? _locationKey;
-
   @override
   Future<List<SoilType>> getSoilTypes() async => SoilCatalog.types;
+
+  @override
+  Future<List<PlantLocation>> getLocations() async {
+    final body = await _client.get('locations');
+    final raw = body is Map<String, dynamic> ? body['data'] : null;
+    if (raw is! List) return const [];
+
+    return [
+      for (final item in raw)
+        if (item is Map<String, dynamic>) PlantLocation.fromJson(item),
+    ];
+  }
+
+  @override
+  Future<PlantLocation> createLocation({
+    required String label,
+    required String city,
+    required String province,
+  }) async {
+    final body = await _json('locations', {
+      'label': label.trim(),
+      'city': city.trim(),
+      'province': province.trim().isEmpty ? null : province.trim(),
+    });
+
+    final raw = body['location'];
+    if (raw is! Map<String, dynamic>) {
+      throw const ApiException(
+        message: 'Lokasi tanam gagal disimpan.',
+        statusCode: 500,
+      );
+    }
+
+    return PlantLocation.fromJson(raw);
+  }
 
   @override
   Future<SoilScanResult> scanSoil({String? imagePath}) async {
@@ -106,6 +148,7 @@ class HttpAddPlantRepository implements AddPlantRepository {
     String? scientificName,
     required PlantingMedia media,
     required SoilType soil,
+    required int locationId,
     required String city,
     required String province,
     required String locationLabel,
@@ -113,12 +156,6 @@ class HttpAddPlantRepository implements AddPlantRepository {
     String? description,
     DateTime? plantingDate,
   }) async {
-    final locationId = await _ensureLocation(
-      label: locationLabel,
-      city: city,
-      province: province,
-    );
-
     final planting = plantingDate ?? DateTime.now();
     final body = await _json('plants', {
       'location_id': locationId,
@@ -143,35 +180,6 @@ class HttpAddPlantRepository implements AddPlantRepository {
       description: description,
       locationLabel: locationLabel,
     );
-  }
-
-  Future<int> _ensureLocation({
-    required String label,
-    required String city,
-    required String province,
-  }) async {
-    final key = '$label|$city|$province';
-    final cached = _locationId;
-    if (cached != null && _locationKey == key) return cached;
-
-    final body = await _json('locations', {
-      'label': label,
-      'city': city,
-      'province': province,
-    });
-
-    final location = body['location'];
-    final id = location is Map<String, dynamic> ? location['id'] : null;
-    if (id is! int) {
-      throw const ApiException(
-        message: 'Lokasi tanam gagal disimpan.',
-        statusCode: 500,
-      );
-    }
-
-    _locationId = id;
-    _locationKey = key;
-    return id;
   }
 
   Future<Map<String, dynamic>> _json(
@@ -253,10 +261,50 @@ class SampleAddPlantRepository implements AddPlantRepository {
 
   static const Duration _latency = Duration(milliseconds: 900);
 
+  final List<PlantLocation> _locations = [
+    const PlantLocation(
+      id: 1,
+      label: 'Politeknik Elektronika Negeri Surabaya',
+      city: 'Surabaya',
+      province: 'Jawa Timur',
+    ),
+    const PlantLocation(
+      id: 2,
+      label: 'Kebun Bibit Wonorejo',
+      city: 'Surabaya',
+      province: 'Jawa Timur',
+    ),
+    const PlantLocation(
+      id: 3,
+      label: 'Rumah Kaca Sukolilo',
+      city: 'Surabaya',
+      province: 'Jawa Timur',
+    ),
+  ];
+
   @override
   Future<List<SoilType>> getSoilTypes() async {
     await Future<void>.delayed(const Duration(milliseconds: 200));
     return SoilCatalog.types;
+  }
+
+  @override
+  Future<List<PlantLocation>> getLocations() async => List.of(_locations);
+
+  @override
+  Future<PlantLocation> createLocation({
+    required String label,
+    required String city,
+    required String province,
+  }) async {
+    final created = PlantLocation(
+      id: _locations.length + 1,
+      label: label.trim(),
+      city: city.trim(),
+      province: province.trim(),
+    );
+    _locations.insert(0, created);
+    return created;
   }
 
   @override
@@ -283,6 +331,7 @@ class SampleAddPlantRepository implements AddPlantRepository {
     String? scientificName,
     required PlantingMedia media,
     required SoilType soil,
+    required int locationId,
     required String city,
     required String province,
     required String locationLabel,

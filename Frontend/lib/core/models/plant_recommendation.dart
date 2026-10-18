@@ -50,6 +50,7 @@ class AddPlantDraft {
     this.locationPosition,
     this.locationCity,
     this.locationProvince,
+    this.locationId,
     this.locationConfirmed = false,
     this.media,
     this.soil,
@@ -69,6 +70,8 @@ class AddPlantDraft {
   final String? locationCity;
   final String? locationProvince;
 
+  final int? locationId;
+
   final bool locationConfirmed;
 
   final String? media;
@@ -85,7 +88,8 @@ class AddPlantDraft {
 
   final String? phase;
 
-  bool get hasLocation => locationConfirmed || locationName != null;
+  bool get hasLocation =>
+      locationConfirmed || (locationName != null && locationId != null);
   bool get hasMedia => media != null;
   bool get hasSoil => soil != null || soilDetected;
   bool get hasPlant => recommendation != null || manualName != null;
@@ -99,6 +103,7 @@ class AddPlantDraft {
     LatLng? locationPosition,
     String? locationCity,
     String? locationProvince,
+    int? locationId,
     bool? locationConfirmed,
     String? media,
     SoilType? soil,
@@ -116,6 +121,7 @@ class AddPlantDraft {
     locationPosition: locationPosition ?? this.locationPosition,
     locationCity: locationCity ?? this.locationCity,
     locationProvince: locationProvince ?? this.locationProvince,
+    locationId: locationId ?? this.locationId,
     locationConfirmed: locationConfirmed ?? this.locationConfirmed,
     media: media ?? this.media,
     soil: soil ?? this.soil,

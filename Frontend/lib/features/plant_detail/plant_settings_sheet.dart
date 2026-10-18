@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/models/plant.dart';
+import 'package:frontend/core/models/plant_location.dart';
+import 'package:frontend/core/state/add_plant_controller.dart';
 import 'package:frontend/core/state/plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_button.dart';
@@ -39,6 +41,7 @@ class PlantSettingsSheet extends StatefulWidget {
 
 class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
   late final TextEditingController _name;
+  late int? _locationId;
   late String _location;
   late String _place;
   late String _soilName;
@@ -46,6 +49,7 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
 
   bool _saving = false;
   bool _archiving = false;
+  List<PlantLocation> _locations = const [];
 
   Future<void> _archive() async {
     final confirmed = await showDialog<bool>(
@@ -93,10 +97,40 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
   void initState() {
     super.initState();
     _name = TextEditingController(text: widget.plant.name);
+    _locationId = widget.plant.locationId;
     _location = widget.plant.location;
     _place = widget.plant.place;
     _soilName = widget.plant.soilName;
     _phase = widget.plant.phase;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadLocations());
+  }
+
+  Future<void> _loadLocations() async {
+    final add = context.read<AddPlantController>();
+    await add.loadLocations();
+    if (!mounted) return;
+    setState(() => _locations = add.locations);
+  }
+
+  Future<void> _pickLocation() async {
+    final picked = await showModalBottomSheet<PlantLocation>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+      ),
+      builder: (_) => _LocationPickSheet(
+        locations: _locations,
+        selectedId: _locationId,
+      ),
+    );
+
+    if (!mounted || picked == null) return;
+    setState(() {
+      _locationId = picked.id;
+      _location = picked.label;
+    });
   }
 
   @override
@@ -161,6 +195,7 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                 label: 'Lokasi Tanaman',
                 leading: AgroIcon(AppAssets.locationTag, size: 20),
                 trailing: const AgroIcon(AppAssets.chevronRightThin, size: 20),
+                onTap: _pickLocation,
 
                 child: Text(
                   _location,
@@ -249,6 +284,7 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                                   .updatePlant(
                                     widget.plant.id,
                                     name: _name.text.trim(),
+                                    locationId: _locationId,
                                     place: _place,
                                     phase: _phase,
                                     soilName: _soilName,
@@ -451,6 +487,61 @@ class _LabeledField extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _LocationPickSheet extends StatelessWidget {
+  const _LocationPickSheet({required this.locations, required this.selectedId});
+
+  final List<PlantLocation> locations;
+  final int? selectedId;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: ListView(
+        shrinkWrap: true,
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.md,
+          horizontal: AppSpacing.page,
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: Text(
+              'Pilih lokasi tanam',
+              style: AppTextStyles.titleLarge.copyWith(height: 19 / 16),
+            ),
+          ),
+          if (locations.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+              child: Text(
+                'Belum ada lokasi tersimpan di akunmu.',
+                style: AppTextStyles.bodyMuted,
+              ),
+            )
+          else
+            for (final location in locations)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  location.label,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: location.id == selectedId
+                        ? AppColors.primary
+                        : AppColors.darkGrey,
+                    fontWeight: location.id == selectedId
+                        ? FontWeight.w600
+                        : null,
+                  ),
+                ),
+                subtitle: Text(location.region, style: AppTextStyles.bodySmall),
+                onTap: () => Navigator.of(context).pop(location),
+              ),
+        ],
+      ),
     );
   }
 }

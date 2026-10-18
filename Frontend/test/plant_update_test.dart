@@ -38,6 +38,7 @@ class _FakePlantRepository implements PlantRepository {
     String plantId, {
     String? name,
     String? location,
+    int? locationId,
     String? place,
     GrowthPhase? phase,
     String? soilName,
@@ -57,6 +58,9 @@ class _FakePlantRepository implements PlantRepository {
 
   @override
   Future<void> confirmRain(int wateringLogId, {required bool rained}) async {}
+
+  @override
+  Future<void> moistureFeedback(int wateringLogId, {required bool moist}) async {}
 }
 
 class _FakeWeatherRepository implements WeatherRepository {

@@ -5,16 +5,35 @@ import 'package:provider/provider.dart';
 import 'package:frontend/core/data/add_plant_repository.dart';
 import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/models/plant.dart';
+import 'package:frontend/core/models/plant_location.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/models/soil_type.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
+import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/features/add_plant/add_plant_flow.dart';
 import 'package:frontend/features/add_plant/soil_detection_screen.dart';
 
 class _FakeRepository implements AddPlantRepository {
   @override
   Future<List<SoilType>> getSoilTypes() async => MockData.soilTypes;
+
+  @override
+  Future<List<PlantLocation>> getLocations() async => const [
+    PlantLocation(
+      id: 1,
+      label: 'Politeknik Elektronika Negeri Surabaya',
+      city: 'Surabaya',
+      province: 'Jawa Timur',
+    ),
+  ];
+
+  @override
+  Future<PlantLocation> createLocation({
+    required String label,
+    required String city,
+    required String province,
+  }) async => PlantLocation(id: 2, label: label, city: city, province: province);
 
   @override
   Future<List<PlantRecommendation>> getRecommendations({
@@ -93,6 +112,7 @@ void main() {
         name: 'Sirih Gading',
         media: PlantingMedia.openField,
         soil: MockData.soilTypes.first,
+        locationId: 1,
         city: 'Surabaya',
         province: 'Jawa Timur',
         locationLabel: 'Rumah Kaca Sukolilo',
@@ -115,7 +135,32 @@ void main() {
   });
 
   group('AddPlantFlow — langkah', () {
+    Future<void> pilihLokasiPertama(WidgetTester tester) async {
+      await tester.pumpWidget(wrap(const AddPlantFlow()));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Politeknik Elektronika Negeri Surabaya'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Konfirmasi Lokasi'));
+      await tester.pumpAndSettle();
+    }
+
     testWidgets('langkah 1: konfirmasi lokasi pindah ke langkah media tanam', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(440, 956);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await pilihLokasiPertama(tester);
+
+      expect(find.text('Pilih Media Tanam'), findsOneWidget);
+      for (final media in PlantingMedia.values) {
+        expect(find.text(media.label), findsOneWidget);
+      }
+    });
+
+    testWidgets('langkah 1: tombol konfirmasi mati sebelum lokasi dipilih', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(440, 956);
@@ -125,13 +170,10 @@ void main() {
       await tester.pumpWidget(wrap(const AddPlantFlow()));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Konfirmasi Lokasi'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Pilih Media Tanam'), findsOneWidget);
-      for (final media in PlantingMedia.values) {
-        expect(find.text(media.label), findsOneWidget);
-      }
+      final button = tester.widget<AgroButton>(
+        find.widgetWithText(AgroButton, 'Konfirmasi Lokasi'),
+      );
+      expect(button.onPressed, isNull);
     });
 
     testWidgets('langkah 3: memilih "Saya Tahu Jenis Tanah" membuka daftar', (
@@ -141,10 +183,7 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(wrap(const AddPlantFlow()));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Konfirmasi Lokasi'));
-      await tester.pumpAndSettle();
+      await pilihLokasiPertama(tester);
       await tester.tap(find.text(PlantingMedia.pot.label));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Lanjut'));
@@ -165,10 +204,7 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(wrap(const AddPlantFlow()));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Konfirmasi Lokasi'));
-      await tester.pumpAndSettle();
+      await pilihLokasiPertama(tester);
       await tester.tap(find.text(PlantingMedia.pot.label));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Lanjut'));
@@ -188,10 +224,7 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(wrap(const AddPlantFlow()));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Konfirmasi Lokasi'));
-      await tester.pumpAndSettle();
+      await pilihLokasiPertama(tester);
       await tester.tap(find.text(PlantingMedia.pot.label));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Lanjut'));
@@ -226,10 +259,7 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(wrap(const AddPlantFlow()));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Konfirmasi Lokasi'));
-      await tester.pumpAndSettle();
+      await pilihLokasiPertama(tester);
       await tester.tap(find.text(PlantingMedia.pot.label));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Lanjut'));

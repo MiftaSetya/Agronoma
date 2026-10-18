@@ -188,6 +188,7 @@ class Plant {
     required this.plantedAt,
     required this.careScore,
     required this.description,
+    this.locationId,
     this.scientificName,
     this.tags = const [],
     this.fertilizer = 'NPK Daun',
@@ -203,6 +204,8 @@ class Plant {
   final String photoAsset;
 
   final String location;
+
+  final int? locationId;
 
   final String place;
 
@@ -236,6 +239,7 @@ class Plant {
   Plant copyWith({
     String? name,
     String? location,
+    int? locationId,
     String? place,
     PlantingMedia? media,
     CareStatus? status,
@@ -250,6 +254,7 @@ class Plant {
     name: name ?? this.name,
     photoAsset: photoAsset,
     location: location ?? this.location,
+    locationId: locationId ?? this.locationId,
     place: place ?? this.place,
     media: media ?? this.media,
     status: status ?? this.status,
@@ -271,6 +276,7 @@ class Plant {
     name: json['name'] as String,
     photoAsset: json['photoAsset'] as String,
     location: json['location'] as String,
+    locationId: json['locationId'] as int?,
     place: json['place'] as String? ?? 'Pekarangan Rumah',
     media: PlantingMedia.values.byName(json['media'] as String),
     status: CareStatus.values.byName(json['status'] as String),
@@ -298,6 +304,7 @@ class Plant {
     'name': name,
     'photoAsset': photoAsset,
     'location': location,
+    'locationId': locationId,
     'place': place,
     'media': media.name,
     'status': status.name,

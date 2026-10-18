@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:frontend/core/data/add_plant_repository.dart';
 import 'package:frontend/core/data/soil_catalog.dart';
 import 'package:frontend/core/models/plant.dart';
+import 'package:frontend/core/models/plant_location.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
 import 'package:frontend/core/models/soil_type.dart';
 
@@ -19,13 +20,17 @@ class AddPlantController extends ChangeNotifier {
   AddPlantDraft _draft = const AddPlantDraft();
   List<PlantRecommendation> _recommendations = const [];
   List<SoilType> _soilTypes = const [];
+  List<PlantLocation> _locations = const [];
   bool _loading = false;
+  bool _loadingLocations = false;
   Object? _error;
 
   AddPlantDraft get draft => _draft;
   List<PlantRecommendation> get recommendations => _recommendations;
   List<SoilType> get soilTypes => _soilTypes;
+  List<PlantLocation> get locations => _locations;
   bool get isLoading => _loading;
+  bool get isLoadingLocations => _loadingLocations;
   Object? get error => _error;
 
   PlantingMedia get media => _draft.media == null
@@ -43,6 +48,7 @@ class AddPlantController extends ChangeNotifier {
     LatLng? position,
     String? city,
     String? province,
+    int? locationId,
   }) {
     _draft = _draft.copyWith(
       locationName: name,
@@ -50,8 +56,58 @@ class AddPlantController extends ChangeNotifier {
       locationPosition: position,
       locationCity: city,
       locationProvince: province,
+      locationId: locationId,
     );
     notifyListeners();
+  }
+
+  void selectLocation(PlantLocation location) {
+    _draft = _draft.copyWith(
+      locationName: location.label,
+      locationAddress: location.region,
+      locationCity: location.city,
+      locationProvince: location.province,
+      locationId: location.id,
+      locationConfirmed: true,
+    );
+    notifyListeners();
+  }
+
+  Future<void> loadLocations() async {
+    if (_loadingLocations) return;
+    _loadingLocations = true;
+    _error = null;
+    notifyListeners();
+    try {
+      _locations = await _repository.getLocations();
+    } catch (e) {
+      _error = e;
+    } finally {
+      _loadingLocations = false;
+      notifyListeners();
+    }
+  }
+
+  Future<PlantLocation?> createLocation({
+    required String label,
+    required String city,
+    required String province,
+  }) async {
+    _error = null;
+    try {
+      final created = await _repository.createLocation(
+        label: label,
+        city: city,
+        province: province,
+      );
+      _locations = [created, ..._locations];
+      selectLocation(created);
+      return created;
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      return null;
+    }
   }
 
   void confirmLocation() {
@@ -156,11 +212,17 @@ class AddPlantController extends ChangeNotifier {
   }
 
   Future<Plant> savePlant({DateTime? plantingDate}) {
+    final locationId = _draft.locationId;
+    if (locationId == null) {
+      throw StateError('Lokasi tanam belum dipilih.');
+    }
+
     return _repository.createPlant(
       name: _draft.resolvedName,
       scientificName: _draft.manualScientificName,
       media: media,
       soil: soil,
+      locationId: locationId,
       city: city,
       province: province,
       locationLabel: _draft.locationName ?? 'Lokasi Tanam',

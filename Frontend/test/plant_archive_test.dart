@@ -91,10 +91,14 @@ class _ArchiveFakeRepository implements PlantRepository {
   }
 
   @override
+  Future<void> moistureFeedback(int wateringLogId, {required bool moist}) async {}
+
+  @override
   Future<Plant> updatePlant(
     String plantId, {
     String? name,
     String? location,
+    int? locationId,
     String? place,
     GrowthPhase? phase,
     String? soilName,

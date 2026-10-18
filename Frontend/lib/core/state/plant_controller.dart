@@ -170,6 +170,7 @@ class PlantController extends ChangeNotifier {
     String plantId, {
     String? name,
     String? location,
+    int? locationId,
     String? place,
     GrowthPhase? phase,
     String? soilName,
@@ -180,6 +181,7 @@ class PlantController extends ChangeNotifier {
         plantId,
         name: name,
         location: location,
+        locationId: locationId,
         place: place,
         phase: phase,
         soilName: soilName,
@@ -234,6 +236,24 @@ class PlantController extends ChangeNotifier {
 
     try {
       await _repository.confirmRain(logId, rained: rained);
+      _error = null;
+      notifyListeners();
+      await loadTasks(plantId);
+      return true;
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> confirmMoisture(String plantId, {required bool moist}) async {
+    final day = todayCare(plantId);
+    final logId = day?.wateringLogId;
+    if (logId == null) return false;
+
+    try {
+      await _repository.moistureFeedback(logId, moist: moist);
       _error = null;
       notifyListeners();
       await loadTasks(plantId);

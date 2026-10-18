@@ -221,48 +221,34 @@ void main() {
   });
 
   group('HttpAddPlantRepository.createPlant', () {
-    test('membuat lokasi lebih dulu lalu menyimpan tanaman', () async {
-      final ctx = build((request) async {
-        if (request.url.path.endsWith('/locations')) {
-          return http.Response(
-            jsonEncode({
-              'location': {
-                'id': 7,
-                'label': 'Rumah Kaca Sukolilo',
-                'city': 'Surabaya',
-                'province': 'Jawa Timur',
-              },
-            }),
-            201,
-          );
-        }
-        return http.Response(
-          jsonEncode({
-            'plant': {
-              'id': 12,
-              'plant_name': 'Cabai Rawit',
-              'planting_medium': 'home_yard',
-              'soil_type': 'fertile',
-              'current_phase': 'seedling',
-              'planting_date': '2026-10-16',
-              'status': 'active',
-              'badge_status': 'kondisi_aman',
-              'location': {
-                'id': 7,
-                'label': 'Rumah Kaca Sukolilo',
-                'city': 'Surabaya',
-                'province': 'Jawa Timur',
-              },
-            },
-          }),
-          201,
-        );
-      });
+    Map<String, dynamic> plantReply(int locationId) => {
+      'id': 12,
+      'plant_name': 'Cabai Rawit',
+      'planting_medium': 'home_yard',
+      'soil_type': 'fertile',
+      'current_phase': 'seedling',
+      'planting_date': '2026-10-16',
+      'status': 'active',
+      'badge_status': 'kondisi_aman',
+      'location': {
+        'id': locationId,
+        'label': 'Rumah Kaca Sukolilo',
+        'city': 'Surabaya',
+        'province': 'Jawa Timur',
+      },
+    };
+
+    test('locationId terpilih dikirim apa adanya tanpa membuat lokasi', () async {
+      final ctx = build((request) async => http.Response(
+        jsonEncode({'plant': plantReply(7)}),
+        201,
+      ));
 
       final plant = await ctx.repo.createPlant(
         name: 'Cabai Rawit',
         media: PlantingMedia.ground,
         soil: SoilCatalog.types[1],
+        locationId: 7,
         city: 'Surabaya',
         province: 'Jawa Timur',
         locationLabel: 'Rumah Kaca Sukolilo',
@@ -271,13 +257,10 @@ void main() {
         plantingDate: DateTime(2026, 10, 16),
       );
 
-      expect(ctx.calls, hasLength(2));
-      expect(ctx.calls.first.url.path, '/api/locations');
-      expect(bodyOf(ctx.calls.first)['label'], 'Rumah Kaca Sukolilo');
+      expect(ctx.calls, hasLength(1));
+      expect(ctx.calls.single.url.path, '/api/plants');
 
-      final sent = bodyOf(ctx.calls.last);
-      expect(ctx.calls.last.url.path, '/api/plants');
-
+      final sent = bodyOf(ctx.calls.single);
       expect(sent['location_id'], 7);
       expect(sent['plant_name'], 'Cabai Rawit');
       expect(sent['planting_medium'], 'home_yard');
@@ -290,6 +273,7 @@ void main() {
       expect(plant.media, PlantingMedia.ground);
       expect(plant.place, PlantingMedia.ground.label);
       expect(plant.location, 'Surabaya');
+      expect(plant.locationId, 7);
       expect(plant.soilName, SoilCatalog.types[1].name);
       expect(plant.phase, GrowthPhase.seedling);
       expect(plant.status, CareStatus.safe);
@@ -298,88 +282,94 @@ void main() {
       expect(plant.plantedAt, DateTime(2026, 10, 16));
     });
 
-    test('lokasi yang sama tidak dibuat dua kali', () async {
+    test('getLocations memetakan daftar lokasi milik pengguna', () async {
       final ctx = build((request) async {
-        if (request.url.path.endsWith('/locations')) {
-          return http.Response(
-            jsonEncode({
-              'location': {
+        expect(request.url.path, '/api/locations');
+        expect(request.method, 'GET');
+        return http.Response(
+          jsonEncode({
+            'data': [
+              {
                 'id': 7,
                 'label': 'Rumah Kaca Sukolilo',
                 'city': 'Surabaya',
                 'province': 'Jawa Timur',
               },
-            }),
-            201,
-          );
-        }
+              {'id': 8, 'label': 'Rumah', 'city': 'Malang'},
+            ],
+          }),
+          200,
+        );
+      });
+
+      final locations = await ctx.repo.getLocations();
+
+      expect(ctx.calls, hasLength(1));
+      expect(locations, hasLength(2));
+      expect(locations.first.id, 7);
+      expect(locations.first.label, 'Rumah Kaca Sukolilo');
+      expect(locations.first.city, 'Surabaya');
+      expect(locations.first.province, 'Jawa Timur');
+      expect(locations.first.region, 'Surabaya, Jawa Timur');
+      expect(locations.last.id, 8);
+      expect(locations.last.region, 'Malang');
+    });
+
+    test('createLocation mengirim label, kota, dan provinsi', () async {
+      final ctx = build((request) async {
+        expect(request.url.path, '/api/locations');
+        expect(request.method, 'POST');
+        final body = bodyOf(request);
+        expect(body['label'], 'Pekarangan Belakang');
+        expect(body['city'], 'Surabaya');
+        expect(body['province'], 'Jawa Timur');
         return http.Response(
           jsonEncode({
-            'plant': {
-              'id': 12,
-              'plant_name': 'Cabai Rawit',
-              'planting_medium': 'pot',
-              'soil_type': 'fertile',
-              'current_phase': 'seedling',
-              'planting_date': '2026-10-16',
-              'badge_status': 'kondisi_aman',
+            'location': {
+              'id': 9,
+              'label': 'Pekarangan Belakang',
+              'city': 'Surabaya',
+              'province': 'Jawa Timur',
             },
           }),
           201,
         );
       });
 
-      for (var i = 0; i < 2; i++) {
-        await ctx.repo.createPlant(
-          name: 'Cabai Rawit',
-          media: PlantingMedia.pot,
-          soil: SoilCatalog.types[1],
-          city: 'Surabaya',
-          province: 'Jawa Timur',
-          locationLabel: 'Rumah Kaca Sukolilo',
-          phase: GrowthPhase.seedling,
-        );
-      }
+      final created = await ctx.repo.createLocation(
+        label: 'Pekarangan Belakang',
+        city: 'Surabaya',
+        province: 'Jawa Timur',
+      );
 
-      final locationCalls = ctx.calls
-          .where((c) => c.url.path.endsWith('/locations'))
-          .length;
-      expect(locationCalls, 1);
-      expect(ctx.calls, hasLength(3));
+      expect(ctx.calls, hasLength(1));
+      expect(created.id, 9);
+      expect(created.label, 'Pekarangan Belakang');
     });
 
     test(
       'tanpa deskripsi AI, deskripsi disusun dari media dan tanah',
       () async {
-        final ctx = build((request) async {
-          if (request.url.path.endsWith('/locations')) {
-            return http.Response(
-              jsonEncode({
-                'location': {'id': 7, 'city': 'Surabaya'},
-              }),
-              201,
-            );
-          }
-          return http.Response(
-            jsonEncode({
-              'plant': {
-                'id': 12,
-                'plant_name': 'Tanaman Baru',
-                'planting_medium': 'pot',
-                'soil_type': 'clay',
-                'current_phase': 'seedling',
-                'planting_date': '2026-10-16',
-                'badge_status': 'kondisi_aman',
-              },
-            }),
-            201,
-          );
-        });
+        final ctx = build((request) async => http.Response(
+          jsonEncode({
+            'plant': {
+              'id': 12,
+              'plant_name': 'Tanaman Baru',
+              'planting_medium': 'pot',
+              'soil_type': 'clay',
+              'current_phase': 'seedling',
+              'planting_date': '2026-10-16',
+              'badge_status': 'kondisi_aman',
+            },
+          }),
+          201,
+        ));
 
         final plant = await ctx.repo.createPlant(
           name: 'Tanaman Baru',
           media: PlantingMedia.pot,
           soil: SoilCatalog.byCode('clay'),
+          locationId: 7,
           city: 'Surabaya',
           province: 'Jawa Timur',
           locationLabel: 'Rumah Kaca Sukolilo',
