@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/routing/app_router.dart';
 import 'package:frontend/core/state/auth_controller.dart';
+import 'package:frontend/core/state/notification_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_common.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
@@ -20,7 +21,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.read<AuthController>().refreshStats();
+      if (!mounted) return;
+      context.read<AuthController>().refreshStats();
+      context.read<NotificationController>().load();
     });
   }
 
@@ -73,6 +76,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (!context.mounted) return;
             await context.read<AuthController>().refreshStats();
           },
+          onNotificationsTap: () async {
+            await Navigator.of(context).pushNamed(Routes.notifications);
+            if (!context.mounted) return;
+            context.read<NotificationController>().load();
+          },
+          unreadCount: context.watch<NotificationController>().unreadCount,
           reminderEnabled: user?.wateringReminderEnabled ?? true,
           reminderSaving: context.watch<AuthController>().isSavingReminder,
           onReminderChanged: (value) async {
@@ -185,6 +194,8 @@ class _CareScoreCard extends StatelessWidget {
 class _SettingsGroup extends StatelessWidget {
   const _SettingsGroup({
     required this.onArchiveTap,
+    required this.onNotificationsTap,
+    required this.unreadCount,
     required this.reminderEnabled,
     required this.reminderSaving,
     required this.onReminderChanged,
@@ -192,6 +203,8 @@ class _SettingsGroup extends StatelessWidget {
   });
 
   final VoidCallback onArchiveTap;
+  final VoidCallback onNotificationsTap;
+  final int unreadCount;
   final bool reminderEnabled;
   final bool reminderSaving;
   final ValueChanged<bool> onReminderChanged;
@@ -235,6 +248,15 @@ class _SettingsGroup extends StatelessWidget {
                 subtitle: 'Riwayat tanaman',
                 onTap: onArchiveTap,
                 trailing: const AgroIcon(AppAssets.chevronRightSmall, size: 12),
+              ),
+              _PreferenceRow(
+                icon: AppAssets.checkCircle,
+                title: 'Notifikasi',
+                subtitle: unreadCount > 0
+                    ? '$unreadCount belum dibaca'
+                    : 'Pengingat & info fase',
+                onTap: onNotificationsTap,
+                trailing: AgroIcon(AppAssets.chevronRightSmall, size: 12),
               ),
             ],
           ),

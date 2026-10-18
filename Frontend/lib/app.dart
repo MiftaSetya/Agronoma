@@ -7,9 +7,11 @@ import 'package:frontend/core/data/api/http_plant_repository.dart';
 import 'package:frontend/core/data/api/http_weather_repository.dart';
 import 'package:frontend/core/data/api/token_store.dart';
 import 'package:frontend/core/data/auth_repository.dart';
+import 'package:frontend/core/data/chat_repository.dart';
 import 'package:frontend/core/data/disease_repository.dart';
 import 'package:frontend/core/data/mock_disease_repository.dart';
 import 'package:frontend/core/data/mock_weather_repository.dart';
+import 'package:frontend/core/data/notification_repository.dart';
 import 'package:frontend/core/data/plant_repository.dart';
 import 'package:frontend/core/data/weather_repository.dart';
 import 'package:frontend/core/models/app_user.dart';
@@ -17,6 +19,7 @@ import 'package:frontend/core/routing/app_router.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
 import 'package:frontend/core/state/auth_controller.dart';
 import 'package:frontend/core/state/chat_controller.dart';
+import 'package:frontend/core/state/notification_controller.dart';
 import 'package:frontend/core/state/plant_controller.dart';
 import 'package:frontend/core/state/session_expiry.dart';
 import 'package:frontend/core/theme/theme.dart';
@@ -115,6 +118,22 @@ class AgronomaApp extends StatelessWidget {
                   : HttpDiseaseRepository(apiClient: ctx.read<ApiClient>())),
         ),
 
+        Provider<ChatRepository>(
+          create: (ctx) =>
+              useSampleData
+                  ? SampleChatRepository()
+                  : HttpChatRepository(apiClient: ctx.read<ApiClient>()),
+        ),
+
+        Provider<NotificationRepository>(
+          create: (ctx) =>
+              useSampleData
+                  ? SampleNotificationRepository()
+                  : HttpNotificationRepository(
+                      apiClient: ctx.read<ApiClient>(),
+                    ),
+        ),
+
         ChangeNotifierProvider(
           create: (ctx) => AuthController(
             authSource: ctx.read<AuthRepository>(),
@@ -132,8 +151,15 @@ class AgronomaApp extends StatelessWidget {
               AddPlantController(dataSource: ctx.read<AddPlantRepository>()),
         ),
         ChangeNotifierProvider(
-          create: (ctx) =>
-              ChatController(detector: ctx.read<DiseaseRepository>()),
+          create: (ctx) => ChatController(
+            chatSource: ctx.read<ChatRepository>(),
+            detector: ctx.read<DiseaseRepository>(),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => NotificationController(
+            ctx.read<NotificationRepository>(),
+          ),
         ),
       ],
       child: _SessionResetGate(
@@ -217,6 +243,7 @@ class _SessionResetGateState extends State<_SessionResetGate> {
     context.read<PlantController>().reset();
     context.read<ChatController>().reset();
     context.read<AddPlantController>().reset();
+    context.read<NotificationController>().reset();
   }
 
   @override

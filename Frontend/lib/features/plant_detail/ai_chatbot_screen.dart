@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
-import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/models/chat_message.dart';
 import 'package:frontend/core/state/chat_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
@@ -21,11 +20,21 @@ class _PlantChatScreenState extends State<PlantChatScreen> {
   final _input = TextEditingController();
   final _scroll = ScrollController();
 
+  static const _greeting = ChatMessage(
+    author: ChatAuthor.bot,
+    text:
+        'Halo! Saya Agronoma AI. Tanya apa saja soal tanamanmu — penyiraman, '
+        'pupuk, hama, atau kondisi daun.',
+  );
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ChatController>().ensureGreeting(MockData.greeting);
+      if (!mounted) return;
+      final chat = context.read<ChatController>();
+      chat.bindPlant(widget.plantId);
+      chat.ensureGreeting(_greeting);
     });
   }
 
@@ -40,7 +49,7 @@ class _PlantChatScreenState extends State<PlantChatScreen> {
     final text = preset ?? _input.text;
     if (text.trim().isEmpty) return;
     _input.clear();
-    await context.read<ChatController>().send(text, reply: MockData.chatReply);
+    await context.read<ChatController>().send(text);
     if (!mounted) return;
 
     await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -83,7 +92,7 @@ class _PlantChatScreenState extends State<PlantChatScreen> {
           ),
           if (chat.messages.length <= 1)
             _SuggestionRow(onPick: (text) => _send(text)),
-          _InputBar(controller: _input, onSend: _send),
+          _InputBar(controller: _input, onSend: _send, enabled: !chat.isSending),
         ],
       ),
     );
@@ -164,6 +173,12 @@ class _SuggestionRow extends StatelessWidget {
 
   final ValueChanged<String> onPick;
 
+  static const _suggestions = [
+    'Daunku menguning, kenapa ya?',
+    'Kapan sebaiknya dipupuk?',
+    'Cara mengatasi kutu daun?',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -171,10 +186,10 @@ class _SuggestionRow extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        itemCount: MockData.chatSuggestions.length,
+        itemCount: _suggestions.length,
         separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (context, i) {
-          final text = MockData.chatSuggestions[i];
+          final text = _suggestions[i];
           return GestureDetector(
             onTap: () => onPick(text),
             child: Container(
@@ -200,10 +215,15 @@ class _SuggestionRow extends StatelessWidget {
 }
 
 class _InputBar extends StatelessWidget {
-  const _InputBar({required this.controller, required this.onSend});
+  const _InputBar({
+    required this.controller,
+    required this.onSend,
+    required this.enabled,
+  });
 
   final TextEditingController controller;
   final Future<void> Function([String? preset]) onSend;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -228,6 +248,7 @@ class _InputBar extends StatelessWidget {
                 style: AppTextStyles.bodyLarge,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => onSend(),
+                enabled: enabled,
                 decoration: const InputDecoration(
                   hintText: 'Tanya tentang tanamanmu…',
                 ),
@@ -235,7 +256,7 @@ class _InputBar extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             IconButton.filled(
-              onPressed: () => onSend(),
+              onPressed: enabled ? () => onSend() : null,
               style: IconButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 minimumSize: const Size(44, 44),

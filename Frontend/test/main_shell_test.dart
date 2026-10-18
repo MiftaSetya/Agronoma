@@ -5,11 +5,13 @@ import 'package:provider/provider.dart';
 import 'package:frontend/core/data/api/plant_schedule.dart';
 import 'package:frontend/core/data/auth_repository.dart';
 import 'package:frontend/core/data/mock_data.dart';
+import 'package:frontend/core/data/notification_repository.dart';
 import 'package:frontend/core/data/plant_repository.dart';
 import 'package:frontend/core/data/weather_repository.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/weather.dart';
 import 'package:frontend/core/state/auth_controller.dart';
+import 'package:frontend/core/state/notification_controller.dart';
 import 'package:frontend/core/state/plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/app_shell.dart';
@@ -59,6 +61,11 @@ void main() {
             create: (_) => PlantController(
               plantRepository: _FakePlantRepository(),
               weatherSource: _FakeWeatherRepository(),
+            ),
+          ),
+          ChangeNotifierProvider<NotificationController>(
+            create: (_) => NotificationController(
+              SampleNotificationRepository(),
             ),
           ),
         ],

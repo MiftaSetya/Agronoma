@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/data/api/plant_schedule.dart';
 import 'package:frontend/core/data/api/weather_codes.dart';
-import 'package:frontend/core/data/mock_data.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/weather.dart';
 import 'package:frontend/core/routing/app_router.dart';
@@ -563,11 +562,11 @@ class _GrowthPhaseCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      for (var i = 0; i < MockData.growthPhaseSteps.length; i++)
+                      for (var i = 0; i < GrowthPhase.values.length; i++)
                         SizedBox(
                           width: _columnWidths[i],
                           child: _PhaseNode(
-                            label: MockData.growthPhaseSteps[i],
+                            label: GrowthPhase.values[i].label,
                             index: i,
                             activeIndex: activeIndex,
                           ),
