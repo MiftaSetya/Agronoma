@@ -26,8 +26,34 @@ TUGAS:
 - Jika konteks tanaman tertentu diberikan, gunakan informasi tersebut untuk jawaban yang lebih personal.
 PROMPT;
 
-    public function __construct(private readonly GeminiService $gemini)
+    public function __construct(private readonly GeminiService $gemini) {}
+
+    public function index(Request $request): JsonResponse
     {
+        $validated = $request->validate([
+            'plant_id' => ['nullable', 'integer'],
+        ]);
+
+        $query = $request->user()->chatSessions()->newQuery();
+
+        $plantId = $validated['plant_id'] ?? null;
+        if ($plantId !== null) {
+            $query->where('context_plant_id', (int) $plantId);
+        }
+
+        $session = $query->latest('id')->first();
+
+        if ($session === null) {
+            return response()->json(['chat_session' => null], 200);
+        }
+
+        return response()->json([
+            'chat_session' => [
+                'id' => $session->id,
+                'context_plant_id' => $session->context_plant_id,
+                'created_at' => $session->created_at,
+            ],
+        ], 200);
     }
 
     public function createSession(Request $request): JsonResponse
@@ -126,7 +152,7 @@ PROMPT;
             ."- Media tanam: {$contextPlant->planting_medium}\n"
             ."- Jenis tanah: {$contextPlant->soil_type}\n"
             ."- Fase pertumbuhan: {$contextPlant->current_phase}\n"
-            ."- Tanggal tanam: ".$contextPlant->planting_date?->toDateString();
+            .'- Tanggal tanam: '.$contextPlant->planting_date?->toDateString();
     }
 
     private function ownsPlant(Request $request, int $plantId): bool

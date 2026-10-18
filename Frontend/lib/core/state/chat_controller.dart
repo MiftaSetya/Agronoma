@@ -28,11 +28,13 @@ class ChatController extends ChangeNotifier {
   Object? get error => _error;
   bool get hasError => _error != null;
 
-  void ensureGreeting(ChatMessage greeting) {
-    if (_messages.isEmpty) {
-      _messages.add(greeting);
-      notifyListeners();
-    }
+  static ChatMessage get _greeting {
+    return const ChatMessage(
+      author: ChatAuthor.bot,
+      text:
+          'Halo! Saya Agronoma AI. Tanya apa saja soal tanamanmu — penyiraman, '
+          'pupuk, hama, atau kondisi daun.',
+    );
   }
 
   Future<void> send(String text) async {
@@ -47,6 +49,9 @@ class ChatController extends ChangeNotifier {
 
     try {
       _sessionId ??= await chatSource.createSession(plantId: _contextPlantId);
+      if (_contextPlantId != null) {
+        _sessionByPlant[_contextPlantId!] = _sessionId!;
+      }
       final reply = await chatSource.sendMessage(_sessionId!, trimmed);
       _messages.add(ChatMessage(author: ChatAuthor.bot, text: reply['content']!));
     } catch (e) {
@@ -67,11 +72,57 @@ class ChatController extends ChangeNotifier {
   }
 
   String? _contextPlantId;
+  final Map<String, int> _sessionByPlant = {};
+  bool _restoring = false;
+
+  bool get isRestoring => _restoring;
+
+  Future<void> restorePlantChat(String? plantId) async {
+    if (_contextPlantId != plantId) {
+      bindPlant(plantId);
+    }
+    if (_messages.isNotEmpty) return;
+    if (plantId == null || plantId.isEmpty) return;
+
+    _restoring = true;
+    notifyListeners();
+    try {
+      final cached = _sessionByPlant[plantId];
+      final sessionId =
+          cached ?? await chatSource.findSession(plantId: plantId);
+      if (sessionId == null) {
+        if (_messages.isEmpty) {
+          _messages.add(_greeting);
+        }
+        return;
+      }
+      _sessionByPlant[plantId] = sessionId;
+      final history = await chatSource.getMessages(sessionId);
+      if (_messages.isNotEmpty) return;
+      _sessionId = sessionId;
+      _messages.add(_greeting);
+      _messages.addAll([
+        for (final m in history)
+          ChatMessage(
+            author: m['role'] == 'user' ? ChatAuthor.user : ChatAuthor.bot,
+            text: m['content'] ?? '',
+          ),
+      ]);
+    } catch (_) {
+      _sessionId = null;
+      if (_messages.isEmpty) {
+        _messages.add(_greeting);
+      }
+    } finally {
+      _restoring = false;
+      notifyListeners();
+    }
+  }
 
   void bindPlant(String? plantId) {
     if (_contextPlantId == plantId) return;
     _contextPlantId = plantId;
-    _sessionId = null;
+    _sessionId = plantId == null ? null : _sessionByPlant[plantId];
     _messages.clear();
     _error = null;
     notifyListeners();
@@ -114,6 +165,8 @@ class ChatController extends ChangeNotifier {
     _error = null;
     _sessionId = null;
     _contextPlantId = null;
+    _sessionByPlant.clear();
+    _restoring = false;
     notifyListeners();
   }
 }

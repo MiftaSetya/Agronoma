@@ -4,6 +4,8 @@ import 'package:frontend/core/data/api/api_exception.dart';
 abstract class ChatRepository {
   Future<int> createSession({String? plantId});
 
+  Future<int?> findSession({String? plantId});
+
   Future<List<Map<String, String>>> getMessages(int sessionId);
 
   Future<Map<String, String>> sendMessage(int sessionId, String content);
@@ -34,6 +36,18 @@ class HttpChatRepository implements ChatRepository {
       );
     }
     return id;
+  }
+
+  @override
+  Future<int?> findSession({String? plantId}) async {
+    final query = plantId == null || plantId.isEmpty
+        ? ''
+        : '?plant_id=${Uri.encodeQueryComponent(plantId)}';
+    final body = await _api.get('chat-sessions$query');
+    final session = body is Map<String, dynamic> ? body['chat_session'] : null;
+    if (session == null) return null;
+    final id = session is Map<String, dynamic> ? session['id'] : null;
+    return id is int ? id : null;
   }
 
   @override
@@ -80,6 +94,9 @@ class SampleChatRepository implements ChatRepository {
 
   @override
   Future<int> createSession({String? plantId}) async => _nextId++;
+
+  @override
+  Future<int?> findSession({String? plantId}) async => null;
 
   @override
   Future<List<Map<String, String>>> getMessages(int sessionId) async =>

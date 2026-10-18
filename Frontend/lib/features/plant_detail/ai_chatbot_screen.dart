@@ -20,21 +20,12 @@ class _PlantChatScreenState extends State<PlantChatScreen> {
   final _input = TextEditingController();
   final _scroll = ScrollController();
 
-  static const _greeting = ChatMessage(
-    author: ChatAuthor.bot,
-    text:
-        'Halo! Saya Agronoma AI. Tanya apa saja soal tanamanmu — penyiraman, '
-        'pupuk, hama, atau kondisi daun.',
-  );
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final chat = context.read<ChatController>();
-      chat.bindPlant(widget.plantId);
-      chat.ensureGreeting(_greeting);
+      context.read<ChatController>().restorePlantChat(widget.plantId);
     });
   }
 

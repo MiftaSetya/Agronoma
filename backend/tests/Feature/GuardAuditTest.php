@@ -107,3 +107,28 @@ test('tanggal tanam hari ini tetap diterima', function () {
         ])
         ->assertStatus(201);
 });
+
+test('GET chat-sessions mengembalikan sesi terbaru milik pengguna', function () {
+    $user = User::factory()->create();
+    $plant = UserPlant::factory()->create([
+        'user_id' => $user->id,
+        'status' => 'active',
+    ]);
+
+    $older = $user->chatSessions()->create(['context_plant_id' => $plant->id]);
+    $latest = $user->chatSessions()->create(['context_plant_id' => $plant->id]);
+
+    $this->actingAs($user, 'sanctum')
+        ->getJson('/api/chat-sessions?plant_id='.$plant->id)
+        ->assertStatus(200)
+        ->assertJsonPath('chat_session.id', $latest->id);
+});
+
+test('GET chat-sessions tanpa sesi mengembalikan null', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user, 'sanctum')
+        ->getJson('/api/chat-sessions')
+        ->assertStatus(200)
+        ->assertJson(['chat_session' => null]);
+});

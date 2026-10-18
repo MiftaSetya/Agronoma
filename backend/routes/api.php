@@ -51,6 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('notifications/read-all', [NotificationController::class, 'readAll']);
 
     Route::post('chat-sessions', [ChatController::class, 'createSession']);
+    Route::get('chat-sessions', [ChatController::class, 'index']);
     Route::get('chat-sessions/{id}/messages', [ChatController::class, 'getMessages'])->whereNumber('id');
     Route::post('chat-sessions/{id}/messages', [ChatController::class, 'sendMessage'])->whereNumber('id');
 
