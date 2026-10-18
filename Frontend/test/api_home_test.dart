@@ -264,6 +264,21 @@ void main() {
       expect(calls.single.url.queryParameters['status'], 'archived');
     });
 
+    test('hapus tanaman memanggil DELETE /plants/{id}', () async {
+      final calls = <http.Request>[];
+      final repo = HttpPlantRepository(
+        apiClient: _client((request) async {
+          calls.add(request);
+          return http.Response('', 204);
+        }),
+      );
+
+      await repo.deletePlant('6');
+
+      expect(calls.single.method, 'DELETE');
+      expect(calls.single.url.path, '/api/plants/6');
+    });
+
     test('konfirmasi hujan memanggil rain-confirm dengan yes/no', () async {
       final calls = <http.Request>[];
       final repo = HttpPlantRepository(

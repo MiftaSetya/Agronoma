@@ -93,6 +93,14 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
       return;
     }
 
+    if (result == PlantSettingsResult.deleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tanaman dihapus permanen.')),
+      );
+      Navigator.of(context).maybePop();
+      return;
+    }
+
     if (result != PlantSettingsResult.saved) return;
 
     final updated = context.read<PlantController>().findById(plant.id);

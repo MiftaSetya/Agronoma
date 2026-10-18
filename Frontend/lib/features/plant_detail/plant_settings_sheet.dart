@@ -12,7 +12,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
-enum PlantSettingsResult { closed, saved, archived }
+enum PlantSettingsResult { closed, saved, archived, deleted }
 
 class PlantSettingsSheet extends StatefulWidget {
   const PlantSettingsSheet({super.key, required this.plant});
@@ -50,8 +50,56 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
 
   bool _saving = false;
   bool _archiving = false;
+  bool _deleting = false;
   List<PlantLocation> _locations = const [];
   String? _photoUrl;
+
+  Future<void> _delete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Hapus tanaman?'),
+        content: Text(
+          '${widget.plant.name} akan dihapus permanen beserta riwayat '
+          'perawatannya. Tindakan ini tidak bisa dibatalkan.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.danger,
+            ),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _deleting = true);
+    final ok = await context.read<PlantController>().deletePlant(
+      widget.plant.id,
+    );
+    if (!mounted) return;
+    setState(() => _deleting = false);
+
+    if (ok) {
+      Navigator.of(context).pop(PlantSettingsResult.deleted);
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Gagal menghapus tanaman. Periksa koneksi Anda.'),
+      ),
+    );
+  }
 
   Future<void> _archive() async {
     final confirmed = await showDialog<bool>(
@@ -274,6 +322,8 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                 busy: _archiving,
                 onTap: _archiving ? null : _archive,
               ),
+              const SizedBox(height: AppSpacing.md),
+              _DeleteAction(busy: _deleting, onTap: _deleting ? null : _delete),
               const SizedBox(height: AppSpacing.lg),
               Row(
                 children: [
@@ -654,6 +704,59 @@ class _ArchiveAction extends StatelessWidget {
                   'Arsipkan tanaman',
                   style: AppTextStyles.bodyLarge.copyWith(
                     color: AppColors.darkGrey,
+                  ),
+                ),
+              ),
+              if (busy)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                const AgroIcon(AppAssets.chevronRightThin, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DeleteAction extends StatelessWidget {
+  const _DeleteAction({required this.busy, required this.onTap});
+
+  final bool busy;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.dangerTint,
+      borderRadius: AppRadius.mdAll,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadius.mdAll,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: AppRadius.mdAll,
+            border: Border.all(color: AppColors.danger, width: 1),
+          ),
+          child: Row(
+            children: [
+              const AgroIcon(AppAssets.closeLine, size: 20),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Hapus tanaman',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.danger,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
