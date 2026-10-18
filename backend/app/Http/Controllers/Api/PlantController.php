@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Throwable;
@@ -138,7 +139,6 @@ class PlantController extends Controller
     public function update(Request $request, int $id): JsonResponse
     {
         $plant = $this->resolveOwnedPlant($request, $id);
-
         $validated = $request->validate([
             'status' => ['sometimes', 'in:active,archived,failed'],
             'current_phase' => ['sometimes', 'in:seedling,early_vegetative,late_vegetative,generative'],
@@ -170,6 +170,28 @@ class PlantController extends Controller
 
         return response()->json([
             'plant' => new UserPlantResource($plant->load('location')),
+        ], 200);
+    }
+
+    public function uploadPhoto(Request $request, int $id): JsonResponse
+    {
+        $plant = $this->resolveOwnedPlant($request, $id);
+
+        $validated = $request->validate([
+            'image' => ['required', 'image', 'max:5120'],
+        ]);
+
+        $oldPhoto = $plant->photo;
+        $path = $validated['image']->store('photos/plants', 'public');
+
+        $plant->update(['photo' => $path]);
+
+        if ($oldPhoto !== null) {
+            Storage::disk('public')->delete($oldPhoto);
+        }
+
+        return response()->json([
+            'photo_url' => $plant->photoUrl(),
         ], 200);
     }
 

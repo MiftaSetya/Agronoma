@@ -182,7 +182,7 @@ class _PhotoHeader extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset(plant.photoAsset, fit: BoxFit.cover),
+        PlantPhoto(plant: plant, fit: BoxFit.cover),
 
         DecoratedBox(
           decoration: const BoxDecoration(

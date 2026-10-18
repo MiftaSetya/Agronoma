@@ -14,6 +14,8 @@ class _FakePlantRepository implements PlantRepository {
   bool failUpdates;
   int updateCalls = 0;
   int postponeCalls = 0;
+  int uploadCalls = 0;
+  bool failUpload = false;
   bool failPostpone = false;
 
   @override
@@ -72,6 +74,13 @@ class _FakePlantRepository implements PlantRepository {
   Future<void> postponeWatering(String plantId) async {
     postponeCalls++;
     if (failPostpone) throw Exception('jaringan putus');
+  }
+
+  @override
+  Future<Plant> uploadPhoto(String plantId, String imagePath) async {
+    uploadCalls++;
+    if (failUpload) throw Exception('jaringan putus');
+    return plant.copyWith(photoUrl: 'file://$imagePath');
   }
 }
 
@@ -165,5 +174,30 @@ void main() {
     expect(ok, isFalse);
     expect(repo.postponeCalls, 1);
     expect(controller.error, isNotNull);
+  });
+
+  test('unggah foto tanaman memperbarui photoUrl', () async {
+    final repo = _FakePlantRepository(_plant());
+    final controller = build(repo);
+    await controller.load();
+
+    final ok = await controller.uploadPhoto('6', '/tmp/foto.jpg');
+
+    expect(ok, isTrue);
+    expect(repo.uploadCalls, 1);
+    expect(controller.findById('6')!.photoUrl, 'file:///tmp/foto.jpg');
+    expect(controller.isUploadingPhoto, isFalse);
+  });
+
+  test('unggah foto tanaman yang gagal melaporkan false', () async {
+    final repo = _FakePlantRepository(_plant())..failUpload = true;
+    final controller = build(repo);
+    await controller.load();
+
+    final ok = await controller.uploadPhoto('6', '/tmp/foto.jpg');
+
+    expect(ok, isFalse);
+    expect(controller.error, isNotNull);
+    expect(controller.findById('6')!.photoUrl, isNull);
   });
 }

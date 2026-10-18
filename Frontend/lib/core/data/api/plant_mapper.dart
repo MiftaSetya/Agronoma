@@ -1,3 +1,4 @@
+import 'package:frontend/core/data/api/api_config.dart';
 import 'package:frontend/core/data/api/backend_codes.dart';
 import 'package:frontend/core/data/plant_catalog.dart';
 import 'package:frontend/core/data/soil_catalog.dart';
@@ -28,6 +29,7 @@ class PlantMapper {
       name: name.isEmpty ? 'Tanaman' : name,
       scientificName: scientificName,
       photoAsset: visual?.photoAsset ?? PlantCatalog.fallbackPhoto,
+      photoUrl: _photoUrl(json['photo_url'] as String?),
 
       location:
           _firstNonEmpty([
@@ -67,6 +69,12 @@ class PlantMapper {
       if (trimmed != null && trimmed.isNotEmpty) return trimmed;
     }
     return null;
+  }
+
+  static String? _photoUrl(String? raw) {
+    final trimmed = raw?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return ApiConfig.normalizeHost(trimmed);
   }
 
   static String _descriptionOrFallback({

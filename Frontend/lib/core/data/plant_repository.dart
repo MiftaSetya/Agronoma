@@ -28,6 +28,7 @@ abstract class PlantRepository {
   });
 
   Future<Plant> setTaskDone(String plantId, CareTaskKind kind, bool done);
+  Future<Plant> uploadPhoto(String plantId, String imagePath);
   Future<Plant> updatePlant(
     String plantId, {
     String? name,
@@ -101,6 +102,16 @@ class MockPlantRepository implements PlantRepository {
           if (t.kind == kind) t.copyWith(done: done) else t,
       ],
     );
+    _plants[index] = updated;
+    return updated;
+  }
+
+  @override
+  Future<Plant> uploadPhoto(String plantId, String imagePath) async {
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    final index = _plants.indexWhere((p) => p.id == plantId);
+    if (index < 0) return _plants.first;
+    final updated = _plants[index].copyWith(photoUrl: 'file://$imagePath');
     _plants[index] = updated;
     return updated;
   }

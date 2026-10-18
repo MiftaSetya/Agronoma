@@ -5,6 +5,48 @@ import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
+class PlantPhoto extends StatelessWidget {
+  const PlantPhoto({
+    super.key,
+    required this.plant,
+    this.width,
+    this.height,
+    this.fit = BoxFit.cover,
+  });
+
+  final Plant plant;
+  final double? width;
+  final double? height;
+  final BoxFit fit;
+
+  @override
+  Widget build(BuildContext context) {
+    final url = plant.photoUrl;
+
+    if (url == null || url.isEmpty) {
+      return Image.asset(
+        plant.photoAsset,
+        width: width,
+        height: height,
+        fit: fit,
+      );
+    }
+
+    return Image.network(
+      url,
+      width: width,
+      height: height,
+      fit: fit,
+      errorBuilder: (_, _, _) => Image.asset(
+        plant.photoAsset,
+        width: width,
+        height: height,
+        fit: fit,
+      ),
+    );
+  }
+}
+
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,
@@ -83,11 +125,10 @@ class PlantCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: AppRadius.smAll,
-                  child: Image.asset(
-                    plant.photoAsset,
+                  child: PlantPhoto(
+                    plant: plant,
                     width: 80,
                     height: 80,
-                    fit: BoxFit.cover,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),

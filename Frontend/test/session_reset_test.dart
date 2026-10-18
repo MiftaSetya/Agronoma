@@ -260,6 +260,10 @@ class _OnePlantRepository implements PlantRepository {
   }) async => (await getPlants()).first;
 
   @override
+  Future<Plant> uploadPhoto(String plantId, String imagePath) async =>
+      (await getPlants()).first;
+
+  @override
   Future<List<Plant>> getArchivedPlants() async => const [];
 
   @override

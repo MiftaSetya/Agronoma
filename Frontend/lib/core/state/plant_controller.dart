@@ -223,6 +223,33 @@ class PlantController extends ChangeNotifier {
     }
   }
 
+  bool _uploadingPhoto = false;
+
+  bool get isUploadingPhoto => _uploadingPhoto;
+
+  Future<bool> uploadPhoto(String plantId, String imagePath) async {
+    if (_uploadingPhoto) return false;
+
+    _uploadingPhoto = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final updated = await _repository.uploadPhoto(plantId, imagePath);
+      _plants = [
+        for (final p in _plants)
+          if (p.id == plantId) updated else p,
+      ];
+      return true;
+    } catch (e) {
+      _error = e;
+      return false;
+    } finally {
+      _uploadingPhoto = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> updatePlant(
     String plantId, {
     String? name,

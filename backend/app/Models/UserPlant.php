@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'user_id',
     'location_id',
     'plant_name',
+    'photo',
     'planting_medium',
     'soil_type',
     'current_phase',
@@ -28,7 +29,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class UserPlant extends Model
 {
-
     use HasFactory;
 
     protected function casts(): array
@@ -43,6 +43,11 @@ class UserPlant extends Model
             'watering_config' => 'array',
             'fertilizing_config' => 'array',
         ];
+    }
+
+    public function photoUrl(): ?string
+    {
+        return $this->photo === null ? null : asset('storage/'.$this->photo);
     }
 
     public function user(): BelongsTo

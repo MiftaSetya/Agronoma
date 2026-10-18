@@ -113,6 +113,10 @@ class _ArchiveFakeRepository implements PlantRepository {
     GrowthPhase? phase,
     String? soilName,
   }) async => getPlant(plantId);
+
+  @override
+  Future<Plant> uploadPhoto(String plantId, String imagePath) async =>
+      getPlant(plantId);
 }
 
 class _NoWeather implements WeatherRepository {

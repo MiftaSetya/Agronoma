@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:frontend/core/data/api/api_client.dart';
 import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/api/backend_codes.dart';
@@ -137,6 +139,27 @@ class HttpPlantRepository implements PlantRepository {
           : 'plants/$plantId/watering/complete',
       timeout: _actionTimeout,
     );
+
+    return getPlant(plantId);
+  }
+
+  @override
+  Future<Plant> uploadPhoto(String plantId, String imagePath) async {
+    final file = File(imagePath);
+    final raw = await _api.postMultipart(
+      'plants/$plantId/photo',
+      field: 'image',
+      bytes: await file.readAsBytes(),
+      filename: file.uri.pathSegments.last,
+      timeout: _actionTimeout,
+    );
+
+    if (raw is! Map<String, dynamic>) {
+      throw const ApiException(
+        message: 'Foto tanaman gagal disimpan.',
+        statusCode: 500,
+      );
+    }
 
     return getPlant(plantId);
   }

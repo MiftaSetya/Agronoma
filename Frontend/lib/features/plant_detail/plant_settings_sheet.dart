@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
@@ -50,6 +51,7 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
   bool _saving = false;
   bool _archiving = false;
   List<PlantLocation> _locations = const [];
+  String? _photoUrl;
 
   Future<void> _archive() async {
     final confirmed = await showDialog<bool>(
@@ -102,6 +104,7 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
     _place = widget.plant.place;
     _soilName = widget.plant.soilName;
     _phase = widget.plant.phase;
+    _photoUrl = widget.plant.photoUrl;
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadLocations());
   }
 
@@ -175,7 +178,19 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xxl),
-              _PhotoPicker(photoAsset: widget.plant.photoAsset),
+              _PhotoPicker(
+                plantId: widget.plant.id,
+                photoAsset: widget.plant.photoAsset,
+                photoUrl: _photoUrl,
+                onUploaded: () {
+                  final updated = context.read<PlantController>().findById(
+                    widget.plant.id,
+                  );
+                  if (updated != null && mounted) {
+                    setState(() => _photoUrl = updated.photoUrl);
+                  }
+                },
+              ),
               const SizedBox(height: AppSpacing.xl),
               _LabeledField(
                 label: 'Nama tanaman',
@@ -357,23 +372,64 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
   }
 }
 
-class _PhotoPicker extends StatelessWidget {
-  const _PhotoPicker({required this.photoAsset});
+class _PhotoPicker extends StatefulWidget {
+  const _PhotoPicker({
+    required this.plantId,
+    required this.photoAsset,
+    this.photoUrl,
+    this.onUploaded,
+  });
 
+  final String plantId;
   final String photoAsset;
+  final String? photoUrl;
+  final VoidCallback? onUploaded;
+
+  @override
+  State<_PhotoPicker> createState() => _PhotoPickerState();
+}
+
+class _PhotoPickerState extends State<_PhotoPicker> {
+  bool _uploading = false;
+
+  Future<void> _pickAndUpload() async {
+    if (_uploading) return;
+
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+      maxWidth: 960,
+    );
+    if (picked == null || !mounted) return;
+
+    setState(() => _uploading = true);
+    final messenger = ScaffoldMessenger.of(context);
+
+    final ok = await context
+        .read<PlantController>()
+        .uploadPhoto(widget.plantId, picked.path);
+
+    if (!mounted) return;
+    setState(() => _uploading = false);
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          ok
+              ? 'Foto tanaman berhasil diperbarui.'
+              : 'Gagal mengunggah foto. Periksa koneksi lalu coba lagi.',
+        ),
+      ),
+    );
+
+    if (ok) widget.onUploaded?.call();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: GestureDetector(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Mengganti foto belum tersedia di versi ini.'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        },
+        onTap: _uploading ? null : _pickAndUpload,
         child: Container(
           width: 80,
           height: 80,
@@ -384,24 +440,43 @@ class _PhotoPicker extends StatelessWidget {
             border: Border.all(color: AppColors.border),
             boxShadow: AppColors.shadow1,
           ),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Image.asset(
-                  photoAsset,
-                  fit: BoxFit.cover,
-                  alignment: Alignment.center,
+          child: _uploading
+              ? const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: widget.photoUrl != null
+                          ? Image.network(
+                              widget.photoUrl!,
+                              fit: BoxFit.cover,
+                              alignment: Alignment.center,
+                              errorBuilder: (_, _, _) => Image.asset(
+                                widget.photoAsset,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.center,
+                              ),
+                            )
+                          : Image.asset(
+                              widget.photoAsset,
+                              fit: BoxFit.cover,
+                              alignment: Alignment.center,
+                            ),
+                    ),
+                    Container(
+                      color: const Color(0x2E000000),
+                      alignment: Alignment.center,
+                      child: const AgroIcon(AppAssets.cameraFill, size: 24),
+                    ),
+                  ],
                 ),
-              ),
-              Container(
-                color: const Color(0x2E000000),
-                alignment: Alignment.center,
-                child: const AgroIcon(AppAssets.cameraFill, size: 24),
-              ),
-            ],
-          ),
         ),
       ),
     );

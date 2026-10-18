@@ -196,12 +196,15 @@ class Plant {
     this.secondaryStatus,
     this.tasks = const [],
     this.timeline = const [],
+    this.photoUrl,
   });
 
   final String id;
   final String name;
 
   final String photoAsset;
+
+  final String? photoUrl;
 
   final String location;
 
@@ -249,10 +252,13 @@ class Plant {
     String? fertilizer,
     String? soilName,
     List<CareTask>? tasks,
+    String? photoUrl,
+    bool clearPhotoUrl = false,
   }) => Plant(
     id: id,
     name: name ?? this.name,
     photoAsset: photoAsset,
+    photoUrl: clearPhotoUrl ? null : (photoUrl ?? this.photoUrl),
     location: location ?? this.location,
     locationId: locationId ?? this.locationId,
     place: place ?? this.place,
@@ -291,6 +297,7 @@ class Plant {
     secondaryStatus: json['secondaryStatus'] == null
         ? null
         : CareStatus.values.byName(json['secondaryStatus'] as String),
+    photoUrl: json['photoUrl'] as String?,
     tasks: (json['tasks'] as List? ?? [])
         .map((e) => CareTask.fromJson(e as Map<String, dynamic>))
         .toList(),
@@ -319,5 +326,6 @@ class Plant {
     'soilName': soilName,
     'tasks': tasks.map((e) => e.toJson()).toList(),
     'timeline': timeline.map((e) => e.toJson()).toList(),
+    'photoUrl': photoUrl,
   };
 }

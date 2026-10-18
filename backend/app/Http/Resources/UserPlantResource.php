@@ -7,12 +7,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserPlantResource extends JsonResource
 {
-
     public function toArray(Request $request): array
     {
         return [
             'id' => $this->id,
             'plant_name' => $this->plant_name,
+            'photo_url' => $this->photoUrl(),
             'planting_medium' => $this->planting_medium,
             'soil_type' => $this->soil_type,
             'current_phase' => $this->current_phase,

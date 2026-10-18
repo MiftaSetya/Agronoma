@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('plants/{id}', [PlantController::class, 'show'])->whereNumber('id');
     Route::get('plants/{id}/weather', [PlantController::class, 'weather'])->whereNumber('id');
     Route::get('plants/{id}/care-calendar', [PlantController::class, 'careCalendar'])->whereNumber('id');
+    Route::post('plants/{id}/photo', [PlantController::class, 'uploadPhoto'])->whereNumber('id');
     Route::patch('plants/{id}', [PlantController::class, 'update'])->whereNumber('id');
     Route::delete('plants/{id}', [PlantController::class, 'destroy'])->whereNumber('id');
 

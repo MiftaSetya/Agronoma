@@ -131,12 +131,7 @@ class _ArchivedCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: AppRadius.smAll,
-            child: Image.asset(
-              plant.photoAsset,
-              width: 64,
-              height: 64,
-              fit: BoxFit.cover,
-            ),
+            child: PlantPhoto(plant: plant, width: 64, height: 64),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
