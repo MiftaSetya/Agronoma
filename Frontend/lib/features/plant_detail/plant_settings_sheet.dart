@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
-import 'package:frontend/core/data/mock_data.dart';
+import 'package:frontend/core/data/soil_catalog.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_location.dart';
 import 'package:frontend/core/state/add_plant_controller.dart';
@@ -225,7 +225,7 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                 label: 'Jenis Tanah',
                 trailing: const AgroIcon(AppAssets.arrowDown, size: 20),
                 onTap: () => _pick(
-                  MockData.soilTypes.map((s) => s.name).toList(),
+                  SoilCatalog.types.map((s) => s.name).toList(),
                   _soilName,
                   (v) => setState(() => _soilName = v),
                 ),
