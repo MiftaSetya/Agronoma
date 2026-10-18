@@ -16,4 +16,20 @@ class ApiConfig {
     }
     return 'http://127.0.0.1:$port/api';
   }
+
+  static String normalizeHost(String url) {
+    final parsed = Uri.tryParse(url);
+    if (parsed == null || parsed.host.isEmpty) return url;
+    if (parsed.host != 'localhost' && parsed.host != '127.0.0.1') return url;
+    final base = Uri.parse(baseUrl);
+    final buffer = StringBuffer('${base.scheme}://${base.host}');
+    if (base.hasPort) {
+      buffer.write(':${base.port}');
+    }
+    buffer.write(parsed.path);
+    if (parsed.hasQuery) {
+      buffer.write('?${parsed.query}');
+    }
+    return buffer.toString();
+  }
 }

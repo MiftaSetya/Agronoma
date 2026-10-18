@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/data/api/api_client.dart';
+import 'package:frontend/core/data/api/api_config.dart';
 import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/api/token_store.dart';
 import 'package:frontend/core/models/app_user.dart';
@@ -163,7 +164,7 @@ class HttpAuthRepository implements AuthRepository {
       );
     }
 
-    return user.copyWith(photoUrl: url);
+    return user.copyWith(photoUrl: ApiConfig.normalizeHost(url));
   }
 
   Future<AuthResult> _authenticate(
@@ -201,6 +202,11 @@ class HttpAuthRepository implements AuthRepository {
     return _mapUser(raw);
   }
 
+  static String? _normalizedPhotoUrl(String? url) {
+    if (url == null || url.isEmpty) return null;
+    return ApiConfig.normalizeHost(url);
+  }
+
   AppUser _mapUser(Map<String, dynamic> json) {
     final createdAt = json['created_at'] as String?;
     return AppUser(
@@ -209,7 +215,7 @@ class HttpAuthRepository implements AuthRepository {
       email: (json['email'] as String?) ?? '',
 
       photoAsset: AppAssets.photoProfile,
-      photoUrl: json['photo_url'] as String?,
+      photoUrl: _normalizedPhotoUrl(json['photo_url'] as String?),
 
       totalPlants: 0,
       harvestedThisSeason: 0,
