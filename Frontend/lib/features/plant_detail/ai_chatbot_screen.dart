@@ -69,19 +69,28 @@ class _PlantChatScreenState extends State<PlantChatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              controller: _scroll,
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              itemCount: chat.messages.length + (chat.isTyping ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index >= chat.messages.length) {
-                  return const _TypingBubble();
-                }
-                return _MessageBubble(message: chat.messages[index]);
-              },
-            ),
+            child: chat.isRestoring && chat.messages.isEmpty
+                ? const Center(
+                    key: Key('chat-restoring'),
+                    child: SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    ),
+                  )
+                : ListView.builder(
+                    controller: _scroll,
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    itemCount: chat.messages.length + (chat.isTyping ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index >= chat.messages.length) {
+                        return const _TypingBubble();
+                      }
+                      return _MessageBubble(message: chat.messages[index]);
+                    },
+                  ),
           ),
-          if (chat.messages.length <= 1)
+          if (!chat.isRestoring && chat.messages.length <= 1)
             _SuggestionRow(onPick: (text) => _send(text)),
           _InputBar(controller: _input, onSend: _send, enabled: !chat.isSending),
         ],
