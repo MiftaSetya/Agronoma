@@ -30,6 +30,8 @@ abstract class AuthRepository {
 
   Future<AppUser> refreshStats(AppUser user);
 
+  Future<AppUser> saveWateringReminder(AppUser user, bool enabled);
+
   Future<bool> hasSession();
 }
 
@@ -102,14 +104,28 @@ class HttpAuthRepository implements AuthRepository {
     try {
       final body = await _client.get('profile');
       if (body is! Map<String, dynamic>) return user;
+      final preferences = body['preferences'];
+      final reminder = preferences is Map<String, dynamic>
+          ? preferences['watering_reminder_enabled']
+          : null;
       return user.copyWith(
         totalPlants: (body['total_plants'] as num?)?.toInt(),
         harvestedThisSeason: (body['harvested_count'] as num?)?.toInt(),
         careScore: (body['care_score_percent'] as num?)?.toDouble(),
+        wateringReminderEnabled: reminder is bool ? reminder : null,
       );
     } on ApiException {
       return user;
     }
+  }
+
+  @override
+  Future<AppUser> saveWateringReminder(AppUser user, bool enabled) async {
+    await _client.patch(
+      'profile/preferences',
+      body: {'watering_reminder_enabled': enabled},
+    );
+    return user.copyWith(wateringReminderEnabled: enabled);
   }
 
   Future<AuthResult> _authenticate(
@@ -208,4 +224,8 @@ class SampleAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser> refreshStats(AppUser user) async => user;
+
+  @override
+  Future<AppUser> saveWateringReminder(AppUser user, bool enabled) async =>
+      user.copyWith(wateringReminderEnabled: enabled);
 }

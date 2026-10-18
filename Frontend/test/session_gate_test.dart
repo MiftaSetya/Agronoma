@@ -86,4 +86,8 @@ class _RestoringAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser> refreshStats(AppUser user) async => user;
+
+  @override
+  Future<AppUser> saveWateringReminder(AppUser user, bool enabled) async =>
+      user.copyWith(wateringReminderEnabled: enabled);
 }

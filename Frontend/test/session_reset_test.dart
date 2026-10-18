@@ -182,6 +182,10 @@ class _StatsAuthRepository implements AuthRepository {
       user.copyWith(totalPlants: 3, harvestedThisSeason: 1, careScore: 67);
 
   @override
+  Future<AppUser> saveWateringReminder(AppUser user, bool enabled) async =>
+      user.copyWith(wateringReminderEnabled: enabled);
+
+  @override
   Future<AuthResult> login({
     required String email,
     required String password,
@@ -243,6 +247,15 @@ class _OnePlantRepository implements PlantRepository {
     GrowthPhase? phase,
     String? soilName,
   }) async => (await getPlants()).first;
+
+  @override
+  Future<List<Plant>> getArchivedPlants() async => const [];
+
+  @override
+  Future<void> setArchived(String plantId, {required bool archived}) async {}
+
+  @override
+  Future<void> confirmRain(int wateringLogId, {required bool rained}) async {}
 }
 
 class _NoWeatherRepository implements WeatherRepository {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'package:frontend/core/state/auth_controller.dart';
 import 'package:frontend/core/widgets/app_shell.dart';
 import 'package:frontend/features/home/home_screen.dart';
 import 'package:frontend/features/profile/profile_screen.dart';
@@ -44,7 +46,10 @@ class _MainShellState extends State<MainShell> {
       onTabSelected: _select,
       child: PageView(
         controller: _controller,
-        onPageChanged: (index) => setState(() => _index = index),
+        onPageChanged: (index) {
+          setState(() => _index = index);
+          if (index == 1) context.read<AuthController>().refreshStats();
+        },
 
         children: const [
           _KeepAlivePage(child: HomeScreen()),

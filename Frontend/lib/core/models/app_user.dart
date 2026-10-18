@@ -10,6 +10,7 @@ class AppUser {
     required this.totalPlants,
     required this.harvestedThisSeason,
     required this.careScore,
+    this.wateringReminderEnabled = true,
     this.joinedAt,
   });
 
@@ -24,12 +25,15 @@ class AppUser {
 
   final double careScore;
 
+  final bool wateringReminderEnabled;
+
   final DateTime? joinedAt;
 
   AppUser copyWith({
     int? totalPlants,
     int? harvestedThisSeason,
     double? careScore,
+    bool? wateringReminderEnabled,
   }) => AppUser(
     id: id,
     name: name,
@@ -38,6 +42,8 @@ class AppUser {
     totalPlants: totalPlants ?? this.totalPlants,
     harvestedThisSeason: harvestedThisSeason ?? this.harvestedThisSeason,
     careScore: careScore ?? this.careScore,
+    wateringReminderEnabled:
+        wateringReminderEnabled ?? this.wateringReminderEnabled,
     joinedAt: joinedAt,
   );
 
@@ -58,6 +64,7 @@ class AppUser {
     totalPlants: (json['totalPlants'] as num).toInt(),
     harvestedThisSeason: (json['harvestedThisSeason'] as num).toInt(),
     careScore: (json['careScore'] as num).toDouble(),
+    wateringReminderEnabled: (json['wateringReminderEnabled'] as bool?) ?? true,
     joinedAt: json['joinedAt'] == null
         ? null
         : DateTime.parse(json['joinedAt'] as String),
@@ -71,6 +78,7 @@ class AppUser {
     'totalPlants': totalPlants,
     'harvestedThisSeason': harvestedThisSeason,
     'careScore': careScore,
+    'wateringReminderEnabled': wateringReminderEnabled,
     'joinedAt': joinedAt?.toIso8601String(),
   };
 }

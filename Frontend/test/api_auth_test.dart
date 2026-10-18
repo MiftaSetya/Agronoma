@@ -8,10 +8,21 @@ import 'package:frontend/core/data/api/api_client.dart';
 import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/api/token_store.dart';
 import 'package:frontend/core/data/auth_repository.dart';
+import 'package:frontend/core/models/app_user.dart';
 import 'package:frontend/core/state/auth_controller.dart';
 
 void main() {
   const baseUrl = 'http://uji.test/api';
+
+  const stubUser = AppUser(
+    id: '1',
+    name: 'Petani Uji',
+    email: 'uji@agronoma.test',
+    photoAsset: '',
+    totalPlants: 0,
+    harvestedThisSeason: 0,
+    careScore: 0,
+  );
 
   ({ApiClient client, InMemoryTokenStore tokens, List<http.Request> calls})
   build(
@@ -232,6 +243,111 @@ void main() {
 
       expect(await repo(ctx.client, ctx.tokens).currentUser(), isNull);
       expect(await ctx.tokens.read(), isNull);
+    });
+  });
+
+  group('Avatar preferensi pengingat', () {
+    test('profil mengembalikan preferensi pengingat ke pengguna', () async {
+      final ctx = build(
+        (_) async => http.Response(
+          jsonEncode({
+            'total_plants': 2,
+            'harvested_count': 1,
+            'care_score_percent': 80,
+            'preferences': {'watering_reminder_enabled': false},
+          }),
+          200,
+        ),
+      );
+
+      final user = await repo(ctx.client, ctx.tokens).refreshStats(stubUser);
+
+      expect(user.totalPlants, 2);
+      expect(user.wateringReminderEnabled, isFalse);
+      expect(ctx.calls.single.url.path, '/api/profile');
+    });
+
+    test('profil tanpa preferensi tidak menimpa nilai terakhir', () async {
+      final ctx = build(
+        (_) async => http.Response(
+          jsonEncode({'total_plants': 5, 'harvested_count': 0}),
+          200,
+        ),
+      );
+
+      final user = await repo(
+        ctx.client,
+        ctx.tokens,
+      ).refreshStats(stubUser.copyWith(wateringReminderEnabled: false));
+
+      expect(user.wateringReminderEnabled, isFalse);
+    });
+
+    test('menyimpan pengingat memanggil PATCH profile/preferences', () async {
+      final ctx = build(
+        (_) async => http.Response(
+          jsonEncode({
+            'preferences': {'watering_reminder_enabled': false},
+          }),
+          200,
+        ),
+      );
+
+      final user = await repo(
+        ctx.client,
+        ctx.tokens,
+      ).saveWateringReminder(stubUser, false);
+
+      expect(user.wateringReminderEnabled, isFalse);
+
+      final call = ctx.calls.single;
+      expect(call.method, 'PATCH');
+      expect(call.url.path, '/api/profile/preferences');
+      expect(
+        (jsonDecode(call.body) as Map<String, dynamic>)[
+            'watering_reminder_enabled'],
+        isFalse,
+      );
+    });
+
+    test('AuthController menyimpan preferensi dan memberi tahu pendengar', () async {
+      final ctx = build(
+        (_) async => http.Response(
+          jsonEncode({
+            'preferences': {'watering_reminder_enabled': false},
+          }),
+          200,
+        ),
+      );
+      final auth = AuthController(
+        authSource: repo(ctx.client, ctx.tokens),
+        initialUser: stubUser,
+      );
+
+      var notifications = 0;
+      auth.addListener(() => notifications++);
+
+      final ok = await auth.setWateringReminder(false);
+
+      expect(ok, isTrue);
+      expect(auth.user!.wateringReminderEnabled, isFalse);
+      expect(notifications, greaterThan(0));
+    });
+
+    test('AuthController mengembalikan false saat server menolak', () async {
+      final ctx = build(
+        (_) async => http.Response('{"message":"Gagal."}', 500),
+        token: null,
+      );
+      final auth = AuthController(
+        authSource: repo(ctx.client, ctx.tokens),
+        initialUser: stubUser,
+      );
+
+      final ok = await auth.setWateringReminder(false);
+
+      expect(ok, isFalse);
+      expect(auth.user!.wateringReminderEnabled, isTrue);
     });
   });
 

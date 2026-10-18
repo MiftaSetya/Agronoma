@@ -68,7 +68,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: AppSpacing.xxxl),
         _SettingsGroup(
-          onArchiveTap: () {},
+          onArchiveTap: () async {
+            await Navigator.of(context).pushNamed(Routes.archivedPlants);
+            if (!context.mounted) return;
+            await context.read<AuthController>().refreshStats();
+          },
+          reminderEnabled: user?.wateringReminderEnabled ?? true,
+          reminderSaving: context.watch<AuthController>().isSavingReminder,
+          onReminderChanged: (value) async {
+            final auth = context.read<AuthController>();
+            final ok = await auth.setWateringReminder(value);
+            if (!context.mounted) return;
+            if (!ok) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Gagal menyimpan pengaturan. Periksa koneksi lalu coba lagi.',
+                  ),
+                ),
+              );
+            }
+          },
           logout: _LogoutCard(
             onTap: () async {
               await context.read<AuthController>().signOut();
@@ -163,9 +183,18 @@ class _CareScoreCard extends StatelessWidget {
 }
 
 class _SettingsGroup extends StatelessWidget {
-  const _SettingsGroup({required this.onArchiveTap, required this.logout});
+  const _SettingsGroup({
+    required this.onArchiveTap,
+    required this.reminderEnabled,
+    required this.reminderSaving,
+    required this.onReminderChanged,
+    required this.logout,
+  });
 
   final VoidCallback onArchiveTap;
+  final bool reminderEnabled;
+  final bool reminderSaving;
+  final ValueChanged<bool> onReminderChanged;
   final Widget logout;
 
   @override
@@ -193,7 +222,11 @@ class _SettingsGroup extends StatelessWidget {
                 icon: AppAssets.waterDrop,
                 title: 'Pengingat Penyiraman',
                 subtitle: 'Notifikasi harian',
-                trailing: const _WaterReminderSwitch(),
+                trailing: _WaterReminderSwitch(
+                  value: reminderEnabled,
+                  saving: reminderSaving,
+                  onChanged: onReminderChanged,
+                ),
                 showDivider: true,
               ),
               _PreferenceRow(
@@ -297,36 +330,40 @@ class _PreferenceRow extends StatelessWidget {
   }
 }
 
-class _WaterReminderSwitch extends StatefulWidget {
-  const _WaterReminderSwitch();
+class _WaterReminderSwitch extends StatelessWidget {
+  const _WaterReminderSwitch({
+    required this.value,
+    required this.onChanged,
+    required this.saving,
+  });
 
-  @override
-  State<_WaterReminderSwitch> createState() => _WaterReminderSwitchState();
-}
-
-class _WaterReminderSwitchState extends State<_WaterReminderSwitch> {
-  bool _on = true;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final bool saving;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => setState(() => _on = !_on),
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 48,
-        height: 24,
-        padding: const EdgeInsets.all(4),
-        alignment: _on ? Alignment.centerRight : Alignment.centerLeft,
-        decoration: BoxDecoration(
-          color: _on ? AppColors.primary : AppColors.border,
-          borderRadius: AppRadius.chipAll,
-        ),
+    return Opacity(
+      opacity: saving ? 0.5 : 1,
+      child: GestureDetector(
+        onTap: saving ? null : () => onChanged(!value),
+        behavior: HitTestBehavior.opaque,
         child: Container(
-          width: 16,
-          height: 16,
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            shape: BoxShape.circle,
+          width: 48,
+          height: 24,
+          padding: const EdgeInsets.all(4),
+          alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+          decoration: BoxDecoration(
+            color: value ? AppColors.primary : AppColors.border,
+            borderRadius: AppRadius.chipAll,
+          ),
+          child: Container(
+            width: 16,
+            height: 16,
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              shape: BoxShape.circle,
+            ),
           ),
         ),
       ),

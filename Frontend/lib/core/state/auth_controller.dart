@@ -52,6 +52,27 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _savingReminder = false;
+  bool get isSavingReminder => _savingReminder;
+
+  Future<bool> setWateringReminder(bool enabled) async {
+    final current = _user;
+    if (current == null || _savingReminder) return false;
+
+    _savingReminder = true;
+    notifyListeners();
+
+    try {
+      _user = await _repository.saveWateringReminder(current, enabled);
+      return true;
+    } on ApiException {
+      return false;
+    } finally {
+      _savingReminder = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> signIn({required String email, required String password}) async {
     _status = AuthStatus.signingIn;
     _errors = const {};
