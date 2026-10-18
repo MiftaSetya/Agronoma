@@ -9,13 +9,18 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
+enum PlantSettingsResult { closed, saved, archived }
+
 class PlantSettingsSheet extends StatefulWidget {
   const PlantSettingsSheet({super.key, required this.plant});
 
   final Plant plant;
 
-  static Future<bool> show(BuildContext context, Plant plant) async {
-    final saved = await showModalBottomSheet<bool>(
+  static Future<PlantSettingsResult> show(
+    BuildContext context,
+    Plant plant,
+  ) async {
+    final result = await showModalBottomSheet<PlantSettingsResult>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
@@ -25,7 +30,7 @@ class PlantSettingsSheet extends StatefulWidget {
       builder: (_) => PlantSettingsSheet(plant: plant),
     );
 
-    return saved ?? false;
+    return result ?? PlantSettingsResult.closed;
   }
 
   @override
@@ -40,6 +45,49 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
   late GrowthPhase _phase;
 
   bool _saving = false;
+  bool _archiving = false;
+
+  Future<void> _archive() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Arsipkan tanaman?'),
+        content: Text(
+          '${widget.plant.name} akan dipindahkan ke arsip dan tidak lagi '
+          'muncul di daftar tanaman aktif.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Arsipkan'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _archiving = true);
+    final ok = await context.read<PlantController>().archive(widget.plant.id);
+    if (!mounted) return;
+    setState(() => _archiving = false);
+
+    if (ok) {
+      Navigator.of(context).pop(PlantSettingsResult.archived);
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Gagal mengarsipkan tanaman. Periksa koneksi Anda.'),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -172,6 +220,11 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xxxl),
+              _ArchiveAction(
+                busy: _archiving,
+                onTap: _archiving ? null : _archive,
+              ),
+              const SizedBox(height: AppSpacing.lg),
               Row(
                 children: [
                   SizedBox(
@@ -205,7 +258,9 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                               setState(() => _saving = false);
 
                               if (ok) {
-                                Navigator.of(context).pop(true);
+                                Navigator.of(context).pop(
+                                  PlantSettingsResult.saved,
+                                );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -396,6 +451,58 @@ class _LabeledField extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ArchiveAction extends StatelessWidget {
+  const _ArchiveAction({required this.busy, required this.onTap});
+
+  final bool busy;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: AppRadius.mdAll,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadius.mdAll,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: AppRadius.mdAll,
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: [
+              const AgroIcon(AppAssets.archive, size: 20),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Arsipkan tanaman',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.darkGrey,
+                  ),
+                ),
+              ),
+              if (busy)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                const AgroIcon(AppAssets.chevronRightThin, size: 20),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

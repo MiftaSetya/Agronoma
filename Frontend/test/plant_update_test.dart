@@ -48,6 +48,15 @@ class _FakePlantRepository implements PlantRepository {
 
     return plant.copyWith(name: name, place: place, phase: phase);
   }
+
+  @override
+  Future<List<Plant>> getArchivedPlants() async => const [];
+
+  @override
+  Future<void> setArchived(String plantId, {required bool archived}) async {}
+
+  @override
+  Future<void> confirmRain(int wateringLogId, {required bool rained}) async {}
 }
 
 class _FakeWeatherRepository implements WeatherRepository {

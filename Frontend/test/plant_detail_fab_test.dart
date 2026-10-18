@@ -27,7 +27,12 @@ Plant _plant() => Plant(
 );
 
 class _FakePlantRepository implements PlantRepository {
+  _FakePlantRepository({this.awaitingRain = false});
+
+  final bool awaitingRain;
+
   int completed = 0;
+  final List<bool> rainConfirms = [];
 
   @override
   Future<List<Plant>> getPlants() async => [_plant()];
@@ -42,8 +47,14 @@ class _FakePlantRepository implements PlantRepository {
   }) async => [
     CareDay(
       date: PlantSchedule.isoDate(today),
-      wateringStatus: completed > 0 ? 'watered' : 'need_water',
+      wateringStatus: completed > 0
+          ? 'watered'
+          : awaitingRain
+          ? 'skip_rain'
+          : 'need_water',
       fertilizingStatus: 'none',
+      wateringLogId: awaitingRain ? 42 : null,
+      rainConfirmed: awaitingRain ? 'not_answered' : null,
     ),
   ];
 
@@ -55,6 +66,17 @@ class _FakePlantRepository implements PlantRepository {
   ) async {
     completed++;
     return _plant();
+  }
+
+  @override
+  Future<List<Plant>> getArchivedPlants() async => const [];
+
+  @override
+  Future<void> setArchived(String plantId, {required bool archived}) async {}
+
+  @override
+  Future<void> confirmRain(int wateringLogId, {required bool rained}) async {
+    rainConfirms.add(rained);
   }
 
   @override
@@ -76,12 +98,13 @@ void main() {
   Future<_FakePlantRepository> pumpDetail(
     WidgetTester tester, {
     required Size screen,
+    bool awaitingRain = false,
   }) async {
     tester.view.physicalSize = screen;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    final repo = _FakePlantRepository();
+    final repo = _FakePlantRepository(awaitingRain: awaitingRain);
     await tester.pumpWidget(
       MultiProvider(
         providers: [
@@ -142,7 +165,7 @@ void main() {
   testWidgets('tombol bulat tetap di dalam layar pada layar pendek', (
     tester,
   ) async {
-    await pumpDetail(tester, screen: const Size(440, 600));
+    await pumpDetail(tester, screen: const Size(440, 600), awaitingRain: true);
 
     final screenHeight = tester.view.physicalSize.height;
     final fab = tester.getRect(find.byKey(plantDetailChatFabKey));
@@ -151,6 +174,37 @@ void main() {
     expect(fab.bottom, lessThanOrEqualTo(screenHeight));
     expect(fab.top, greaterThan(0));
     expect(rain.top, greaterThan(0));
+  });
+
+  testWidgets('tombol hujan disembunyikan bila tidak ada konfirmasi tertunda', (
+    tester,
+  ) async {
+    await pumpDetail(tester, screen: const Size(440, 740));
+
+    expect(find.byKey(plantDetailRainFabKey), findsNothing);
+    expect(find.byKey(plantDetailChatFabKey), findsOne);
+  });
+
+  testWidgets('menekan tombol hujan mengirim rain-confirm sesuai pilihan', (
+    tester,
+  ) async {
+    final repo = await pumpDetail(
+      tester,
+      screen: const Size(440, 740),
+      awaitingRain: true,
+    );
+
+    expect(find.byKey(plantDetailRainFabKey), findsOne);
+
+    await tester.tap(find.byKey(plantDetailRainFabKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Konfirmasi Hujan'), findsOne);
+
+    await tester.tap(find.text('Ya, Hujan'));
+    await tester.pumpAndSettle();
+
+    expect(repo.rainConfirms, [true]);
   });
 
   testWidgets(

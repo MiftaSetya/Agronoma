@@ -15,7 +15,7 @@ class HttpPlantRepository implements PlantRepository {
 
   @override
   Future<List<Plant>> getPlants() async {
-    final body = await _api.get('plants');
+    final body = await _api.get('plants', query: {'status': 'active'});
     final raw = body is Map<String, dynamic> ? body['data'] : null;
     if (raw is! List) return const [];
 
@@ -33,6 +33,35 @@ class HttpPlantRepository implements PlantRepository {
       throw const FormatException('Balasan tanaman tidak dikenali.');
     }
     return PlantMapper.fromBackend(raw);
+  }
+
+  @override
+  Future<List<Plant>> getArchivedPlants() async {
+    final body = await _api.get('plants', query: {'status': 'archived'});
+    final raw = body is Map<String, dynamic> ? body['data'] : null;
+    if (raw is! List) return const [];
+
+    return [
+      for (final item in raw)
+        if (item is Map<String, dynamic>) PlantMapper.fromBackend(item),
+    ];
+  }
+
+  @override
+  Future<void> setArchived(String plantId, {required bool archived}) async {
+    await _api.patch(
+      'plants/$plantId',
+      body: {'status': archived ? 'archived' : 'active'},
+    );
+  }
+
+  @override
+  Future<void> confirmRain(int wateringLogId, {required bool rained}) async {
+    await _api.post(
+      'watering-logs/$wateringLogId/rain-confirm',
+      body: {'rain_confirmed': rained ? 'yes' : 'no'},
+      timeout: _actionTimeout,
+    );
   }
 
   @override

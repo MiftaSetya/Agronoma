@@ -5,6 +5,8 @@ class CareDay {
     required this.date,
     required this.wateringStatus,
     required this.fertilizingStatus,
+    this.wateringLogId,
+    this.rainConfirmed,
   });
 
   final String date;
@@ -13,11 +15,20 @@ class CareDay {
 
   final String fertilizingStatus;
 
+  final int? wateringLogId;
+
+  final String? rainConfirmed;
+
   factory CareDay.fromJson(Map<String, dynamic> json) => CareDay(
     date: '${json['date']}',
     wateringStatus: json['watering_status'] as String? ?? 'none',
     fertilizingStatus: json['fertilizing_status'] as String? ?? 'none',
+    wateringLogId: (json['watering_log_id'] as num?)?.toInt(),
+    rainConfirmed: json['rain_confirmed'] as String?,
   );
+
+  bool get awaitsRainConfirmation =>
+      wateringStatus == 'skip_rain' && rainConfirmed == 'not_answered';
 
   bool get needsWater => wateringStatus == 'need_water';
 

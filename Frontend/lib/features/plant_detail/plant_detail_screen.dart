@@ -66,6 +66,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
       }
       if (id.isEmpty) return;
       final plant = await controller.fetch(id);
+      await controller.loadTasks(id);
       if (mounted) setState(() => _plant = plant);
     } catch (e) {
       if (mounted) setState(() => _error = e);
@@ -78,9 +79,19 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     final plant = _plant;
     if (plant == null) return;
 
-    final saved = await PlantSettingsSheet.show(context, plant);
+    final result = await PlantSettingsSheet.show(context, plant);
 
-    if (!saved || !mounted) return;
+    if (!mounted) return;
+
+    if (result == PlantSettingsResult.archived) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tanaman dipindahkan ke arsip.')),
+      );
+      Navigator.of(context).maybePop();
+      return;
+    }
+
+    if (result != PlantSettingsResult.saved) return;
 
     final updated = context.read<PlantController>().findById(plant.id);
 
@@ -1006,11 +1017,20 @@ class _CareListCard extends StatelessWidget {
             for (final task in tasks) ...[
               _TaskRow(
                 task: task,
-                onToggle: () => context.read<PlantController>().toggleTask(
-                  plant.id,
-                  task.kind,
-                  !task.done,
-                ),
+                onToggle: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  final ok = await context
+                      .read<PlantController>()
+                      .toggleTask(plant.id, task.kind, !task.done);
+                  if (ok) return;
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Gagal menyimpan perawatan. Periksa koneksi lalu coba lagi.',
+                      ),
+                    ),
+                  );
+                },
               ),
               if (task != tasks.last) const SizedBox(height: AppSpacing.sm),
             ],
@@ -1133,34 +1153,86 @@ class _DetailFabs extends StatelessWidget {
 
   final Plant plant;
 
+  Future<void> _confirmRain(BuildContext context) async {
+    final controller = context.read<PlantController>();
+    final messenger = ScaffoldMessenger.of(context);
+
+    final rained = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Konfirmasi Hujan'),
+        content: const Text(
+          'Apakah hari ini benar-benar turun hujan di lokasi tanaman ini?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Tidak Hujan'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Ya, Hujan'),
+          ),
+        ],
+      ),
+    );
+
+    if (rained == null) return;
+
+    final ok = await controller.confirmRain(plant.id, rained: rained);
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          ok
+              ? rained
+                    ? 'Penyiraman dilewati karena hujan sudah dikonfirmasi.'
+                    : 'Hujan tidak terjadi, jadwal penyiraman dikembalikan.'
+              : 'Gagal menyimpan konfirmasi hujan. Periksa koneksi Anda.',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<PlantController>();
+    final awaitsRain =
+        controller.todayCare(plant.id)?.awaitsRainConfirmation ?? false;
+
     return Positioned(
       right: AppSpacing.lg,
       bottom: AppShellBottom.fabInset,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Material(
-            key: plantDetailRainFabKey,
-            color: AppColors.surface,
-            shape: const CircleBorder(
-              side: BorderSide(color: AppColors.border),
-            ),
-            child: InkWell(
-              onTap: () {},
-              customBorder: const CircleBorder(),
-              child: const Padding(
-                padding: EdgeInsets.all(AppSpacing.lg),
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: AgroIcon(AppAssets.rainAlert, size: 24),
+          if (awaitsRain) ...[
+            Material(
+              key: plantDetailRainFabKey,
+              color: AppColors.surface,
+              shape: const CircleBorder(
+                side: BorderSide(color: AppColors.border),
+              ),
+              child: InkWell(
+                onTap: () => _confirmRain(context),
+                customBorder: const CircleBorder(),
+                child: const Padding(
+                  padding: EdgeInsets.all(AppSpacing.lg),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: AgroIcon(AppAssets.rainAlert, size: 24),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.lg),
+          ],
           Material(
             key: plantDetailChatFabKey,
             color: AppColors.primary,

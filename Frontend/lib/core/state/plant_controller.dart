@@ -61,6 +61,7 @@ class PlantController extends ChangeNotifier {
     _weatherByCity = const {};
     _careDays = const {};
     _adopted = const [];
+    _archived = const [];
     _error = null;
     _loading = false;
     notifyListeners();
@@ -147,18 +148,21 @@ class PlantController extends ChangeNotifier {
     }
   }
 
-  Future<void> toggleTask(String plantId, CareTaskKind kind, bool done) async {
+  Future<bool> toggleTask(String plantId, CareTaskKind kind, bool done) async {
     try {
       final updated = await _repository.setTaskDone(plantId, kind, done);
       _plants = [
         for (final p in _plants)
           if (p.id == plantId) updated else p,
       ];
+      _error = null;
       notifyListeners();
       await loadTasks(plantId);
+      return true;
     } catch (e) {
       _error = e;
       notifyListeners();
+      return false;
     }
   }
 
@@ -207,6 +211,74 @@ class PlantController extends ChangeNotifier {
         _weatherByCity = {..._weatherByCity, plant.location: weather};
         notifyListeners();
       }
+    }
+  }
+
+  List<Plant> _archived = const [];
+  List<Plant> get archivedPlants => _archived;
+
+  CareDay? todayCare(String plantId) {
+    final days = _careDays[plantId];
+    if (days == null || days.isEmpty) return null;
+    final key = PlantSchedule.isoDate(DateTime.now());
+    for (final day in days) {
+      if (day.date == key) return day;
+    }
+    return null;
+  }
+
+  Future<bool> confirmRain(String plantId, {required bool rained}) async {
+    final day = todayCare(plantId);
+    final logId = day?.wateringLogId;
+    if (logId == null) return false;
+
+    try {
+      await _repository.confirmRain(logId, rained: rained);
+      _error = null;
+      notifyListeners();
+      await loadTasks(plantId);
+      return true;
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> loadArchived() async {
+    try {
+      _archived = await _repository.getArchivedPlants();
+      _error = null;
+    } catch (e) {
+      _error = e;
+    }
+    notifyListeners();
+  }
+
+  Future<bool> archive(String plantId) => _setArchived(plantId, true);
+
+  Future<bool> restore(String plantId) => _setArchived(plantId, false);
+
+  Future<bool> _setArchived(String plantId, bool archived) async {
+    try {
+      await _repository.setArchived(plantId, archived: archived);
+      _plants = [
+        for (final p in _plants)
+          if (p.id != plantId) p,
+      ];
+      _adopted = [
+        for (final p in _adopted)
+          if (p.id != plantId) p,
+      ];
+      _careDays = {..._careDays}..remove(plantId);
+      _error = null;
+      notifyListeners();
+      await loadArchived();
+      return true;
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      return false;
     }
   }
 }

@@ -9,6 +9,7 @@ import 'package:frontend/features/auth/session_gate.dart';
 import 'package:frontend/features/disease/disease_detection_screen.dart';
 import 'package:frontend/features/plant_detail/ai_chatbot_screen.dart';
 import 'package:frontend/features/plant_detail/plant_detail_screen.dart';
+import 'package:frontend/features/profile/archived_plants_screen.dart';
 import 'package:frontend/features/splash/splash_screen.dart';
 
 class Routes {
@@ -27,6 +28,7 @@ class Routes {
   static const addPlant = '/add-plant';
   static const soilDetection = '/soil-detection';
   static const diseaseDetection = '/disease-detection';
+  static const archivedPlants = '/archived-plants';
 }
 
 class PlantDetailArgs {
@@ -82,6 +84,9 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
         ),
         settings,
       );
+
+    case Routes.archivedPlants:
+      return _page(const ArchivedPlantsScreen(), settings);
 
     default:
       return _page(const LoginScreen(), settings);

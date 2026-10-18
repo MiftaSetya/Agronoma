@@ -6,6 +6,12 @@ abstract class PlantRepository {
   Future<List<Plant>> getPlants();
   Future<Plant> getPlant(String id);
 
+  Future<List<Plant>> getArchivedPlants();
+
+  Future<void> setArchived(String plantId, {required bool archived});
+
+  Future<void> confirmRain(int wateringLogId, {required bool rained});
+
   Future<List<CareDay>> careDays(Plant plant, {required DateTime today});
 
   Future<Plant> setTaskDone(String plantId, CareTaskKind kind, bool done);
@@ -37,6 +43,15 @@ class MockPlantRepository implements PlantRepository {
     await Future<void>.delayed(const Duration(milliseconds: 150));
     return _plants.firstWhere((p) => p.id == id);
   }
+
+  @override
+  Future<List<Plant>> getArchivedPlants() async => const [];
+
+  @override
+  Future<void> setArchived(String plantId, {required bool archived}) async {}
+
+  @override
+  Future<void> confirmRain(int wateringLogId, {required bool rained}) async {}
 
   @override
   Future<List<CareDay>> careDays(Plant plant, {required DateTime today}) async {

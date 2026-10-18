@@ -57,8 +57,10 @@ Map<String, dynamic> _plantJson({
 void main() {
   group('HttpPlantRepository', () {
     test('GET /plants dipetakan menjadi daftar tanaman', () async {
+      final requests = <http.Request>[];
       final repo = HttpPlantRepository(
         apiClient: _client((request) async {
+          requests.add(request);
           expect(request.url.path, '/api/plants');
           return http.Response(
             jsonEncode({
@@ -77,6 +79,8 @@ void main() {
 
       expect(plants.single.location, 'Surabaya');
       expect(plants.single.media, PlantingMedia.pot);
+
+      expect(requests.single.url.queryParameters['status'], 'active');
     });
 
     test('badge_status backend menentukan kondisi pada kartu', () async {
@@ -194,6 +198,116 @@ void main() {
       await repo.setTaskDone('6', CareTaskKind.watering, false);
 
       expect(requests, 1);
+    });
+
+    test('arsip memakai PATCH status=archived', () async {
+      final calls = <http.Request>[];
+      final repo = HttpPlantRepository(
+        apiClient: _client((request) async {
+          calls.add(request);
+          return http.Response(
+            jsonEncode({'plant': _plantJson(id: 6, name: 'Cabai Rawit')}),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+
+      await repo.setArchived('6', archived: true);
+
+      expect(calls.single.method, 'PATCH');
+      expect(calls.single.url.path, '/api/plants/6');
+      expect((jsonDecode(calls.single.body) as Map)['status'], 'archived');
+    });
+
+    test('mengembalikan tanaman dari arsip memakai status=active', () async {
+      final calls = <http.Request>[];
+      final repo = HttpPlantRepository(
+        apiClient: _client((request) async {
+          calls.add(request);
+          return http.Response(
+            jsonEncode({'plant': _plantJson(id: 6, name: 'Cabai Rawit')}),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+
+      await repo.setArchived('6', archived: false);
+
+      expect((jsonDecode(calls.single.body) as Map)['status'], 'active');
+    });
+
+    test('daftar arsip meminta status=archived', () async {
+      final calls = <http.Request>[];
+      final repo = HttpPlantRepository(
+        apiClient: _client((request) async {
+          calls.add(request);
+          return http.Response(
+            jsonEncode({
+              'data': [_plantJson(id: 8, name: 'Bayam')],
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+
+      final plants = await repo.getArchivedPlants();
+
+      expect(plants, hasLength(1));
+      expect(plants.single.name, 'Bayam');
+      expect(calls.single.url.queryParameters['status'], 'archived');
+    });
+
+    test('konfirmasi hujan memanggil rain-confirm dengan yes/no', () async {
+      final calls = <http.Request>[];
+      final repo = HttpPlantRepository(
+        apiClient: _client((request) async {
+          calls.add(request);
+          return http.Response('{}', 200);
+        }),
+      );
+
+      await repo.confirmRain(42, rained: true);
+      await repo.confirmRain(42, rained: false);
+
+      expect(calls.first.url.path, '/api/watering-logs/42/rain-confirm');
+      expect((jsonDecode(calls.first.body) as Map)['rain_confirmed'], 'yes');
+      expect((jsonDecode(calls.last.body) as Map)['rain_confirmed'], 'no');
+    });
+
+    test('care-calendar meneruskan id log dan status konfirmasi hujan', () async {
+      final repo = HttpPlantRepository(
+        apiClient: _client(
+          (request) async => http.Response(
+            '{"days":[{"date":"2026-10-17","watering_status":"skip_rain",'
+            '"fertilizing_status":"none","watering_log_id":42,'
+            '"rain_confirmed":"not_answered"}]}',
+            200,
+            headers: {'content-type': 'application/json'},
+          ),
+        ),
+      );
+
+      final plant = Plant(
+        id: '6',
+        name: 'Cabai Rawit',
+        photoAsset: AppAssets.photoPotSoil,
+        location: 'Surabaya',
+        place: 'Pot tanaman',
+        media: PlantingMedia.pot,
+        status: CareStatus.safe,
+        phase: GrowthPhase.seedling,
+        plantedAt: DateTime(2026, 10, 17),
+        careScore: 100,
+        description: '',
+      );
+
+      final days = await repo.careDays(plant, today: DateTime(2026, 10, 17));
+
+      expect(days.single.wateringLogId, 42);
+      expect(days.single.awaitsRainConfirmation, isTrue);
     });
   });
 
