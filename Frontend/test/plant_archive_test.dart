@@ -194,6 +194,11 @@ void main() {
     expect(ok, isTrue);
     expect(controller.archivedPlants.map((p) => p.id), isNot(contains('8')));
     expect(repo.active.map((p) => p.id), contains('8'));
+    expect(
+      controller.plants.map((p) => p.id),
+      contains('8'),
+      reason: 'tanaman yang dikembalikan harus tampil di daftar aktif',
+    );
   });
 
   test('reset mengosongkan daftar arsip', () async {

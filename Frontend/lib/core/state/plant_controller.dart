@@ -392,6 +392,7 @@ class PlantController extends ChangeNotifier {
       _error = null;
       notifyListeners();
       await loadArchived();
+      if (!archived) await load(force: true);
       return true;
     } catch (e) {
       _error = e;
