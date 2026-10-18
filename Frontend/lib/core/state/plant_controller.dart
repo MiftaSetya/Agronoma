@@ -18,8 +18,6 @@ class PlantController extends ChangeNotifier {
 
   List<Plant> _plants = const [];
 
-  String? _greeting;
-
   Map<String, Weather> _weatherByCity = const {};
 
   Map<String, List<CareDay>> _careDays = const {};
@@ -30,8 +28,6 @@ class PlantController extends ChangeNotifier {
   Object? _error;
 
   List<Plant> get plants => _plants;
-
-  String? get greeting => _greeting;
 
   List<Weather> get cityWeather =>
       _weatherByCity.values.toList(growable: false);
@@ -95,7 +91,6 @@ class PlantController extends ChangeNotifier {
 
   void reset() {
     _plants = const [];
-    _greeting = null;
     _weatherByCity = const {};
     _careDays = const {};
     _careDaysByMonth = const {};
@@ -128,7 +123,6 @@ class PlantController extends ChangeNotifier {
           if (!fetchedIds.contains(p.id)) p,
       ];
       _weatherByCity = await _loadWeatherPerCity(_plants);
-      _greeting = await _repository.dashboardGreeting();
     } catch (e) {
       _error = e;
     } finally {
@@ -376,6 +370,36 @@ class PlantController extends ChangeNotifier {
   Future<bool> archive(String plantId) => _setArchived(plantId, true);
 
   Future<bool> restore(String plantId) => _setArchived(plantId, false);
+
+  Future<bool> deletePlant(String plantId) async {
+    try {
+      await _repository.deletePlant(plantId);
+      _plants = [
+        for (final p in _plants)
+          if (p.id != plantId) p,
+      ];
+      _adopted = [
+        for (final p in _adopted)
+          if (p.id != plantId) p,
+      ];
+      _archived = [
+        for (final p in _archived)
+          if (p.id != plantId) p,
+      ];
+      _careDays = {..._careDays}..remove(plantId);
+      _careDaysByMonth = {
+        for (final entry in _careDaysByMonth.entries)
+          if (!entry.key.startsWith('$plantId|')) entry.key: entry.value,
+      };
+      _error = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      return false;
+    }
+  }
 
   Future<bool> _setArchived(String plantId, bool archived) async {
     try {

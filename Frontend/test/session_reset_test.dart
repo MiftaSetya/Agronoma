@@ -232,9 +232,6 @@ class _OnePlantRepository implements PlantRepository {
   Future<Plant> getPlant(String id) async => (await getPlants()).first;
 
   @override
-  Future<String?> dashboardGreeting() async => null;
-
-  @override
   Future<List<CareDay>> careDays(
     Plant plant, {
     DateTime? today,
@@ -268,6 +265,9 @@ class _OnePlantRepository implements PlantRepository {
 
   @override
   Future<void> setArchived(String plantId, {required bool archived}) async {}
+
+  @override
+  Future<void> deletePlant(String plantId) async {}
 
   @override
   Future<void> confirmRain(int wateringLogId, {required bool rained}) async {}

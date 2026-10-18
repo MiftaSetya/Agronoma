@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final name = context.select<AuthController, String>(
       (a) => a.user?.firstName ?? 'User',
     );
-    final greeting = controller.greeting ?? 'Hallo, $name!';
+    final greeting = 'Halo, $name!';
 
     return RefreshIndicator(
       onRefresh: () => controller.load(force: true),

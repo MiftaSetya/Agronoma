@@ -26,17 +26,20 @@ class _ArchiveFakeRepository implements PlantRepository {
   _ArchiveFakeRepository({
     this.failTaskDone = false,
     this.failArchive = false,
+    this.failDelete = false,
     this.rainDays = false,
   });
 
   final bool failTaskDone;
   final bool failArchive;
+  final bool failDelete;
   final bool rainDays;
 
   final List<Plant> active = [_plant('6', 'Kangkung')];
   final List<Plant> archived = [_plant('8', 'Bayam')];
 
   int archiveCalls = 0;
+  int deleteCalls = 0;
   int tailConfirms = 0;
 
   @override
@@ -48,9 +51,6 @@ class _ArchiveFakeRepository implements PlantRepository {
   @override
   Future<Plant> getPlant(String id) async =>
       [...active, ...archived].firstWhere((p) => p.id == id);
-
-  @override
-  Future<String?> dashboardGreeting() async => null;
 
   @override
   Future<List<CareDay>> careDays(
@@ -90,6 +90,14 @@ class _ArchiveFakeRepository implements PlantRepository {
       this.archived.removeWhere((p) => p.id == plantId);
       active.add(moved);
     }
+  }
+
+  @override
+  Future<void> deletePlant(String plantId) async {
+    if (failDelete) throw Exception('jaringan putus');
+    deleteCalls++;
+    active.removeWhere((p) => p.id == plantId);
+    archived.removeWhere((p) => p.id == plantId);
   }
 
   @override
@@ -199,6 +207,35 @@ void main() {
       contains('8'),
       reason: 'tanaman yang dikembalikan harus tampil di daftar aktif',
     );
+  });
+
+  test('menghapus tanaman mengosongkan daftar aktif dan arsip', () async {
+    final repo = _ArchiveFakeRepository();
+    final controller = build(repo);
+
+    await controller.load();
+    await controller.loadArchived();
+    expect(controller.plants.map((p) => p.id), contains('6'));
+    expect(controller.archivedPlants.map((p) => p.id), contains('8'));
+
+    final ok = await controller.deletePlant('6');
+
+    expect(ok, isTrue);
+    expect(controller.plants.map((p) => p.id), isNot(contains('6')));
+    expect(repo.deleteCalls, 1);
+  });
+
+  test('menghapus tanaman yang gagal tidak mengubah daftar aktif', () async {
+    final repo = _ArchiveFakeRepository(failDelete: true);
+    final controller = build(repo);
+
+    await controller.load();
+
+    final ok = await controller.deletePlant('6');
+
+    expect(ok, isFalse);
+    expect(controller.plants.map((p) => p.id), contains('6'));
+    expect(controller.error, isNotNull);
   });
 
   test('reset mengosongkan daftar arsip', () async {
