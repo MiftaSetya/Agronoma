@@ -40,14 +40,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final auth = context.read<AuthController>();
     final ok = await auth.uploadPhoto(picked.path);
     if (!mounted) return;
+
+    String message;
+    if (ok) {
+      message = 'Foto profil berhasil diperbarui.';
+    } else {
+      final error = auth.photoError;
+      message = error == null
+          ? 'Gagal mengunggah foto. Periksa koneksi lalu coba lagi.'
+          : error.message;
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          ok
-              ? 'Foto profil berhasil diperbarui.'
-              : 'Gagal mengunggah foto. Periksa koneksi lalu coba lagi.',
-        ),
-      ),
+      SnackBar(content: Text(message)),
     );
   }
 

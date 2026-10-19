@@ -16,6 +16,8 @@ class HttpPlantRepository implements PlantRepository {
 
   static const Duration _actionTimeout = Duration(seconds: 20);
 
+  static const Duration _uploadTimeout = Duration(seconds: 90);
+
   @override
   Future<List<Plant>> getPlants() async {
     final body = await _api.get('plants', query: {'status': 'active'});
@@ -148,7 +150,7 @@ class HttpPlantRepository implements PlantRepository {
       field: 'image',
       bytes: await file.readAsBytes(),
       filename: file.uri.pathSegments.last,
-      timeout: _actionTimeout,
+      timeout: _uploadTimeout,
     );
 
     if (raw is! Map<String, dynamic>) {

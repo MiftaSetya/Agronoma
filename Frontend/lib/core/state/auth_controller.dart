@@ -69,6 +69,9 @@ class AuthController extends ChangeNotifier {
   bool _uploadingPhoto = false;
   bool get isUploadingPhoto => _uploadingPhoto;
 
+  ApiException? _photoError;
+  ApiException? get photoError => _photoError;
+
   Future<bool> setWateringReminder(bool enabled) async {
     final current = _user;
     if (current == null || _savingReminder) return false;
@@ -92,12 +95,14 @@ class AuthController extends ChangeNotifier {
     if (current == null || _uploadingPhoto) return false;
 
     _uploadingPhoto = true;
+    _photoError = null;
     notifyListeners();
 
     try {
       _user = await _repository.uploadPhoto(current, imagePath);
       return true;
-    } on ApiException {
+    } on ApiException catch (e) {
+      _photoError = e;
       return false;
     } finally {
       _uploadingPhoto = false;

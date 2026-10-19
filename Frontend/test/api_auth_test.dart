@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -242,6 +243,38 @@ void main() {
 
       expect(await repo(ctx.client, ctx.tokens).currentUser(), isNull);
       expect(await ctx.tokens.read(), isNull);
+    });
+  });
+
+  group('HttpAuthRepository.uploadPhoto', () {
+    test('mengirim multipart dengan field image dan token bearer', () async {
+      final ctx = build(
+        (request) async {
+          final text = latin1.decode(request.bodyBytes, allowInvalid: true);
+          expect(text, contains('name="image"'));
+          expect(text, contains('filename="avatar.jpg"'));
+          return http.Response(
+            jsonEncode({'photo_url': '/storage/photos/profile/baru.jpg'}),
+            200,
+          );
+        },
+        token: 'token-abc',
+      );
+
+      final dir = await Directory.systemTemp.createTemp('agronoma_photo');
+      addTearDown(() => dir.delete(recursive: true));
+      final file = File('${dir.path}/avatar.jpg');
+      await file.writeAsBytes(const [0xFF, 0xD8, 0xFF, 0xD9]);
+
+      final updated = await repo(
+        ctx.client,
+        ctx.tokens,
+      ).uploadPhoto(stubUser, file.path);
+
+      expect(ctx.calls.single.method, 'POST');
+      expect(ctx.calls.single.url.path, '/api/profile/photo');
+      expect(ctx.calls.single.headers['Authorization'], 'Bearer token-abc');
+      expect(updated.photoUrl, '/storage/photos/profile/baru.jpg');
     });
   });
 

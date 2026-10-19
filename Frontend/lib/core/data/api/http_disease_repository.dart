@@ -15,7 +15,7 @@ class HttpDiseaseRepository implements DiseaseRepository {
 
   final String? _defaultPlantId;
 
-  static const Duration _aiTimeout = Duration(seconds: 60);
+  static const Duration _aiTimeout = Duration(seconds: 120);
 
   static const String _healthyName = 'Tanaman Sehat';
 

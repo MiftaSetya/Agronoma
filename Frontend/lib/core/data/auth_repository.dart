@@ -146,6 +146,7 @@ class HttpAuthRepository implements AuthRepository {
       field: 'image',
       bytes: await file.readAsBytes(),
       filename: file.uri.pathSegments.last,
+      timeout: const Duration(seconds: 90),
     );
 
     if (raw is! Map<String, dynamic>) {
