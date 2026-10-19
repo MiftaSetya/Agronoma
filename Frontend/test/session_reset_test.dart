@@ -124,7 +124,7 @@ void main() {
   testWidgets('statistik profil tersimpan setelah refresh', (tester) async {
     final auth = AuthController(
       authSource: _StatsAuthRepository(),
-      initialUser: _user(totalPlants: 0, harvested: 0, score: 0),
+      initialUser: _user(totalPlants: 0, harvested: 0),
     );
 
     await auth.refreshStats();
@@ -139,7 +139,7 @@ void main() {
       final repo = _StatsAuthRepository();
       final auth = AuthController(
         authSource: repo,
-        initialUser: _user(totalPlants: 0, harvested: 0, score: 0),
+        initialUser: _user(totalPlants: 0, harvested: 0),
       );
 
       expect(auth.isSignedIn, isTrue);
@@ -152,11 +152,7 @@ void main() {
   );
 }
 
-AppUser _user({
-  required int totalPlants,
-  required int harvested,
-  required double score,
-}) => AppUser(
+AppUser _user({required int totalPlants, required int harvested}) => AppUser(
   id: '1',
   name: 'Petani Uji',
   email: 'uji@agronoma.test',
@@ -176,7 +172,7 @@ class _StatsAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser?> currentUser() async =>
-      _user(totalPlants: 0, harvested: 0, score: 0);
+      _user(totalPlants: 0, harvested: 0);
 
   @override
   Future<AppUser> refreshStats(AppUser user) async =>
