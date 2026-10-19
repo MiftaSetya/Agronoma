@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'package:frontend/core/data/add_plant_repository.dart';
@@ -22,6 +23,7 @@ import 'package:frontend/core/state/auth_controller.dart';
 import 'package:frontend/core/state/chat_controller.dart';
 import 'package:frontend/core/state/notification_controller.dart';
 import 'package:frontend/core/state/plant_controller.dart';
+import 'package:frontend/core/state/push_message_router.dart';
 import 'package:frontend/core/state/push_token_service.dart';
 import 'package:frontend/core/state/scan_history_controller.dart';
 import 'package:frontend/core/state/session_expiry.dart';
@@ -204,6 +206,7 @@ class _SessionResetGateState extends State<_SessionResetGate> {
   AuthController? _auth;
   SessionExpiry? _expiry;
   bool _signedIn = false;
+  PushMessageRouter? _pushRouter;
 
   @override
   void initState() {
@@ -226,9 +229,28 @@ class _SessionResetGateState extends State<_SessionResetGate> {
 
     if (_signedIn) {
       context.read<NotificationController>().startPolling();
+      _startPushRouter();
     }
 
     if (expiry.expired) _onExpired();
+  }
+
+  void _startPushRouter() {
+    if (_pushRouter != null) return;
+    final router = PushMessageRouter(
+      onRefreshNotifications:
+          context.read<NotificationController>().load,
+      onOpenNotifications: () {
+        final navigator = _navigatorKey.currentState;
+        if (navigator == null) return;
+        navigator.pushNamed(Routes.notifications);
+      },
+      initialMessage: FirebaseMessaging.instance.getInitialMessage,
+      foregroundMessages: FirebaseMessaging.onMessage,
+      openedMessages: FirebaseMessaging.onMessageOpenedApp,
+    );
+    router.bind();
+    _pushRouter = router;
   }
 
   void _onAuthChanged() {
@@ -242,6 +264,7 @@ class _SessionResetGateState extends State<_SessionResetGate> {
       _clearSessionData();
     } else {
       context.read<NotificationController>().startPolling();
+      _startPushRouter();
     }
     _signedIn = signedIn;
   }
@@ -271,6 +294,7 @@ class _SessionResetGateState extends State<_SessionResetGate> {
 
   @override
   void dispose() {
+    _pushRouter?.dispose();
     _auth?.removeListener(_onAuthChanged);
     _expiry?.removeListener(_onExpired);
     super.dispose();
