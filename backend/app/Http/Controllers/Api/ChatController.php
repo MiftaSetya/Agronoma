@@ -110,7 +110,27 @@ PROMPT;
             'content' => ['required', 'string', 'max:4000'],
         ]);
 
+        $userMessage = ChatMessage::create([
+            'session_id' => $session->id,
+            'role' => 'user',
+            'content' => $validated['content'],
+        ]);
+
+        if (! $this->isAgronomyTopic($validated['content'])) {
+            return response()->json([
+                'user_message' => new ChatMessageResource($userMessage),
+                'ai_message' => new ChatMessageResource(
+                    ChatMessage::create([
+                        'session_id' => $session->id,
+                        'role' => 'ai',
+                        'content' => 'Maaf, saya hanya bisa membantu seputar perawatan tanaman di Agronoma. Silakan tanyakan soal tanaman Anda.',
+                    ]),
+                ),
+            ], 201);
+        }
+
         $history = $session->messages()
+            ->where('id', '!=', $userMessage->id)
             ->orderBy('created_at')
             ->get()
             ->map(fn (ChatMessage $message): array => [
@@ -130,12 +150,6 @@ PROMPT;
             throw new RuntimeException('Gagal mendapatkan respons dari asisten.', 0, $e);
         }
 
-        $userMessage = ChatMessage::create([
-            'session_id' => $session->id,
-            'role' => 'user',
-            'content' => $validated['content'],
-        ]);
-
         $aiMessage = ChatMessage::create([
             'session_id' => $session->id,
             'role' => 'ai',
@@ -146,6 +160,25 @@ PROMPT;
             'user_message' => new ChatMessageResource($userMessage),
             'ai_message' => new ChatMessageResource($aiMessage),
         ], 201);
+    }
+
+    private function isAgronomyTopic(string $content): bool
+    {
+        $normalized = mb_strtolower($content);
+
+        foreach ([
+            'tanam', 'tumbuh', 'tanah', 'pupuk', 'siram', 'air', 'hama',
+            'penyakit', 'daun', 'akar', 'batang', 'buah', 'bunga', 'benih',
+            'bibit', 'panen', 'kebun', 'perkarangan', 'agronom', 'pertanian',
+            'sayur', 'cabai', 'padi', 'jagung', 'kangkung', 'bayam', 'tomat',
+            'mangga', 'jeruk', 'kompos', 'ph ', 'hidroponik', 'polybag', 'pot',
+        ] as $keyword) {
+            if (str_contains($normalized, $keyword)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function buildSystemInstruction(ChatSession $session): string
