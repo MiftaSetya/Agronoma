@@ -199,7 +199,13 @@ class PlantController extends Controller
     {
         $plant = $this->resolveOwnedPlant($request, $id);
 
+        $photo = $plant->photo;
+
         $plant->delete();
+
+        if ($photo !== null) {
+            Storage::disk('public')->delete($photo);
+        }
 
         return response()->json(null, 204);
     }

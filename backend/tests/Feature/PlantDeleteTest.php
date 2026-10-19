@@ -4,6 +4,8 @@ use App\Models\Location;
 use App\Models\User;
 use App\Models\UserPlant;
 use App\Models\WateringLog;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 function deletePlantFixture(): array
 {
@@ -68,4 +70,21 @@ test('menghapus tanaman memerlukan autentikasi', function () {
     $this->deleteJson("/api/plants/{$plant->id}")->assertStatus(401);
 
     expect(UserPlant::find($plant->id))->not->toBeNull();
+});
+
+test('menghapus tanaman ikut menghapus file fotonya', function () {
+    Storage::fake('public');
+    [$user, $plant] = deletePlantFixture();
+
+    $image = UploadedFile::fake()->image('tanaman.jpg', 100, 100);
+    $path = $image->store('photos/plants', 'public');
+    $plant->forceFill(['photo' => $path])->save();
+
+    Storage::disk('public')->assertExists($path);
+
+    $this->actingAs($user, 'sanctum')
+        ->deleteJson("/api/plants/{$plant->id}")
+        ->assertStatus(204);
+
+    Storage::disk('public')->assertMissing($path);
 });
