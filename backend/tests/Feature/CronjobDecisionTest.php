@@ -1,11 +1,11 @@
 <?php
 
-use App\Services\WeatherApiService;
 use App\Models\Location;
 use App\Models\User;
 use App\Models\UserPlant;
 use App\Models\WateringLog;
 use App\Models\WeatherCache;
+use App\Services\WeatherApiService;
 
 function createActivePlant(array $plantOverrides = [], array $locationOverrides = []): array
 {
@@ -208,12 +208,37 @@ test('cronjob menyelesaikan konfirmasi hujan yang menggantung dari kemarin', fun
     $this->assertDatabaseHas('user_plants', [
         'id' => $plant->id,
         'last_watered_date' => now()->subDay()->toDateString(),
+        'adjusted_due_date' => null,
+        'delay_streak_days' => 0,
     ]);
 
     $this->assertDatabaseHas('watering_logs', [
         'id' => $partialLog->id,
         'user_moisture_feedback' => 'moist',
     ]);
+});
+
+test('cronjob membersihkan sisa tunda saat konfirmasi hujan otomatis', function () {
+    [$user, $plant] = createActivePlant([
+        'adjusted_due_date' => now()->subDay()->toDateString(),
+        'delay_streak_days' => 1,
+    ]);
+
+    $skipLog = WateringLog::factory()->create([
+        'user_plant_id' => $plant->id,
+        'status' => 'skip_rain',
+        'rain_confirmed' => 'not_answered',
+        'scheduled_date' => now()->subDay()->toDateString(),
+    ]);
+
+    stubWeather([]);
+
+    $this->artisan('agronoma:daily-processing')->assertSuccessful();
+
+    $fresh = $plant->fresh();
+
+    expect($fresh->adjusted_due_date)->toBeNull();
+    expect((int) $fresh->delay_streak_days)->toBe(0);
 });
 
 test('cronjob mendeteksi pergantian fase dan mengirim notifikasi phase_change', function () {

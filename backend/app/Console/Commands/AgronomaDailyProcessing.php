@@ -81,6 +81,8 @@ class AgronomaDailyProcessing extends Command
             if ($log->userPlant !== null) {
                 $log->userPlant->forceFill([
                     'last_watered_date' => $log->scheduled_date->toDateString(),
+                    'adjusted_due_date' => null,
+                    'delay_streak_days' => 0,
                 ])->save();
             }
         }
