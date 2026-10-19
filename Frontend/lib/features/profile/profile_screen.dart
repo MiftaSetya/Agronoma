@@ -89,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 icon: AppAssets.harvest,
                 title: 'Dipanen',
                 value: '${user?.harvestedThisSeason ?? 0}',
-                caption: 'Musim ini',
+                caption: 'Total panen',
                 valueColor: AppColors.harvest,
               ),
             ),

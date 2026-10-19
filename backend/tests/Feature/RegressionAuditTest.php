@@ -144,7 +144,7 @@ test('profil memisahkan tanaman aktif dari yang sudah dipanen', function () {
         ->assertJsonFragment(['total_plants' => 1, 'harvested_count' => 0]);
 
     $this->actingAs($user, 'sanctum')
-        ->patchJson("/api/plants/{$plant->id}", ['status' => 'archived'])
+        ->patchJson("/api/plants/{$plant->id}", ['status' => 'harvested'])
         ->assertStatus(200);
 
     $this->actingAs($user, 'sanctum')

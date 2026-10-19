@@ -8,7 +8,11 @@ abstract class PlantRepository {
 
   Future<List<Plant>> getArchivedPlants();
 
-  Future<void> setArchived(String plantId, {required bool archived});
+  Future<void> setArchived(
+    String plantId, {
+    required bool archived,
+    bool markHarvested = false,
+  });
 
   Future<void> deletePlant(String plantId);
 
@@ -63,7 +67,11 @@ class MockPlantRepository implements PlantRepository {
   Future<List<Plant>> getArchivedPlants() async => const [];
 
   @override
-  Future<void> setArchived(String plantId, {required bool archived}) async {}
+  Future<void> setArchived(
+    String plantId, {
+    required bool archived,
+    bool markHarvested = false,
+  }) async {}
 
   @override
   Future<void> deletePlant(String plantId) async {

@@ -39,6 +39,7 @@ class _ArchiveFakeRepository implements PlantRepository {
   final List<Plant> archived = [_plant('8', 'Bayam')];
 
   int archiveCalls = 0;
+  int harvestedCalls = 0;
   int deleteCalls = 0;
   int tailConfirms = 0;
 
@@ -78,8 +79,17 @@ class _ArchiveFakeRepository implements PlantRepository {
   }
 
   @override
-  Future<void> setArchived(String plantId, {required bool archived}) async {
+  Future<void> setArchived(
+    String plantId, {
+    required bool archived,
+    bool markHarvested = false,
+  }) async {
     if (failArchive) throw Exception('jaringan putus');
+    if (markHarvested) {
+      harvestedCalls++;
+      active.removeWhere((p) => p.id == plantId);
+      return;
+    }
     archiveCalls++;
     if (archived) {
       final moved = active.firstWhere((p) => p.id == plantId);
@@ -207,6 +217,34 @@ void main() {
       contains('8'),
       reason: 'tanaman yang dikembalikan harus tampil di daftar aktif',
     );
+  });
+
+  test('menandai panen mengirim status harvested dan mengosongkan daftar aktif', () async {
+    final repo = _ArchiveFakeRepository();
+    final controller = build(repo);
+
+    await controller.load();
+    expect(controller.plants.map((p) => p.id), contains('6'));
+
+    final ok = await controller.harvest('6');
+
+    expect(ok, isTrue);
+    expect(controller.plants.map((p) => p.id), isNot(contains('6')));
+    expect(repo.harvestedCalls, 1);
+    expect(repo.archiveCalls, 0);
+  });
+
+  test('menandai panen yang gagal tidak mengubah daftar aktif', () async {
+    final repo = _ArchiveFakeRepository(failArchive: true);
+    final controller = build(repo);
+
+    await controller.load();
+
+    final ok = await controller.harvest('6');
+
+    expect(ok, isFalse);
+    expect(controller.plants.map((p) => p.id), contains('6'));
+    expect(controller.error, isNotNull);
   });
 
   test('menghapus tanaman mengosongkan daftar aktif dan arsip', () async {

@@ -16,7 +16,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         $totalPlants = $user->userPlants()->where('status', 'active')->count();
-        $harvestedCount = $user->userPlants()->where('status', 'archived')->count();
+        $harvestedCount = $user->userPlants()->where('status', 'harvested')->count();
 
         $careScorePercent = $this->careScorePercent($user);
 

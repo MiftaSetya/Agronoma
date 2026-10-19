@@ -242,6 +242,26 @@ void main() {
       expect((jsonDecode(calls.single.body) as Map)['status'], 'active');
     });
 
+    test('menandai panen memakai PATCH status=harvested', () async {
+      final calls = <http.Request>[];
+      final repo = HttpPlantRepository(
+        apiClient: _client((request) async {
+          calls.add(request);
+          return http.Response(
+            jsonEncode({'plant': _plantJson(id: 6, name: 'Cabai Rawit')}),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+
+      await repo.setArchived('6', archived: true, markHarvested: true);
+
+      expect(calls.single.method, 'PATCH');
+      expect(calls.single.url.path, '/api/plants/6');
+      expect((jsonDecode(calls.single.body) as Map)['status'], 'harvested');
+    });
+
     test('daftar arsip meminta status=archived', () async {
       final calls = <http.Request>[];
       final repo = HttpPlantRepository(

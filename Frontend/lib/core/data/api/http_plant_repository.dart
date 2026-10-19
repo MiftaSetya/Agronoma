@@ -51,10 +51,14 @@ class HttpPlantRepository implements PlantRepository {
   }
 
   @override
-  Future<void> setArchived(String plantId, {required bool archived}) async {
+  Future<void> setArchived(
+    String plantId, {
+    required bool archived,
+    bool markHarvested = false,
+  }) async {
     await _api.patch(
       'plants/$plantId',
-      body: {'status': archived ? 'archived' : 'active'},
+      body: {'status': markHarvested ? 'harvested' : archived ? 'archived' : 'active'},
     );
   }
 

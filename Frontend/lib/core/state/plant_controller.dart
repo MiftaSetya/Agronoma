@@ -371,6 +371,28 @@ class PlantController extends ChangeNotifier {
 
   Future<bool> restore(String plantId) => _setArchived(plantId, false);
 
+  Future<bool> harvest(String plantId) async {
+    try {
+      await _repository.setArchived(plantId, archived: true, markHarvested: true);
+      _plants = [
+        for (final p in _plants)
+          if (p.id != plantId) p,
+      ];
+      _adopted = [
+        for (final p in _adopted)
+          if (p.id != plantId) p,
+      ];
+      _careDays = {..._careDays}..remove(plantId);
+      _error = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> deletePlant(String plantId) async {
     try {
       await _repository.deletePlant(plantId);

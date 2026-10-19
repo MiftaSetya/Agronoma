@@ -140,7 +140,7 @@ class PlantController extends Controller
     {
         $plant = $this->resolveOwnedPlant($request, $id);
         $validated = $request->validate([
-            'status' => ['sometimes', 'in:active,archived,failed'],
+            'status' => ['sometimes', 'in:active,archived,harvested,failed'],
             'current_phase' => ['sometimes', 'in:seedling,early_vegetative,late_vegetative,generative'],
 
             'plant_name' => ['sometimes', 'string', 'max:150'],

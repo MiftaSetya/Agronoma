@@ -4,12 +4,10 @@ namespace Database\Factories;
 
 use App\Models\Location;
 use App\Models\User;
-use App\Models\UserPlant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class UserPlantFactory extends Factory
 {
-
     public function definition(): array
     {
         return [
@@ -96,6 +94,11 @@ class UserPlantFactory extends Factory
     public function archived(): static
     {
         return $this->state(['status' => 'archived']);
+    }
+
+    public function harvested(): static
+    {
+        return $this->state(['status' => 'harvested']);
     }
 
     public function phase(string $phase): static

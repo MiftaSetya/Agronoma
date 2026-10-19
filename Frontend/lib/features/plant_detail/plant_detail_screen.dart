@@ -85,6 +85,14 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
 
     if (!mounted) return;
 
+    if (result == PlantSettingsResult.harvested) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tanaman dicatat sebagai hasil panen.')),
+      );
+      Navigator.of(context).maybePop();
+      return;
+    }
+
     if (result == PlantSettingsResult.archived) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tanaman dipindahkan ke arsip.')),

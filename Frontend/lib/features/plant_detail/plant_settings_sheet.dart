@@ -12,7 +12,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
 
-enum PlantSettingsResult { closed, saved, archived, deleted }
+enum PlantSettingsResult { closed, saved, archived, harvested, deleted }
 
 class PlantSettingsSheet extends StatefulWidget {
   const PlantSettingsSheet({super.key, required this.plant});
@@ -50,6 +50,7 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
 
   bool _saving = false;
   bool _archiving = false;
+  bool _harvesting = false;
   bool _deleting = false;
   List<PlantLocation> _locations = const [];
   String? _photoUrl;
@@ -97,6 +98,48 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Gagal menghapus tanaman. Periksa koneksi Anda.'),
+      ),
+    );
+  }
+
+  Future<void> _harvest() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Tandai sudah dipanen?'),
+        content: Text(
+          '${widget.plant.name} akan dicatat sebagai hasil panen dan '
+          'dipindahkan ke arsip.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Panen'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _harvesting = true);
+    final ok = await context.read<PlantController>().harvest(widget.plant.id);
+    if (!mounted) return;
+    setState(() => _harvesting = false);
+
+    if (ok) {
+      Navigator.of(context).pop(PlantSettingsResult.harvested);
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Gagal menandai panen. Periksa koneksi Anda.'),
       ),
     );
   }
@@ -318,6 +361,11 @@ class _PlantSettingsSheetState extends State<PlantSettingsSheet> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xxxl),
+              _HarvestAction(
+                busy: _harvesting,
+                onTap: _harvesting ? null : _harvest,
+              ),
+              const SizedBox(height: AppSpacing.md),
               _ArchiveAction(
                 busy: _archiving,
                 onTap: _archiving ? null : _archive,
@@ -666,6 +714,58 @@ class _LocationPickSheet extends StatelessWidget {
                 onTap: () => Navigator.of(context).pop(location),
               ),
         ],
+      ),
+    );
+  }
+}
+
+class _HarvestAction extends StatelessWidget {
+  const _HarvestAction({required this.busy, required this.onTap});
+
+  final bool busy;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: AppRadius.mdAll,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadius.mdAll,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: AppRadius.mdAll,
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: [
+              const AgroIcon(AppAssets.harvest, size: 20),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Tandai sudah dipanen',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.darkGrey,
+                  ),
+                ),
+              ),
+              if (busy)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                const AgroIcon(AppAssets.chevronRightThin, size: 20),
+            ],
+          ),
+        ),
       ),
     );
   }
