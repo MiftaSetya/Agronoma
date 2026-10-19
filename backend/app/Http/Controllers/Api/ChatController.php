@@ -164,16 +164,18 @@ PROMPT;
 
     private function isAgronomyTopic(string $content): bool
     {
-        $normalized = mb_strtolower($content);
+        $normalized = ' '.mb_strtolower(preg_replace('/\s+/', ' ', $content).' ');
 
         foreach ([
-            'tanam', 'tumbuh', 'tanah', 'pupuk', 'siram', 'air', 'hama',
-            'penyakit', 'daun', 'akar', 'batang', 'buah', 'bunga', 'benih',
-            'bibit', 'panen', 'kebun', 'perkarangan', 'agronom', 'pertanian',
-            'sayur', 'cabai', 'padi', 'jagung', 'kangkung', 'bayam', 'tomat',
-            'mangga', 'jeruk', 'kompos', 'ph ', 'hidroponik', 'polybag', 'pot',
-        ] as $keyword) {
-            if (str_contains($normalized, $keyword)) {
+            '/tanam/', '/tumbuh/', '/tanah/', '/pupuk/', '/siram/', '/\bair\b/',
+            '/hama/', '/penyakit/', '/daun/', '/\bakar\b/', '/batang/', '/buah/',
+            '/bunga/', '/\bbenih\b/', '/\bbibit\b/', '/panen/', '/kebun/',
+            '/perkarangan/', '/agronom/', '/pertanian/', '/sayur/', '/cabai/',
+            '/\bpadi\b/', '/jagung/', '/kangkung/', '/bayam/', '/tomat/',
+            '/mangga/', '/jeruk/', '/kompos/', '/hidroponik/', '/polybag/',
+            '/\bpot\b/', '/\bph\b/', '/\bmusim\b/', '/\biklim\b/', '/\bcuaca\b/',
+        ] as $pattern) {
+            if (preg_match($pattern, $normalized) === 1) {
                 return true;
             }
         }
