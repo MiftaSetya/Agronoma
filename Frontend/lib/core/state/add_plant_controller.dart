@@ -97,6 +97,8 @@ class AddPlantController extends ChangeNotifier {
     required String label,
     required String city,
     required String province,
+    double? latitude,
+    double? longitude,
   }) async {
     _error = null;
     try {
@@ -104,6 +106,8 @@ class AddPlantController extends ChangeNotifier {
         label: label,
         city: city,
         province: province,
+        latitude: latitude,
+        longitude: longitude,
       );
       _locations = [created, ..._locations];
       selectLocation(created);
@@ -120,6 +124,8 @@ class AddPlantController extends ChangeNotifier {
     required String label,
     required String city,
     required String province,
+    double? latitude,
+    double? longitude,
   }) async {
     _error = null;
     try {
@@ -128,6 +134,8 @@ class AddPlantController extends ChangeNotifier {
         label: label,
         city: city,
         province: province,
+        latitude: latitude,
+        longitude: longitude,
       );
       _locations = [
         for (final l in _locations)

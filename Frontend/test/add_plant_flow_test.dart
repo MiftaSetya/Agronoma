@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/data/add_plant_repository.dart';
 import 'package:frontend/core/data/api/api_exception.dart';
 import 'package:frontend/core/data/mock_data.dart';
+import 'package:frontend/core/data/reverse_geocoder.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_location.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
@@ -17,6 +21,9 @@ import 'package:frontend/features/add_plant/add_plant_flow.dart';
 import 'package:frontend/features/add_plant/soil_detection_screen.dart';
 
 class _FakeRepository implements AddPlantRepository {
+  double? lastLatitude;
+  double? lastLongitude;
+
   @override
   Future<List<SoilType>> getSoilTypes() async => MockData.soilTypes;
   @override
@@ -34,7 +41,20 @@ class _FakeRepository implements AddPlantRepository {
     required String label,
     required String city,
     required String province,
-  }) async => PlantLocation(id: 2, label: label, city: city, province: province);
+    double? latitude,
+    double? longitude,
+  }) async {
+    lastLatitude = latitude;
+    lastLongitude = longitude;
+    return PlantLocation(
+      id: 2,
+      label: label,
+      city: city,
+      province: province,
+      latitude: latitude,
+      longitude: longitude,
+    );
+  }
 
   @override
   Future<PlantLocation> updateLocation(
@@ -42,7 +62,16 @@ class _FakeRepository implements AddPlantRepository {
     required String label,
     required String city,
     required String province,
-  }) async => PlantLocation(id: id, label: label, city: city, province: province);
+    double? latitude,
+    double? longitude,
+  }) async => PlantLocation(
+    id: id,
+    label: label,
+    city: city,
+    province: province,
+    latitude: latitude,
+    longitude: longitude,
+  );
 
   @override
   Future<void> deleteLocation(int id) async {}
@@ -278,6 +307,75 @@ void main() {
 
       expect(c.city, AddPlantController.fallbackCity);
       expect(c.province, AddPlantController.fallbackProvince);
+    });
+  });
+
+  group('ReverseGeocoder', () {
+    test('mengambil kota dan provinsi dari respons Nominatim', () async {
+      final client = MockClient((request) async {
+        expect(request.url.host, 'nominatim.openstreetmap.org');
+        expect(request.url.queryParameters['lat'], '-7.257500');
+        expect(request.url.queryParameters['lon'], '112.752100');
+        return http.Response(
+          '{"display_name":"Surabaya, Jawa Timur, Indonesia",'
+          '"address":{"city":"Surabaya","state":"Jawa Timur"}}',
+          200,
+        );
+      });
+
+      final geocoder = ReverseGeocoder(httpClient: client);
+      final place = await geocoder.lookup(const LatLng(-7.2575, 112.7521));
+
+      expect(place, isNotNull);
+      expect(place!.city, 'Surabaya');
+      expect(place.province, 'Jawa Timur');
+      expect(place.isEmpty, isFalse);
+    });
+
+    test('respons bukan kota mengembalikan null', () async {
+      final client = MockClient(
+        (request) async => http.Response('{"address":{}}', 200),
+      );
+
+      final geocoder = ReverseGeocoder(httpClient: client);
+      final place = await geocoder.lookup(const LatLng(0, 0));
+
+      expect(place, isNull);
+    });
+  });
+
+  group('AddPlantController — koordinat lokasi', () {
+    test('createLocation meneruskan latitude dan longitude ke repository',
+        () async {
+      final repo = _FakeRepository();
+      final c = AddPlantController(dataSource: repo);
+
+      final created = await c.createLocation(
+        label: 'Kebun Depan',
+        city: 'Sidoarjo',
+        province: 'Jawa Timur',
+        latitude: -7.4478,
+        longitude: 112.7183,
+      );
+
+      expect(created, isNotNull);
+      expect(repo.lastLatitude, -7.4478);
+      expect(repo.lastLongitude, 112.7183);
+      expect(created!.latitude, -7.4478);
+      expect(created.longitude, 112.7183);
+      expect(created.hasCoordinates, isTrue);
+    });
+
+    test('PlantLocation tanpa koordinat melaporkan hasCoordinates false', () {
+      const location = PlantLocation(
+        id: 1,
+        label: 'Rumah',
+        city: 'Surabaya',
+        province: 'Jawa Timur',
+      );
+
+      expect(location.hasCoordinates, isFalse);
+      expect(location.region, 'Surabaya, Jawa Timur');
     });
   });
 

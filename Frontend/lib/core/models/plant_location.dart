@@ -7,12 +7,19 @@ class PlantLocation {
     required this.label,
     required this.city,
     required this.province,
+    this.latitude,
+    this.longitude,
   });
 
   final int id;
   final String label;
   final String city;
   final String province;
+
+  final double? latitude;
+  final double? longitude;
+
+  bool get hasCoordinates => latitude != null && longitude != null;
 
   String get region => province.trim().isEmpty ? city : '$city, $province';
 
@@ -21,6 +28,8 @@ class PlantLocation {
     label: (json['label'] as String? ?? '').trim(),
     city: (json['city'] as String? ?? '').trim(),
     province: (json['province'] as String? ?? '').trim(),
+    latitude: (json['latitude'] as num?)?.toDouble(),
+    longitude: (json['longitude'] as num?)?.toDouble(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -28,6 +37,8 @@ class PlantLocation {
     'label': label,
     'city': city,
     'province': province,
+    'latitude': latitude,
+    'longitude': longitude,
   };
 
   @override

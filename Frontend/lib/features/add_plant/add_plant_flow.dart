@@ -1,8 +1,10 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import 'package:frontend/core/assets/app_assets.dart';
 import 'package:frontend/core/data/api/api_exception.dart';
+import 'package:frontend/core/data/reverse_geocoder.dart';
 import 'package:frontend/core/models/plant.dart';
 import 'package:frontend/core/models/plant_location.dart';
 import 'package:frontend/core/models/plant_recommendation.dart';
@@ -13,6 +15,7 @@ import 'package:frontend/core/state/plant_controller.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/core/widgets/agro_button.dart';
 import 'package:frontend/core/widgets/agro_icon.dart';
+import 'package:frontend/core/widgets/agro_map.dart';
 import 'package:frontend/core/widgets/agro_text_field.dart';
 import 'package:frontend/core/widgets/app_shell.dart';
 import 'package:frontend/features/add_plant/soil_detection_screen.dart';
@@ -609,6 +612,8 @@ class _LocationSheet extends StatefulWidget {
 }
 
 class _LocationSheetState extends State<_LocationSheet> {
+  static const LatLng _defaultCenter = LatLng(-7.2575, 112.7521);
+
   late final TextEditingController _label = TextEditingController(
     text: widget.existing?.label ?? '',
   );
@@ -619,10 +624,36 @@ class _LocationSheetState extends State<_LocationSheet> {
     text: widget.existing?.province ?? '',
   );
 
+  final ReverseGeocoder _geocoder = ReverseGeocoder();
+
+  late LatLng _center = _initialCenter;
+  late double? _latitude = widget.existing?.latitude;
+  late double? _longitude = widget.existing?.longitude;
+  String? _pinCity;
+  String? _pinProvince;
+  bool _geocoding = false;
   bool _saving = false;
   String? _errorText;
 
   bool get _isEditing => widget.existing != null;
+
+  LatLng get _initialCenter {
+    final lat = widget.existing?.latitude;
+    final lng = widget.existing?.longitude;
+    if (lat != null && lng != null) return LatLng(lat, lng);
+    return _defaultCenter;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (!_isEditing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _updateCoordinatesFromCenter(initial: true);
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -630,6 +661,32 @@ class _LocationSheetState extends State<_LocationSheet> {
     _city.dispose();
     _province.dispose();
     super.dispose();
+  }
+
+  Future<void> _updateCoordinatesFromCenter({bool initial = false}) async {
+    setState(() {
+      _latitude = _center.latitude;
+      _longitude = _center.longitude;
+      if (!initial) {
+        _pinCity = null;
+        _pinProvince = null;
+      }
+      _geocoding = true;
+    });
+
+    final place = await _geocoder.lookup(_center);
+
+    if (!mounted) return;
+
+    setState(() {
+      _geocoding = false;
+      if (place != null) {
+        _pinCity = place.city;
+        _pinProvince = place.province;
+        if (_city.text.trim().isEmpty) _city.text = place.city;
+        if (_province.text.trim().isEmpty) _province.text = place.province;
+      }
+    });
   }
 
   Future<void> _submit() async {
@@ -654,12 +711,16 @@ class _LocationSheetState extends State<_LocationSheet> {
         label: label,
         city: city,
         province: _province.text.trim(),
+        latitude: _latitude,
+        longitude: _longitude,
       );
     } else {
       saved = await add.createLocation(
         label: label,
         city: city,
         province: _province.text.trim(),
+        latitude: _latitude,
+        longitude: _longitude,
       );
     }
 
@@ -723,6 +784,17 @@ class _LocationSheetState extends State<_LocationSheet> {
               hint: 'Contoh: Jawa Timur',
               controller: _province,
             ),
+            const SizedBox(height: AppSpacing.lg),
+            _MapPicker(
+              center: _center,
+              pinCity: _pinCity,
+              pinProvince: _pinProvince,
+              geocoding: _geocoding,
+              onCenterChanged: (center) {
+                _center = center;
+                _updateCoordinatesFromCenter();
+              },
+            ),
             if (_errorText != null) ...[
               const SizedBox(height: AppSpacing.md),
               Text(
@@ -741,6 +813,69 @@ class _LocationSheetState extends State<_LocationSheet> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _MapPicker extends StatelessWidget {
+  const _MapPicker({
+    required this.center,
+    required this.pinCity,
+    required this.pinProvince,
+    required this.geocoding,
+    required this.onCenterChanged,
+  });
+
+  final LatLng center;
+  final String? pinCity;
+  final String? pinProvince;
+  final bool geocoding;
+  final ValueChanged<LatLng> onCenterChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasPin = pinCity != null && pinCity!.trim().isNotEmpty;
+    final label = hasPin
+        ? [
+            if (pinCity != null && pinCity!.trim().isNotEmpty) pinCity!,
+            if (pinProvince != null && pinProvince!.trim().isNotEmpty)
+              pinProvince!,
+          ].join(', ')
+        : 'Geser peta untuk memilih titik lokasi.';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: AppRadius.mdAll,
+          child: SizedBox(
+            height: 210,
+            child: AgroMap(center: center, onCenterChanged: onCenterChanged),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            if (geocoding)
+              const Padding(
+                padding: EdgeInsets.only(right: AppSpacing.sm),
+                child: SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: hasPin ? AppColors.inkSecondary : AppColors.inkMuted,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

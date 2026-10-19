@@ -24,6 +24,8 @@ abstract class AddPlantRepository {
     required String label,
     required String city,
     required String province,
+    double? latitude,
+    double? longitude,
   });
 
   Future<PlantLocation> updateLocation(
@@ -31,6 +33,8 @@ abstract class AddPlantRepository {
     required String label,
     required String city,
     required String province,
+    double? latitude,
+    double? longitude,
   });
 
   Future<void> deleteLocation(int id);
@@ -92,11 +96,15 @@ class HttpAddPlantRepository implements AddPlantRepository {
     required String label,
     required String city,
     required String province,
+    double? latitude,
+    double? longitude,
   }) async {
     final body = await _json('locations', {
       'label': label.trim(),
       'city': city.trim(),
       'province': province.trim().isEmpty ? null : province.trim(),
+      'latitude': latitude,
+      'longitude': longitude,
     });
 
     final raw = body['location'];
@@ -116,6 +124,8 @@ class HttpAddPlantRepository implements AddPlantRepository {
     required String label,
     required String city,
     required String province,
+    double? latitude,
+    double? longitude,
   }) async {
     final raw = await _client.patch(
       'locations/$id',
@@ -123,6 +133,8 @@ class HttpAddPlantRepository implements AddPlantRepository {
         'label': label.trim(),
         'city': city.trim(),
         'province': province.trim().isEmpty ? null : province.trim(),
+        'latitude': latitude,
+        'longitude': longitude,
       },
     );
 
@@ -379,12 +391,16 @@ class SampleAddPlantRepository implements AddPlantRepository {
     required String label,
     required String city,
     required String province,
+    double? latitude,
+    double? longitude,
   }) async {
     final created = PlantLocation(
       id: _locations.length + 1,
       label: label.trim(),
       city: city.trim(),
       province: province.trim(),
+      latitude: latitude,
+      longitude: longitude,
     );
     _locations.insert(0, created);
     return created;
@@ -396,6 +412,8 @@ class SampleAddPlantRepository implements AddPlantRepository {
     required String label,
     required String city,
     required String province,
+    double? latitude,
+    double? longitude,
   }) async {
     final index = _locations.indexWhere((l) => l.id == id);
     if (index == -1) {
@@ -410,6 +428,8 @@ class SampleAddPlantRepository implements AddPlantRepository {
       label: label.trim(),
       city: city.trim(),
       province: province.trim(),
+      latitude: latitude,
+      longitude: longitude,
     );
     _locations[index] = updated;
     return updated;
