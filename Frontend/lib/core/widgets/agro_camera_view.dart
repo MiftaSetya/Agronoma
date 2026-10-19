@@ -202,6 +202,8 @@ class _AgroCameraViewState extends State<AgroCameraView>
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -228,11 +230,11 @@ class _AgroCameraViewState extends State<AgroCameraView>
           ),
         ),
 
-        const Positioned(
+        Positioned(
           left: 0,
           right: 0,
-          top: 734,
-          height: 223,
+          bottom: 0,
+          height: 223 + bottomInset,
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -260,7 +262,7 @@ class _AgroCameraViewState extends State<AgroCameraView>
         Positioned(
           left: 0,
           right: 0,
-          bottom: 166,
+          bottom: 166 + bottomInset,
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -280,8 +282,7 @@ class _AgroCameraViewState extends State<AgroCameraView>
         Positioned(
           left: 48,
           right: 48,
-          top: 734,
-          height: 223,
+          bottom: 70.5 + bottomInset,
           child: Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
