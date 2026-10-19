@@ -29,6 +29,52 @@ test('user dapat membuat lokasi baru', function () {
         ->assertJsonPath('location.city', 'Bandung');
 });
 
+test('lokasi menyimpan koordinat peta yang dipilih', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user, 'sanctum')
+        ->postJson('/api/locations', [
+            'label' => 'Kebun Depan',
+            'city' => 'Sidoarjo',
+            'province' => 'Jawa Timur',
+            'latitude' => -7.4478,
+            'longitude' => 112.7183,
+        ])->assertStatus(201)
+        ->assertJsonPath('location.latitude', -7.4478)
+        ->assertJsonPath('location.longitude', 112.7183);
+
+    $this->assertDatabaseHas('locations', [
+        'user_id' => $user->id,
+        'latitude' => -7.4478,
+        'longitude' => 112.7183,
+    ]);
+});
+
+test('koordinat di luar rentang ditolak', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user, 'sanctum')
+        ->postJson('/api/locations', [
+            'label' => 'Kebun',
+            'city' => 'Bandung',
+            'latitude' => 123.5,
+            'longitude' => 200.5,
+        ])->assertStatus(422)
+        ->assertJsonValidationErrors(['latitude', 'longitude']);
+});
+
+test('update lokasi dapat mengubah koordinat', function () {
+    $user = User::factory()->create();
+    $location = Location::factory()->create(['user_id' => $user->id]);
+
+    $this->actingAs($user, 'sanctum')
+        ->patchJson("/api/locations/{$location->id}", [
+            'latitude' => -6.2,
+            'longitude' => 106.8166,
+        ])->assertStatus(200)
+        ->assertJsonPath('location.latitude', -6.2);
+});
+
 test('user dapat mengupdate lokasi miliknya sendiri', function () {
     $user = User::factory()->create();
     $location = Location::factory()->create(['user_id' => $user->id]);

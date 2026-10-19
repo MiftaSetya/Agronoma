@@ -8,10 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'label', 'city', 'province'])]
+#[Fillable(['user_id', 'label', 'city', 'province', 'latitude', 'longitude'])]
 class Location extends Model
 {
-
     use HasFactory;
 
     public function user(): BelongsTo

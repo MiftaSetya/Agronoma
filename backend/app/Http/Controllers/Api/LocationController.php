@@ -30,6 +30,8 @@ class LocationController extends Controller
             'label' => ['required', 'string', 'max:100'],
             'city' => ['required', 'string', 'max:100'],
             'province' => ['nullable', 'string', 'max:100'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ]);
 
         $location = $request->user()->locations()->create($validated);
@@ -47,6 +49,8 @@ class LocationController extends Controller
             'label' => ['sometimes', 'string', 'max:100'],
             'city' => ['sometimes', 'string', 'max:100'],
             'province' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'latitude' => ['sometimes', 'nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['sometimes', 'nullable', 'numeric', 'between:-180,180'],
         ]);
 
         $location->update($validated);
