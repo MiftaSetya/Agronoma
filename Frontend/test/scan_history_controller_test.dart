@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:frontend/core/data/api/api_config.dart';
 import 'package:frontend/core/data/scan_history_repository.dart';
 import 'package:frontend/core/models/scan_record.dart';
 import 'package:frontend/core/state/scan_history_controller.dart';
@@ -63,9 +64,10 @@ void main() {
       'image_url': 'http://localhost:8000/storage/scans/pest/9.jpg',
     });
 
+    final base = Uri.parse(ApiConfig.baseUrl);
     expect(
       record.imageUrl,
-      startsWith('http://127.0.0.1:8000/storage/scans/pest/9.jpg'),
+      startsWith('${base.scheme}://${base.host}/storage/scans/pest/9.jpg'),
     );
   });
 

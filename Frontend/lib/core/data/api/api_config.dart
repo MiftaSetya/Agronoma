@@ -1,20 +1,13 @@
-import 'dart:io' show Platform;
-
-import 'package:flutter/foundation.dart';
-
 class ApiConfig {
   ApiConfig._();
 
   static const String _override = String.fromEnvironment('API_BASE_URL');
 
-  static const int port = 8000;
+  static const String productionBaseUrl = 'https://agronoma.dbx.web.id/api';
 
   static String get baseUrl {
     if (_override.isNotEmpty) return _override;
-    if (!kIsWeb && Platform.isAndroid) {
-      return 'http://10.0.2.2:$port/api';
-    }
-    return 'http://127.0.0.1:$port/api';
+    return productionBaseUrl;
   }
 
   static String normalizeHost(String url) {
