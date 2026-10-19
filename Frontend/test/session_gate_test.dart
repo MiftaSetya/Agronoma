@@ -68,7 +68,6 @@ class _RestoringAuthRepository implements AuthRepository {
     photoAsset: '',
     totalPlants: 0,
     harvestedThisSeason: 0,
-    careScore: 0,
   );
 
   @override

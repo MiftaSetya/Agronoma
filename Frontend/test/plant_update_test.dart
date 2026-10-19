@@ -109,8 +109,8 @@ Plant _plant() => Plant(
   status: CareStatus.safe,
   phase: GrowthPhase.seedling,
   plantedAt: DateTime(2026, 10, 17),
-  careScore: 100,
   description: 'Kangkung di pot.',
+    careScore: 100,
 );
 
 PlantController build(PlantRepository repo) => PlantController(

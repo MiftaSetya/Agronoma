@@ -18,8 +18,8 @@ Plant _plant({CareStatus status = CareStatus.safe}) => Plant(
   status: status,
   phase: GrowthPhase.seedling,
   plantedAt: DateTime(2026, 10, 17),
-  careScore: 100,
   description: 'Cabai rawit di pot.',
+    careScore: 100,
 );
 
 class _ScheduleFakeRepository implements PlantRepository {

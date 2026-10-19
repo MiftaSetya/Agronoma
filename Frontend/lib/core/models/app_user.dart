@@ -9,7 +9,6 @@ class AppUser {
     required this.photoAsset,
     required this.totalPlants,
     required this.harvestedThisSeason,
-    required this.careScore,
     this.photoUrl,
     this.wateringReminderEnabled = true,
     this.joinedAt,
@@ -26,8 +25,6 @@ class AppUser {
   final int totalPlants;
   final int harvestedThisSeason;
 
-  final double careScore;
-
   final bool wateringReminderEnabled;
 
   final DateTime? joinedAt;
@@ -35,7 +32,6 @@ class AppUser {
   AppUser copyWith({
     int? totalPlants,
     int? harvestedThisSeason,
-    double? careScore,
     String? photoUrl,
     bool clearPhotoUrl = false,
     bool? wateringReminderEnabled,
@@ -47,20 +43,12 @@ class AppUser {
     photoUrl: clearPhotoUrl ? null : (photoUrl ?? this.photoUrl),
     totalPlants: totalPlants ?? this.totalPlants,
     harvestedThisSeason: harvestedThisSeason ?? this.harvestedThisSeason,
-    careScore: careScore ?? this.careScore,
     wateringReminderEnabled:
         wateringReminderEnabled ?? this.wateringReminderEnabled,
     joinedAt: joinedAt,
   );
 
   String get firstName => name.split(' ').first;
-  String get careScoreLabel => '${careScore.round()}%';
-  String get careScoreCaption => switch (careScore) {
-    >= 90 => 'Sangat baik',
-    >= 75 => 'Baik',
-    >= 60 => 'Cukup',
-    _ => 'Perlu ditingkatkan',
-  };
 
   factory AppUser.fromJson(Map<String, dynamic> json) => AppUser(
     id: json['id'] as String,
@@ -70,7 +58,6 @@ class AppUser {
     photoUrl: json['photoUrl'] as String?,
     totalPlants: (json['totalPlants'] as num).toInt(),
     harvestedThisSeason: (json['harvestedThisSeason'] as num).toInt(),
-    careScore: (json['careScore'] as num).toDouble(),
     wateringReminderEnabled: (json['wateringReminderEnabled'] as bool?) ?? true,
     joinedAt: json['joinedAt'] == null
         ? null
@@ -85,7 +72,6 @@ class AppUser {
     'photoUrl': photoUrl,
     'totalPlants': totalPlants,
     'harvestedThisSeason': harvestedThisSeason,
-    'careScore': careScore,
     'wateringReminderEnabled': wateringReminderEnabled,
     'joinedAt': joinedAt?.toIso8601String(),
   };

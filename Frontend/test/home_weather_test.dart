@@ -26,8 +26,8 @@ Plant _plant(String id, String name, String city) => Plant(
   status: CareStatus.safe,
   phase: GrowthPhase.seedling,
   plantedAt: DateTime(2026, 10, 16),
-  careScore: 100,
   description: 'Deskripsi $name.',
+    careScore: 100,
 );
 
 class _FakePlantRepository implements PlantRepository {

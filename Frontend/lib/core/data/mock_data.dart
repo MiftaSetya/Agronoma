@@ -24,7 +24,6 @@ class MockData {
     photoAsset: AppAssets.photoProfile,
     totalPlants: 24,
     harvestedThisSeason: 12,
-    careScore: 98,
     joinedAt: _daysAgo(180),
   );
 

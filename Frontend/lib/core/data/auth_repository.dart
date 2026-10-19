@@ -122,7 +122,6 @@ class HttpAuthRepository implements AuthRepository {
       return user.copyWith(
         totalPlants: (body['total_plants'] as num?)?.toInt(),
         harvestedThisSeason: (body['harvested_count'] as num?)?.toInt(),
-        careScore: (body['care_score_percent'] as num?)?.toDouble(),
         wateringReminderEnabled: reminder is bool ? reminder : null,
       );
     } on ApiException {
@@ -219,7 +218,6 @@ class HttpAuthRepository implements AuthRepository {
 
       totalPlants: 0,
       harvestedThisSeason: 0,
-      careScore: 0,
       joinedAt: createdAt == null ? null : DateTime.tryParse(createdAt),
     );
   }
@@ -235,7 +233,6 @@ class SampleAuthRepository implements AuthRepository {
     photoAsset: AppAssets.photoProfile,
     totalPlants: 5,
     harvestedThisSeason: 2,
-    careScore: 92,
   );
 
   final AppUser _user;

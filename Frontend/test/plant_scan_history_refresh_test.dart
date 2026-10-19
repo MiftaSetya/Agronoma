@@ -26,8 +26,8 @@ Plant _plant() => Plant(
   status: CareStatus.safe,
   phase: GrowthPhase.seedling,
   plantedAt: DateTime(2026, 10, 17),
-  careScore: 100,
   description: 'Ditanam di pot tanaman dengan media tanam campuran.',
+    careScore: 100,
 );
 
 class _FakePlantRepository implements PlantRepository {

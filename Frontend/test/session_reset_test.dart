@@ -131,7 +131,6 @@ void main() {
 
     expect(auth.user!.totalPlants, 3);
     expect(auth.user!.harvestedThisSeason, 1);
-    expect(auth.user!.careScore, 67);
   });
 
   testWidgets(
@@ -164,7 +163,6 @@ AppUser _user({
   photoAsset: '',
   totalPlants: totalPlants,
   harvestedThisSeason: harvested,
-  careScore: score,
 );
 
 class _StatsAuthRepository implements AuthRepository {
@@ -182,7 +180,7 @@ class _StatsAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser> refreshStats(AppUser user) async =>
-      user.copyWith(totalPlants: 3, harvestedThisSeason: 1, careScore: 67);
+      user.copyWith(totalPlants: 3, harvestedThisSeason: 1);
 
   @override
   Future<AppUser> saveWateringReminder(AppUser user, bool enabled) async =>
@@ -223,8 +221,8 @@ class _OnePlantRepository implements PlantRepository {
       status: CareStatus.safe,
       phase: GrowthPhase.seedling,
       plantedAt: DateTime(2026, 10, 17),
-      careScore: 100,
       description: 'Kangkung.',
+    careScore: 100,
     ),
   ];
 

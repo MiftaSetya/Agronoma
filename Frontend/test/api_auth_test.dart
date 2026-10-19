@@ -21,7 +21,6 @@ void main() {
     photoAsset: '',
     totalPlants: 0,
     harvestedThisSeason: 0,
-    careScore: 0,
   );
 
   ({ApiClient client, InMemoryTokenStore tokens, List<http.Request> calls})

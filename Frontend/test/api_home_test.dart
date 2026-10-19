@@ -126,8 +126,8 @@ void main() {
         status: CareStatus.safe,
         phase: GrowthPhase.seedling,
         plantedAt: DateTime(2026, 10, 17),
-        careScore: 100,
         description: '',
+    careScore: 100,
       );
 
       final days = await repo.careDays(plant, today: DateTime(2026, 10, 17));
@@ -339,8 +339,8 @@ void main() {
         status: CareStatus.safe,
         phase: GrowthPhase.seedling,
         plantedAt: DateTime(2026, 10, 17),
-        careScore: 100,
         description: '',
+    careScore: 100,
       );
 
       final days = await repo.careDays(plant, today: DateTime(2026, 10, 17));

@@ -95,11 +95,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),
-        _CareScoreCard(
-          score: user?.careScoreLabel ?? '0%',
-          caption: user?.careScoreCaption ?? '-',
-        ),
         const SizedBox(height: AppSpacing.xxxl),
         _SettingsGroup(
           onArchiveTap: () async {
@@ -220,55 +215,6 @@ class _ProfileHeader extends StatelessWidget {
           style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
         ),
       ],
-    );
-  }
-}
-
-class _CareScoreCard extends StatelessWidget {
-  const _CareScoreCard({required this.score, required this.caption});
-
-  final String score;
-  final String caption;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(17),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: AppRadius.mdAll,
-        border: Border.all(color: const Color(0xFF659022)),
-        boxShadow: AppColors.shadow1,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const AgroIcon(AppAssets.leafFill, size: 20),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                'Skor perawatan',
-                style: AppTextStyles.titleMedium.copyWith(
-                  color: AppColors.onPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            score,
-            style: AppTextStyles.displayMedium.copyWith(
-              color: AppColors.onPrimary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            caption,
-            style: AppTextStyles.titleWide.copyWith(color: AppColors.onPrimary),
-          ),
-        ],
-      ),
     );
   }
 }
